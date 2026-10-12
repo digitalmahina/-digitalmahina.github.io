@@ -1530,6 +1530,22 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       @media (prefers-reduced-motion: reduce) {
         .x-side, .x-main { transition: none !important; }
       }
+      /* v26: air + carbon visible */
+      :root[data-theme="cab"] .x-main { background: transparent; }
+      :root[data-theme="cab"] .x-bar { border-bottom-color: transparent; }
+      .x-home { padding-top: 8px; }
+      .x-home .x-kick { margin-bottom: 10px; }
+      .x-home .x-htitle { margin-bottom: 8px; }
+      .x-home .x-hsearch { margin-top: 28px; min-height: 56px; }
+      .x-home .x-tseg { margin: 20px 0 8px; }
+      .x-home > * + * { margin-top: 20px; }
+      .x-home .x-tiles { gap: 18px; margin-top: 28px; }
+      .x-home .x-tile { min-height: 220px; padding: 24px; }
+      .x-home .x-tile__t { margin-top: 26px; }
+      .x-home .x-fly, .x-home .x-attn { margin-top: 18px; padding: 20px 22px; gap: 18px; }
+      .x-home .x-rf2 { margin: 20px 0 0; padding: 16px 18px; }
+      .x-home .x-sec { margin-top: 40px; }
+      @media (min-width: 700px) { .x-home .x-htitle { font-size: 56px; } .x-home .x-tiles { margin-top: 32px; } }
     </style>
   </head>
   <body>
@@ -3105,9 +3121,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
-        var APP_BUILD = "v25";
+        var APP_BUILD = "v26";
         var CHANGELOG = [
-          { v: "2026-10-12 · 25", d: "2026-10-12", items: ["Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
+          { v: "2026-10-12 · 26", d: "2026-10-12", items: ["Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
           { v: "2026-10-12 · 20", d: "2026-10-12", items: ["Новый вид «Кабина»: тёмная тема, трафаретные заголовки, цвет по смыслу", "Нижние вкладки: Карты, РЛЭ, Табло, Учёба, Ещё", "Переключатель Ми-8Т / АМТ / МТВ на главной (запоминается)", "Чек-лист: подсветка текущего пункта и «Карта выполнена»"] },
           { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
