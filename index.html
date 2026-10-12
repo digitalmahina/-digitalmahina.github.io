@@ -1320,6 +1320,44 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       :root[data-theme="dark"] .x-rv__img { filter: invert(1) brightness(0.88); }
       @media (prefers-color-scheme: dark) { :root:not([data-theme]) .x-rv__img { filter: invert(1) brightness(0.88); } }
       :root[data-theme="night"] .x-rv__img { filter: invert(1) sepia(1) saturate(4) hue-rotate(-50deg) brightness(0.7); }
+
+      /* v11 reader */
+      .x-rv__pages { display: flex; justify-content: center; align-items: flex-start; gap: 6px; min-height: 100%; }
+      .x-rv.is-imm .x-rv__bar, .x-rv.is-imm .x-rv__foot { display: none; }
+      .x-rv__foot { display: flex; align-items: center; gap: 8px; padding: 8px max(10px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); border-top: 1px solid var(--stroke-secondary); }
+      .x-rv__sl { flex: 1 1 auto; min-width: 80px; accent-color: #3ddc84; height: 32px; }
+      .x-rv__sll { flex: 0 1 220px; min-width: 0; font: var(--type-small); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+      .x-rv [data-act="rv-note"][aria-pressed="true"] { color: #d99a00; }
+      .x-rv__pop { position: absolute; right: max(10px, env(safe-area-inset-right)); bottom: calc(64px + env(safe-area-inset-bottom)); z-index: 3; width: min(340px, calc(100% - 20px)); max-height: 70%; overflow: auto; padding: 14px; border-radius: 14px; background: var(--fill-primary-on); border: 1px solid var(--stroke-primary); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+      .x-rv__pop[hidden], .x-rv__grid[hidden] { display: none; }
+      .x-rv__pop h4 { margin: 12px 0 6px; font: var(--type-small); color: var(--text-secondary); text-transform: uppercase; letter-spacing: .06em; }
+      .x-rv__pop h4:first-child { margin-top: 0; }
+      .x-rv__seg { display: flex; flex-wrap: wrap; gap: 6px; }
+      .x-rv__seg button { flex: 1 1 auto; min-height: 40px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--stroke-primary); background: var(--fill-tertiary); color: var(--text-primary); font: inherit; }
+      .x-rv__seg button[aria-pressed="true"] { background: #3ddc84; color: #000; border-color: #3ddc84; font-weight: 600; }
+      .x-rv__hint { margin: 10px 0 0; font: var(--type-small); color: var(--text-secondary); }
+      .x-rv__grid { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; background: var(--fill-primary-on); }
+      .x-rv__gbody { flex: 1 1 auto; overflow: auto; padding: 12px; -webkit-overflow-scrolling: touch; }
+      .x-rv__thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
+      .x-rv__th { display: block; padding: 0; border: 2px solid transparent; border-radius: 6px; background: none; color: var(--text-secondary); font: var(--type-small); text-align: center; cursor: pointer; }
+      .x-rv__th img { display: block; width: 100%; aspect-ratio: 0.707; object-fit: cover; object-position: top; background: #fff; border-radius: 4px; }
+      .x-rv__th.is-cur { border-color: #3ddc84; color: var(--text-primary); }
+      .x-rv__th b { display: block; padding: 3px 0; font-weight: 500; }
+      .x-rv__th em { color: #d99a00; font-style: normal; }
+      .x-rv__sec { grid-column: 1 / -1; margin: 10px 0 0; font: var(--type-label); font-weight: 600; color: var(--text-primary); }
+      .x-rv__bl { list-style: none; margin: 0; padding: 0; }
+      .x-rv__bl li { display: flex; gap: 10px; align-items: baseline; padding: 12px 4px; border-bottom: 1px solid var(--stroke-secondary); cursor: pointer; }
+      .x-rv__bl li span { flex: 1; min-width: 0; }
+      .x-rv__bl small { display: block; color: var(--text-secondary); }
+      .x-rv__toast { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 5; padding: 10px 16px; border-radius: 12px; background: rgba(0,0,0,.75); color: #fff; font: var(--type-label); pointer-events: none; }
+      .x-rv__toast[hidden] { display: none; }
+      .x-rv[data-rm="paper"] .x-rv__img { filter: none !important; }
+      .x-rv[data-rm="sepia"] .x-rv__img { filter: sepia(.55) brightness(.97) contrast(1.05) !important; }
+      .x-rv[data-rm="dark"] .x-rv__img { filter: invert(1) brightness(.88) !important; }
+      .x-rv[data-rm="night"] .x-rv__img { filter: invert(1) sepia(1) saturate(4) hue-rotate(-50deg) brightness(.7) !important; }
+      .x-rv[data-rm="paper"] .x-rv__box, .x-rv[data-rm="sepia"] .x-rv__box { background: #8a8a8a; }
+      .x-rv[data-rm="dark"] .x-rv__box, .x-rv[data-rm="night"] .x-rv__box { background: #000; }
+      .x-rv__box { position: relative; }
       @media (prefers-reduced-motion: reduce) { .x-rotor { animation: none; } .x-splash { transition: none; } }
 
       /* ---------- режим «Кабина» ---------- */
@@ -1564,9 +1602,24 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           <button class="x-btn" type="button" data-act="rv-zin" aria-label="Увеличить">+</button>
         </div>
         <div class="x-rv__box" id="rv-box">
-          <img class="x-rv__img" id="rv-img" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" />
+          <div class="x-rv__pages" id="rv-pages"><img class="x-rv__img" id="rv-img" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" /><img class="x-rv__img" id="rv-img2" alt="" hidden src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" /></div>
           <p class="x-rv__err" id="rv-err" hidden></p>
         </div>
+        <div class="x-rv__foot" id="rv-foot">
+          <button class="x-btn" type="button" data-act="rv-back" id="rv-back" hidden aria-label="Вернуться">←</button>
+          <input class="x-rv__sl" id="rv-sl" type="range" min="1" value="1" aria-label="Перейти к странице" />
+          <span class="x-rv__sll" id="rv-sll"></span>
+          <button class="x-btn" type="button" data-act="rv-note" aria-pressed="false" aria-label="Заметка к странице">✎</button>
+          <button class="x-btn" type="button" data-act="rv-grid" aria-label="Страницы и закладки">▦</button>
+          <button class="x-btn" type="button" data-act="rv-aa" aria-label="Вид страницы">Aa</button>
+        </div>
+        <div class="x-rv__pop" id="rv-pop" hidden></div>
+        <div class="x-rv__grid" id="rv-grid" hidden>
+          <div class="x-rv__bar"><button class="x-btn" type="button" data-act="rv-gclose" aria-label="Закрыть">✕</button><p class="x-rv__cap" id="rv-gcap">Страницы</p>
+            <span class="x-rv__seg" style="flex:0 0 auto"><button type="button" data-act="rv-gtab" data-t="p" aria-pressed="true">Страницы</button><button type="button" data-act="rv-gtab" data-t="b" aria-pressed="false">Закладки</button></span></div>
+          <div class="x-rv__gbody" id="rv-gbody"></div>
+        </div>
+        <div class="x-rv__toast" id="rv-toast" hidden></div>
       </div>
     </div>
 
@@ -2509,6 +2562,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           Object.keys(study).forEach(function (id) { out.study[id] = { title: byId[id].title, status: study[id].s, updated: iso(study[id].t) }; });
           Object.keys(selftest).forEach(function (id) { out.selftest[id] = { title: byId[id].title, result: selftest[id].r, label: QRES[selftest[id].r], date: iso(selftest[id].t) }; });
           Object.keys(verify).forEach(function (id) { out.verify[id] = { title: byId[id].title, status: verify[id].s, comment: verify[id].c || "", date: verify[id].t || "" }; });
+          out.rleBookmarks = libBm.slice(); out.rleNotes = Object.assign({}, rleNotes);
           return JSON.stringify(out, null, 2);
         }
         function exportText() {
@@ -2576,7 +2630,11 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           var data;
           try { data = JSON.parse(text); } catch (e) { alert("Это не JSON. Выберите файл, сохранённый через «Экспорт данных»."); return; }
           if (data && data.version > 3) { alert("Файл сохранён более новой версией приложения (формат v" + data.version + "). Поддерживаются v2 и v3."); return; }
-          if (!data || typeof data !== "object" || (!data.notes && !data.study && !data.favorites && !data.selftest && !data.srs && !data.verify)) { alert("В файле нет заметок, листа на изучение, избранного или результатов самопроверки."); return; }
+          if (data && typeof data === "object") {
+            if (Array.isArray(data.rleBookmarks)) { data.rleBookmarks.forEach(function (x) { if (x && x.k && x.p && libBmIdx(x.k, +x.p) < 0) libBm.push({ k: x.k, p: +x.p, t: x.t || Date.now(), s: x.s || libSecOf(x.k, +x.p) }); }); store.set("mi8-rle-bm", libBm); }
+            if (data.rleNotes && typeof data.rleNotes === "object") { Object.keys(data.rleNotes).forEach(function (k) { if (typeof data.rleNotes[k] === "string" && data.rleNotes[k]) rleNotes[k] = data.rleNotes[k]; }); store.set("mi8-rle-notes", rleNotes); }
+          }
+          if (!data || typeof data !== "object" || (!data.notes && !data.study && !data.favorites && !data.selftest && !data.srs && !data.verify && !data.rleBookmarks && !data.rleNotes)) { alert("В файле нет заметок, листа на изучение, избранного или результатов самопроверки."); return; }
           var inNotes = {}, inStudy = {}, inFavs = [], inSelf = {}, inSrs = {}, inVer = {};
           /* Сверка с РЛЭ: optional; an older file simply has none. */
           if (data.verify && typeof data.verify === "object" && !Array.isArray(data.verify)) Object.keys(data.verify).forEach(function (id) {
@@ -2839,6 +2897,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
         var CHANGELOG = [
+          { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
           { v: "2026-10-12 · 10", d: "2026-10-12", items: ["Библиотека РЛЭ: РЛЭ Ми-8 (ред. 01.04.2025, Изм. 76), Ми-8АМТ (08.2025) и Ми-8МТВ-1 (01.04.2025) целиком — оглавление, поиск по тексту, закладки, переход по номеру страницы", "Просмотр страницы из карты теперь листает всю книгу", "Номера страниц РЛЭ Ми-8 пересчитаны под новую редакцию; 18 карт Ми-8Т помечены: раздел РЛЭ изменён Изм. 75 (пожары, управление)", "Раздел «Что изменилось в редакциях» и эти карты в очереди сверки"] },
           { v: "2026-10-12 · 9", d: "2026-10-12", items: ["Новая страница «Табло»: сигнальные табло Ми-8Т и Ми-8АМТ / МТВ по системам, цвет, значение и переход к аварийной карте", "Мастерская табло (в Настройках и на странице «Табло»): своя картинка, цвет или надпись для любого табло, экспорт и импорт набора"] },
           { v: "2026-10-12 · 8", d: "2026-10-12", items: ["Иконка приложения — сигнальное табло «ПОЛЕТ»"] },
@@ -3352,7 +3411,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           }, 350);
         });
         document.addEventListener("change", function (e) {
-          if (e.target.id === "rv-pg" && rv) { var p = parseInt(e.target.value, 10); if (p >= 1 && (!rv.n || p <= rv.n)) { rv.p = p; rvShow(); } else e.target.value = rv.p; }
+          if (e.target.id === "rv-pg" && rv) { var p = parseInt(e.target.value, 10); if (p >= 1 && (!rv.n || p <= rv.n)) { rvGo(p, true); } else e.target.value = rv.p; }
         });
         var LIB_ACTS = {
           lib: function () { if (!sheetEl.hidden) sheetEl.hidden = true; var e = currentEntry(); if (e && e.v === "lib") render(); else openView({ v: "lib" }); },
@@ -3751,27 +3810,128 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         var rvEl = document.getElementById("rv"), rvImg = document.getElementById("rv-img"), rvErr = document.getElementById("rv-err"),
           rvCap = document.getElementById("rv-cap"), rvZ = document.getElementById("rv-z"), rvBox = document.getElementById("rv-box");
         var rv = null, rvPushed = false, rvRet = null, RV_BLANK = rvImg.getAttribute("src");
+        var rvImg2 = document.getElementById("rv-img2"), rvSl = document.getElementById("rv-sl"), rvSll = document.getElementById("rv-sll"),
+          rvPop = document.getElementById("rv-pop"), rvGrid = document.getElementById("rv-grid"), rvGBody = document.getElementById("rv-gbody"),
+          rvToastEl = document.getElementById("rv-toast"), rvBackBtn = document.getElementById("rv-back");
+        var rvPref = store.get("mi8-rle-view", {}) || {};
+        if (!rvPref.rm) rvPref.rm = "auto"; if (!rvPref.fit) rvPref.fit = "w"; if (rvPref.spread == null) rvPref.spread = true; if (rvPref.wake == null) rvPref.wake = true;
+        var rleNotes = store.get("mi8-rle-notes", {}) || {};
+        function rvPrefSave() { store.set("mi8-rle-view", rvPref); }
+        function rvSrcOf(k) { return (window.MI8_RLE && window.MI8_RLE[k]) || ("rle/" + k + ".webp"); }
+        function rvIsSpread() { return !!(rvPref.spread && rvBox.clientWidth > rvBox.clientHeight && rvBox.clientWidth >= 700); }
+        function rvToast(t) { rvToastEl.textContent = t; rvToastEl.hidden = false; clearTimeout(rvToast.t); rvToast.t = setTimeout(function () { rvToastEl.hidden = true; }, 900); }
+        function rvGo(p, jump) {
+          if (!rv) return;
+          p = Math.max(1, rv.n ? Math.min(rv.n, p) : p);
+          if (p === rv.p) return;
+          if (jump) { rv.hist.push(rv.p); if (rv.hist.length > 30) rv.hist.shift(); }
+          rv.p = p; rvShow();
+        }
+        function rvStep(d) { if (!rv) return; var st = rvIsSpread() ? 2 : 1; var p = rv.p + d * st; if (p < 1) p = 1; if (rv.n && p > rv.n) return; if (p !== rv.p) { rv.p = p; rvShow(); } }
         function rvShow() {
-          var src = rv.src, p = rv.p, k = src.key + "-" + p, sec = libSecOf(src.key, p);
-          rvCap.textContent = libTitle(src.key) + " · стр. " + p + (rv.n ? " из " + rv.n : "") + (sec ? " · " + sec : "");
+          var src = rv.src, p = rv.p, k = src.key + "-" + p, sec = libSecOf(src.key, p), sp = rvIsSpread() && (!rv.n || p < rv.n);
+          rvCap.textContent = libTitle(src.key) + " · стр. " + p + (sp ? "–" + (p + 1) : "") + (rv.n ? " из " + rv.n : "") + (sec ? " · " + sec : "");
           libLastSet(src.key, p);
           var pg = document.getElementById("rv-pg"); if (pg) { pg.value = p; pg.max = rv.n || ""; }
           var bmb = rvEl.querySelector('[data-act="rv-bm"]'); if (bmb) { var on = libBmIdx(src.key, p) >= 0; bmb.setAttribute("aria-pressed", String(on)); bmb.textContent = on ? "★" : "☆"; }
+          var nb = rvEl.querySelector('[data-act="rv-note"]'); if (nb) nb.setAttribute("aria-pressed", String(!!rleNotes[k]));
           rvErr.hidden = true; rvImg.hidden = false;
           rvImg.alt = src.man + ", страница PDF " + p;
-          rvImg.src = (window.MI8_RLE && window.MI8_RLE[k]) || ("rle/" + k + ".webp");
+          rvImg.src = rvSrcOf(k);
+          if (sp) { rvImg2.hidden = false; rvImg2.alt = src.man + ", страница PDF " + (p + 1); rvImg2.src = rvSrcOf(src.key + "-" + (p + 1)); }
+          else { rvImg2.hidden = true; rvImg2.src = RV_BLANK; }
           rvBox.scrollTop = 0; rvBox.scrollLeft = 0;
           rvEl.querySelector('[data-act="rv-prev"]').disabled = p <= 1;
-          rvEl.querySelector('[data-act="rv-next"]').disabled = !!rv.n && p >= rv.n;
+          rvEl.querySelector('[data-act="rv-next"]').disabled = !!rv.n && p >= rv.n - (sp ? 1 : 0);
+          if (rv.n) { rvSl.max = rv.n; rvSl.value = p; } rvSll.textContent = "стр. " + p + (rv.n ? " / " + rv.n : "") + (sec ? " · " + sec : "");
+          var last = rv.hist.length ? rv.hist[rv.hist.length - 1] : 0;
+          rvBackBtn.hidden = !last; rvBackBtn.textContent = last ? "← " + last : "←"; rvBackBtn.setAttribute("aria-label", "Вернуться на стр. " + last);
+          rvEl.setAttribute("data-rm", rvPref.rm === "auto" ? "" : rvPref.rm);
           rvZoom(0);
+          try { var nx = new Image(); nx.src = rvSrcOf(src.key + "-" + (p + (sp ? 2 : 1))); } catch (e) {}
         }
         function rvZoom(d) {
           rv.z = Math.max(100, Math.min(300, rv.z + d));
-          rvImg.style.width = rv.z + "%";
+          var sp = !rvImg2.hidden;
+          [rvImg, rvImg2].forEach(function (im) {
+            if (rvPref.fit === "p") { im.style.width = "auto"; im.style.height = Math.max(200, rvBox.clientHeight - 4) * rv.z / 100 + "px"; im.style.maxWidth = "none"; }
+            else { im.style.height = "auto"; im.style.width = (sp ? rv.z / 2 - 0.5 : rv.z) + "%"; }
+          });
           rvZ.textContent = rv.z + "%";
           rvEl.querySelector('[data-act="rv-zout"]').disabled = rv.z <= 100;
           rvEl.querySelector('[data-act="rv-zin"]').disabled = rv.z >= 300;
         }
+        function rvSegHtml(name, cur, opts) {
+          return '<div class="x-rv__seg">' + opts.map(function (o) { return '<button type="button" data-act="rv-set" data-k="' + name + '" data-v="' + o[0] + '" aria-pressed="' + (String(cur) === String(o[0])) + '">' + o[1] + "</button>"; }).join("") + "</div>";
+        }
+        function rvAaRender() {
+          rvPop.innerHTML = "<h4>Режим чтения</h4>" + rvSegHtml("rm", rvPref.rm, [["auto", "Как тема"], ["paper", "Бумага"], ["sepia", "Сепия"], ["dark", "Тёмный"], ["night", "Ночь"]]) +
+            "<h4>Масштаб</h4>" + rvSegHtml("fit", rvPref.fit, [["w", "По ширине"], ["p", "Страница целиком"]]) +
+            "<h4>Горизонтально</h4>" + rvSegHtml("spread", rvPref.spread, [[true, "Разворот 2 стр."], [false, "Одна страница"]]) +
+            "<h4>Экран</h4>" + rvSegHtml("wake", rvPref.wake, [[true, "Не гаснет при чтении"], [false, "Как обычно"]]) +
+            '<p class="x-rv__hint">Касание края — листать, середины — скрыть панели. Свайп влево/вправо — листать. Двойное касание — увеличить.</p>';
+        }
+        var rvWake = null;
+        function rvWakeSet(on) {
+          try {
+            if (on && rvPref.wake && navigator.wakeLock && !rvWake) navigator.wakeLock.request("screen").then(function (w) { rvWake = w; w.addEventListener("release", function () { rvWake = null; }); }).catch(function () {});
+            if (!on && rvWake) { rvWake.release(); rvWake = null; }
+          } catch (e) {}
+        }
+        document.addEventListener("visibilitychange", function () { if (rv && document.visibilityState === "visible") rvWakeSet(true); });
+        function rvGridRender(tab) {
+          rv.gtab = tab;
+          Array.prototype.forEach.call(rvGrid.querySelectorAll('[data-act="rv-gtab"]'), function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-t") === tab)); });
+          var key = rv.src.key, b = LIB.books[key], h = "";
+          if (tab === "p") {
+            var secs = {}; if (b) b.toc.forEach(function (x) { if (x[3] && !secs[x[3]]) secs[x[3]] = x; });
+            h = '<div class="x-rv__thumbs">';
+            for (var p = 1; p <= rv.n; p++) {
+              var x = secs[p]; if (x && x[0] && !x[1]) h += '<p class="x-rv__sec">' + esc(x[0] + (x[2] ? " " + x[2] : "")) + "</p>";
+              var k = key + "-" + p, m = (libBmIdx(key, p) >= 0 ? "★" : "") + (rleNotes[k] ? "✎" : "");
+              h += '<button type="button" class="x-rv__th' + (p === rv.p ? " is-cur" : "") + '" data-act="rv-gto" data-p="' + p + '"><img loading="lazy" alt="" src="' + rvSrcOf(k) + '" /><b>' + p + (m ? " <em>" + m + "</em>" : "") + "</b></button>";
+            }
+            h += "</div>";
+          } else {
+            var items = [];
+            libBm.forEach(function (x) { if (x.k === key) items.push({ p: x.p, t: "★ Закладка" }); });
+            Object.keys(rleNotes).forEach(function (k2) { var i = k2.lastIndexOf("-"); if (k2.slice(0, i) === key) items.push({ p: +k2.slice(i + 1), t: "✎ " + rleNotes[k2] }); });
+            items.sort(function (a2, b2) { return a2.p - b2.p; });
+            h = items.length ? '<ul class="x-rv__bl">' + items.map(function (it) { return '<li data-act="rv-gto" data-p="' + it.p + '"><b>стр. ' + it.p + "</b><span>" + esc(it.t) + "<small>" + esc(libSecOf(key, it.p)) + "</small></span></li>"; }).join("") + "</ul>"
+              : '<p class="x-rv__hint">Пока пусто. ☆ — закладка на странице, ✎ — заметка к странице.</p>';
+          }
+          rvGBody.innerHTML = h;
+          document.getElementById("rv-gcap").textContent = libTitle(key) + (tab === "p" ? " · " + rv.n + " стр." : "");
+          if (tab === "p") { var cur = rvGBody.querySelector(".is-cur"); if (cur) try { cur.scrollIntoView({ block: "center" }); } catch (e) { cur.scrollIntoView(); } }
+        }
+        rvSl.addEventListener("input", function () { if (!rv) return; var p = +rvSl.value; rvSll.textContent = "стр. " + p + " / " + rv.n + " · " + libSecOf(rv.src.key, p); });
+        rvSl.addEventListener("change", function () { if (rv) rvGo(+rvSl.value, true); });
+        /* touch: edge taps turn pages, centre tap toggles bars, swipe turns, double tap zooms */
+        (function () {
+          var t0 = null, lastTap = 0, tapTimer = null;
+          rvBox.addEventListener("touchstart", function (e) { if (e.touches.length !== 1) { t0 = null; return; } var t = e.touches[0]; t0 = { x: t.clientX, y: t.clientY, tm: Date.now(), sl: rvBox.scrollLeft }; }, { passive: true });
+          rvBox.addEventListener("touchend", function (e) {
+            if (!t0 || !rv) return; var t = e.changedTouches[0], dx = t.clientX - t0.x, dy = t.clientY - t0.y, dt = Date.now() - t0.tm, s0 = t0; t0 = null;
+            var zoomed = rv.z > 100 || rvBox.scrollWidth > rvBox.clientWidth + 4;
+            if (!zoomed && Math.abs(dx) > 60 && Math.abs(dy) < 60 && dt < 600) { rvStep(dx < 0 ? 1 : -1); return; }
+            if (Math.abs(dx) < 10 && Math.abs(dy) < 10 && dt < 350) { e.preventDefault(); rvTap(t.clientX, t.clientY); }
+          });
+          rvBox.addEventListener("click", function (e) { if (e.detail === 0) return; if (rvBox._touch) return; rvTap(e.clientX, e.clientY); });
+          rvBox.addEventListener("touchstart", function () { rvBox._touch = true; }, { passive: true, once: true });
+          function rvTap(x, y) {
+            var now = Date.now();
+            if (now - lastTap < 300) { clearTimeout(tapTimer); lastTap = 0; rvZoom(rv.z > 100 ? -(rv.z - 100) : 100); return; }
+            lastTap = now;
+            tapTimer = setTimeout(function () {
+              if (!rv) return; if (!rvPop.hidden) { rvPop.hidden = true; return; }
+              var r = rvBox.getBoundingClientRect(), fx = (x - r.left) / r.width, zoomed = rv.z > 100;
+              if (!zoomed && fx < 0.22) rvStep(-1);
+              else if (!zoomed && fx > 0.78) rvStep(1);
+              else rvEl.classList.toggle("is-imm");
+            }, 280);
+          }
+        })();
+        window.addEventListener("resize", function () { if (rv) rvShow(); });
         rvImg.addEventListener("error", function () {
           if (!rv) return;
           var src = rv.src, p = rv.p;
@@ -3785,7 +3945,8 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         }
         function rvOpenBook(key, p, btn) {
           var b = LIB.books[key], n = b ? b.n : 0;
-          rv = { src: { key: key, man: libTitle(key), file: b ? b.t + ", " + b.ed : key }, p: Math.max(1, n ? Math.min(n, p) : p), n: n, z: 100 };
+          rv = { src: { key: key, man: libTitle(key), file: b ? b.t + ", " + b.ed : key }, p: Math.max(1, n ? Math.min(n, p) : p), n: n, z: 100, hist: [] };
+          rvPop.hidden = true; rvGrid.hidden = true; rvEl.classList.remove("is-imm"); rvWakeSet(true);
           rvRet = btn || null;
           rvEl.hidden = false;
           rvShow();
@@ -3794,7 +3955,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         }
         function rvClose(fromPop) {
           if (!rv) return;
-          rv = null; rvEl.hidden = true; rvImg.src = RV_BLANK;
+          rv = null; rvEl.hidden = true; rvImg.src = RV_BLANK; rvImg2.src = RV_BLANK; rvPop.hidden = true; rvGrid.hidden = true; rvGBody.innerHTML = ""; rvWakeSet(false);
           if (rvPushed) { rvPushed = false; if (!fromPop) { try { history.back(); } catch (e) {} } }
           try { if (rvRet && document.contains(rvRet)) rvRet.focus(); } catch (e) {}
           rvRet = null;
@@ -3802,8 +3963,20 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         var RV_ACTS = {
           "rv-open": rvOpen,
           "rv-close": function () { rvClose(false); },
-          "rv-prev": function () { if (rv && rv.p > 1) { rv.p--; rvShow(); } },
-          "rv-next": function () { if (rv && (!rv.n || rv.p < rv.n)) { rv.p++; rvShow(); } },
+          "rv-prev": function () { rvStep(-1); },
+          "rv-next": function () { rvStep(1); },
+          "rv-back": function () { if (rv && rv.hist.length) { rv.p = rv.hist.pop(); rvShow(); } },
+          "rv-aa": function () { if (!rv) return; if (rvPop.hidden) { rvAaRender(); rvPop.hidden = false; } else rvPop.hidden = true; },
+          "rv-set": function (btn) { var k = btn.getAttribute("data-k"), v = btn.getAttribute("data-v"); rvPref[k] = (v === "true" ? true : v === "false" ? false : v); rvPrefSave(); if (k === "wake") rvWakeSet(rvPref.wake); rvAaRender(); rvShow(); },
+          "rv-note": function () {
+            if (!rv) return; var k = rv.src.key + "-" + rv.p, cur = rleNotes[k] || "";
+            var t = window.prompt("Заметка к стр. " + rv.p + " (пусто — удалить):", cur); if (t === null) return;
+            t = t.trim(); if (t) rleNotes[k] = t; else delete rleNotes[k]; store.set("mi8-rle-notes", rleNotes); rvShow(); rvToast(t ? "Заметка сохранена" : "Заметка удалена");
+          },
+          "rv-grid": function () { if (!rv) return; rvPop.hidden = true; rvGrid.hidden = false; rvGridRender(rv.gtab || "p"); },
+          "rv-gclose": function () { rvGrid.hidden = true; rvGBody.innerHTML = ""; },
+          "rv-gtab": function (btn) { if (rv) rvGridRender(btn.getAttribute("data-t")); },
+          "rv-gto": function (btn) { if (!rv) return; rvGrid.hidden = true; rvGBody.innerHTML = ""; rvGo(+btn.getAttribute("data-p"), true); },
           "rv-bm": function () { if (!rv) return; libBmToggle(rv.src.key, rv.p); rvShow(); },
           "rv-toc": function () { if (!rv) return; var k = rv.src.key, p = rv.p; rvClose(false); libTocFocus = p; setTimeout(function () { openView({ v: "libb", f: k }); }, 0); },
           "rv-zin": function () { if (rv) rvZoom(50); },
@@ -4225,7 +4398,10 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         document.addEventListener("keydown", function (e) {
           var tag = (e.target.tagName || "").toLowerCase();
           if (rv) {
-            if (e.key === "Escape") { e.preventDefault(); rvClose(false); }
+            if (e.key === "Escape") { e.preventDefault(); if (!rvGrid.hidden) RV_ACTS["rv-gclose"](); else if (!rvPop.hidden) rvPop.hidden = true; else rvClose(false); }
+            else if (tag === "input" || tag === "textarea") return;
+            else if (e.key === " " || e.key === "PageDown") { e.preventDefault(); RV_ACTS["rv-next"](); }
+            else if (e.key === "PageUp") { e.preventDefault(); RV_ACTS["rv-prev"](); }
             else if (e.key === "ArrowLeft") RV_ACTS["rv-prev"]();
             else if (e.key === "ArrowRight") RV_ACTS["rv-next"]();
             return;
