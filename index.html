@@ -2611,7 +2611,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         var rf = { on: false, n: 0, N: 0, err: 0 };
         function rleTotal() { var t = 0; Object.keys(LIB.books).forEach(function (k) { t += LIB.books[k].n || 0; }); return t; }
         function rleUrls() { var a = []; Object.keys(LIB.books).forEach(function (k) { for (var i = 1; i <= LIB.books[k].n; i++) a.push("rle/" + k + "-" + i + ".webp"); }); return a; }
-        function rleCacheName() { return caches.keys().then(function (ks) { return ks.filter(function (k) { return /^mi8-rle-/.test(k); }).sort().pop() || "mi8-rle-2025-10c"; }); }
+        function rleCacheName() { return caches.keys().then(function (ks) { return ks.filter(function (k) { return /^mi8-rle-/.test(k); }).sort().pop() || "mi8-rle-2025-10d"; }); }
         function rleHave() {
           return rleCacheName().then(function (nm) { return caches.open(nm).then(function (c) { return c.keys(); }).then(function (rs) {
             var set = {}; rs.forEach(function (r) { var m = /\/rle\/([A-Z]+-\d+)\.webp/.exec(r.url); if (m) set[m[1]] = 1; }); return { nm: nm, set: set }; }); });
@@ -3264,9 +3264,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
-        var APP_BUILD = "v32";
+        var APP_BUILD = "v33";
         var CHANGELOG = [
-          { v: "2026-10-12 · 32", d: "2026-10-12", items: ["Страницы РЛЭ можно увеличивать двумя пальцами (до 400%), листание при увеличении — прокруткой", "Плотность текста в РЛЭ (кнопка Aa): «Чётче» по умолчанию и «Жирнее» для мелкого шрифта", "РЛЭ как электронная книга: полка с обложками, «Читаете сейчас», процент прочитанного, закладки-ленточки", "В читалке: полоса прогресса книги, «до конца раздела N стр.», анимация перелистывания", "Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
+          { v: "2026-10-12 · 33", d: "2026-10-12", items: ["Страницы РЛЭ перерисованы в 200 dpi: шрифт тонкий и ровный, как в оригинальном PDF (страницы загрузятся заново)", "Страницы РЛЭ можно увеличивать двумя пальцами (до 400%), листание при увеличении — прокруткой", "Плотность текста в РЛЭ (кнопка Aa): «Чётче» по умолчанию и «Жирнее» для мелкого шрифта", "РЛЭ как электронная книга: полка с обложками, «Читаете сейчас», процент прочитанного, закладки-ленточки", "В читалке: полоса прогресса книги, «до конца раздела N стр.», анимация перелистывания", "Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
           { v: "2026-10-12 · 20", d: "2026-10-12", items: ["Новый вид «Кабина»: тёмная тема, трафаретные заголовки, цвет по смыслу", "Нижние вкладки: Карты, РЛЭ, Табло, Учёба, Ещё", "Переключатель Ми-8Т / АМТ / МТВ на главной (запоминается)", "Чек-лист: подсветка текущего пункта и «Карта выполнена»"] },
           { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
@@ -4252,7 +4252,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           rvPop = document.getElementById("rv-pop"), rvGrid = document.getElementById("rv-grid"), rvGBody = document.getElementById("rv-gbody"),
           rvToastEl = document.getElementById("rv-toast"), rvBackBtn = document.getElementById("rv-back");
         var rvPref = store.get("mi8-rle-view", {}) || {};
-        if (!rvPref.rm) rvPref.rm = "auto"; if (!rvPref.fit) rvPref.fit = "w"; if (rvPref.spread == null) rvPref.spread = true; if (rvPref.wake == null) rvPref.wake = true; if (rvPref.ink == null) rvPref.ink = "1";
+        if (!rvPref.rm) rvPref.rm = "auto"; if (!rvPref.fit) rvPref.fit = "w"; if (rvPref.spread == null) rvPref.spread = true; if (rvPref.wake == null) rvPref.wake = true; if (rvPref.inkV !== 2) { rvPref.ink = "0"; rvPref.inkV = 2; }
         var rleNotes = store.get("mi8-rle-notes", {}) || {};
         function rvPrefSave() { store.set("mi8-rle-view", rvPref); }
         function rvSrcOf(k) { return (window.MI8_RLE && window.MI8_RLE[k]) || ("rle/" + k + ".webp"); }
@@ -4316,7 +4316,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         }
         function rvAaRender() {
           rvPop.innerHTML = "<h4>Режим чтения</h4>" + rvSegHtml("rm", rvPref.rm, [["auto", "Как тема"], ["paper", "Бумага"], ["sepia", "Сепия"], ["dark", "Тёмный"], ["night", "Ночь"]]) +
-            "<h4>Плотность текста</h4>" + rvSegHtml("ink", rvPref.ink, [["0", "Как в скане"], ["1", "Чётче"], ["2", "Жирнее"]]) +
+            "<h4>Плотность текста</h4>" + rvSegHtml("ink", rvPref.ink, [["0", "Как в оригинале"], ["1", "Темнее"], ["2", "Жирнее"]]) +
             "<h4>Масштаб · " + rv.z + "%</h4>" + rvSegHtml("fit", rvPref.fit, [["w", "По ширине"], ["p", "Страница целиком"]]) +
             '<div class="x-rv__seg" style="margin-top:6px"><button type="button" data-act="rv-zout2">− Меньше</button><button type="button" data-act="rv-zin2">+ Больше</button></div>' +
             "<h4>Горизонтально</h4>" + rvSegHtml("spread", rvPref.spread, [[true, "Разворот 2 стр."], [false, "Одна страница"]]) +
