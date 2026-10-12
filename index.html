@@ -3161,7 +3161,15 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         var IS_FILE = location.protocol === "file:" || location.protocol === "blob:" || location.protocol === "about:";
         try {
           if (!IS_FILE && "serviceWorker" in navigator && /^https?:$/.test(location.protocol))
-            fetch("sw.js", { method: "HEAD", cache: "no-store" }).then(function (r) { if (r.ok) return navigator.serviceWorker.register("sw.js"); }).catch(function () {});
+            fetch("sw.js", { method: "HEAD", cache: "no-store" }).then(function (r) { if (r.ok) return navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) { try { reg.update(); } catch (e) {} }); }).catch(function () {});
+          /* new version took control right after launch: reload once so the user sees it immediately */
+          if (!IS_FILE && "serviceWorker" in navigator && navigator.serviceWorker.controller) {
+            var swT0 = Date.now(), swReloaded = false;
+            navigator.serviceWorker.addEventListener("controllerchange", function () {
+              if (swReloaded || Date.now() - swT0 > 20000 || (typeof rv !== "undefined" && rv)) return;
+              swReloaded = true; try { location.reload(); } catch (e) {}
+            });
+          }
         } catch (e) {}
         var RLE_KEYS = (function () {
           var o = {};
