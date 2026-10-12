@@ -1,0 +1,22 @@
+name: Обновление базы ФАП
+on:
+  schedule:
+    - cron: '0 3 * * *'   # каждый день в 06:00 МСК
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: fap-update, cancel-in-progress: false }
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Сбор текстов с favt.gov.ru и pravo.gov.ru
+        run: python3 fap/scripts/update.py || echo "::warning::Источник недоступен, база не изменена"
+      - name: Сохранить изменения (GitHub Pages опубликует сам)
+        run: |
+          git config user.name "fap-bot"; git config user.email "fap-bot@users.noreply.github.com"
+          git add fap/data
+          git diff --cached --quiet || git commit -m "База ФАП: обновление $(date -u +%F)"
+          git push
