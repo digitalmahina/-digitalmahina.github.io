@@ -3,79 +3,94 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Макет · Liquid Glass — Ми-8 Экипаж</title>
+<title>Макет · Кабина — Ми-8 Экипаж</title>
 <style>
-:root{--tx:#fff;--mut:rgba(235,240,255,.62);--g:rgba(255,255,255,.09);--g2:rgba(255,255,255,.16);--edge:rgba(255,255,255,.22);--hi:rgba(255,255,255,.45);
---sh:0 12px 40px rgba(0,0,0,.38);--acc:#5cf2a0;--red:#ff5d62;--amb:#ffb340;--blue:#5aa8ff;--bg1:#0b1220;--bg2:#101a2e}
-html.light{--tx:#0b1020;--mut:rgba(20,28,50,.58);--g:rgba(255,255,255,.42);--g2:rgba(255,255,255,.7);--edge:rgba(255,255,255,.75);--hi:rgba(255,255,255,.95);
---sh:0 10px 34px rgba(30,50,90,.18);--acc:#0fa860;--bg1:#dfe8f5;--bg2:#eef2f8}
+:root{--tx:#e9ece6;--mut:rgba(200,210,200,.55);--acc:#3dff8a;--red:#ff3b30;--amb:#ffb000;--blue:#47b8ff;--bg1:#07090a;
+--g:rgba(18,22,24,.58);--edge:rgba(255,255,255,.13);--hi:rgba(255,255,255,.18);--sh:0 14px 40px rgba(0,0,0,.6);
+--cond:"DIN Condensed","Bahnschrift","Oswald","Arial Narrow","Roboto Condensed",sans-serif;--mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+html.nvg{--tx:#ff9a8a;--mut:rgba(255,120,100,.5);--acc:#ff4433;--amb:#ff5a3c;--blue:#ff6a50;--red:#ff2a1a;--edge:rgba(255,60,40,.22);--hi:rgba(255,80,60,.2)}
+html.nvg .bg{filter:sepia(1) hue-rotate(-40deg) saturate(3) brightness(.55)}html.nvg .lamp{filter:hue-rotate(-30deg) saturate(.6) brightness(.7)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%}
-body{color:var(--tx);font:17px/1.35 -apple-system,"SF Pro Text",system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg1);padding-bottom:120px;transition:background .4s}
-/* живой фон, сквозь который «течёт» стекло */
-.bg{position:fixed;inset:-20%;z-index:-1;background:radial-gradient(40% 35% at 18% 20%,#1e7a5a 0,transparent 70%),radial-gradient(35% 30% at 85% 15%,#2f4fd0 0,transparent 70%),radial-gradient(45% 40% at 70% 85%,#a03a6a 0,transparent 70%),radial-gradient(40% 35% at 10% 90%,#c27a1a 0,transparent 70%),linear-gradient(160deg,var(--bg1),var(--bg2));filter:saturate(120%);animation:drift 28s ease-in-out infinite alternate}
-html.light .bg{background:radial-gradient(40% 35% at 18% 20%,#7fe0b8 0,transparent 70%),radial-gradient(35% 30% at 85% 15%,#8fb0ff 0,transparent 70%),radial-gradient(45% 40% at 70% 85%,#ffb0cf 0,transparent 70%),radial-gradient(40% 35% at 10% 90%,#ffd68a 0,transparent 70%),linear-gradient(160deg,var(--bg1),var(--bg2))}
-@keyframes drift{to{transform:translate3d(4%,-3%,0) rotate(6deg) scale(1.06)}}
-/* стекло */
-.glass{position:relative;background:linear-gradient(135deg,var(--g2),var(--g) 45%,var(--g));-webkit-backdrop-filter:blur(26px) saturate(190%);backdrop-filter:blur(26px) saturate(190%);border:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--hi),inset 0 -1px 1px rgba(255,255,255,.06),var(--sh)}
-.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(120% 60% at 20% 0,rgba(255,255,255,.22),transparent 55%);mix-blend-mode:overlay}
-.press{transition:transform .25s cubic-bezier(.3,1.6,.5,1),filter .2s}
-.press:active{transform:scale(.96);filter:brightness(1.15)}
-svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.mock{position:fixed;top:calc(env(safe-area-inset-top) + 6px);left:50%;transform:translateX(-50%);z-index:20;font:600 12px/1 inherit;padding:7px 12px;border-radius:20px;color:var(--tx);white-space:nowrap}
-header{position:sticky;top:0;z-index:8;padding:calc(env(safe-area-inset-top) + 44px) 18px 10px;max-width:920px;margin:0 auto}
-.hrow{display:flex;align-items:center;gap:12px}
-h1{font:800 34px/1.1 -apple-system,"SF Pro Display",system-ui,sans-serif;letter-spacing:-.02em;margin:0;flex:1}
-.circle{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--tx);border:0;cursor:pointer}
-.seg{margin-top:14px;display:flex;border-radius:999px;padding:4px;position:relative}
-.seg .thumb{position:absolute;top:4px;bottom:4px;left:4px;border-radius:999px;transition:transform .45s cubic-bezier(.3,1.35,.45,1),width .45s;background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,.14));border:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--hi),0 4px 14px rgba(0,0,0,.25)}
-.seg button{flex:1;position:relative;z-index:1;border:0;background:none;color:var(--mut);font:600 16px/1 inherit;padding:12px 0;cursor:pointer;transition:color .3s}
-.seg button.on{color:var(--tx)}
-.search{margin-top:12px;display:flex;align-items:center;gap:10px;border-radius:999px;padding:13px 16px;color:var(--mut)}
+body{color:var(--tx);font:17px/1.35 -apple-system,system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg1);padding-bottom:120px}
+/* фон: углепластик + сетка ИЛС + приглушённый свет кабины */
+.bg{position:fixed;inset:0;z-index:-1;
+background:
+radial-gradient(60% 40% at 50% -5%,rgba(61,255,138,.16),transparent 70%),
+radial-gradient(40% 30% at 100% 100%,rgba(255,176,0,.10),transparent 70%),
+radial-gradient(120% 90% at 50% 40%,transparent 50%,rgba(0,0,0,.85)),
+linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px) 0 0/48px 48px,
+linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px) 0 0/48px 48px,
+repeating-linear-gradient(45deg,#111416 0 3px,#0b0d0f 3px 6px),#0a0c0e}
+.glass{position:relative;background:linear-gradient(160deg,rgba(255,255,255,.07),var(--g) 40%);-webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%);border:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--hi),inset 0 0 0 1px rgba(0,0,0,.4),var(--sh)}
+/* уголки как на ИЛС/МФИ */
+.hud::before,.hud::after{content:"";position:absolute;width:14px;height:14px;border:2px solid var(--acc);opacity:.75;pointer-events:none}
+.hud::before{top:-1px;left:-1px;border-right:0;border-bottom:0;border-top-left-radius:inherit}
+.hud::after{bottom:-1px;right:-1px;border-left:0;border-top:0;border-bottom-right-radius:inherit}
+.press{transition:transform .2s cubic-bezier(.3,1.5,.5,1),filter .2s}
+.press:active{transform:scale(.97);filter:brightness(1.25)}
+svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:square;stroke-linejoin:miter;flex:none}
+.mock{position:fixed;top:calc(env(safe-area-inset-top) + 6px);left:50%;transform:translateX(-50%);z-index:20;font:600 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:7px 12px;border-radius:6px;color:var(--amb);white-space:nowrap}
+header{position:sticky;top:0;z-index:8;padding:calc(env(safe-area-inset-top) + 40px) 18px 10px;max-width:920px;margin:0 auto}
+.hrow{display:flex;align-items:flex-end;gap:12px}
+.kick{font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--acc);text-transform:uppercase;margin-bottom:6px}
+h1{font:700 44px/0.95 var(--cond);text-transform:uppercase;letter-spacing:.03em;margin:0;flex:1}
+.circle{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--tx);border:0;cursor:pointer;font:700 12px/1 var(--mono)}
+.seg{margin-top:14px;display:flex;border-radius:10px;padding:4px;position:relative}
+.seg .thumb{position:absolute;top:4px;bottom:4px;left:4px;border-radius:7px;transition:transform .4s cubic-bezier(.3,1.3,.45,1),width .4s;background:linear-gradient(180deg,rgba(61,255,138,.28),rgba(61,255,138,.08));border:1px solid color-mix(in srgb,var(--acc) 60%,transparent);box-shadow:0 0 18px color-mix(in srgb,var(--acc) 35%,transparent),inset 0 1px 0 rgba(255,255,255,.25)}
+html.nvg .seg .thumb,html.nvg .tab .thumb{background:rgba(255,60,40,.18)}
+.seg button{flex:1;position:relative;z-index:1;border:0;background:none;color:var(--mut);font:700 20px/1 var(--cond);letter-spacing:.06em;text-transform:uppercase;padding:12px 0 10px;cursor:pointer;transition:color .3s}
+.seg button.on{color:var(--tx);text-shadow:0 0 10px color-mix(in srgb,var(--acc) 60%,transparent)}
+.search{margin-top:12px;display:flex;align-items:center;gap:10px;border-radius:10px;padding:13px 16px;color:var(--mut);font-family:var(--mono);font-size:15px}
 main{padding:8px 18px;max-width:920px;margin:0 auto}
-.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:620px){.tiles{grid-template-columns:1fr}h1{font-size:30px}}
-.tile{border-radius:28px;padding:20px;min-height:168px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;overflow:hidden}
-.tile .orb{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 6px 18px var(--c)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:620px){.tiles{grid-template-columns:1fr}h1{font-size:38px}}
+.tile{border-radius:14px;padding:18px;min-height:178px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;overflow:hidden}
+.tile .top{display:flex;justify-content:space-between;align-items:flex-start}
+.tile .no{font:700 40px/1 var(--cond);color:var(--c);opacity:.9;text-shadow:0 0 16px color-mix(in srgb,var(--c) 50%,transparent)}
+.tile .orb{width:50px;height:50px;border-radius:10px;display:grid;place-items:center;color:var(--c);border:1.5px solid color-mix(in srgb,var(--c) 70%,transparent);background:color-mix(in srgb,var(--c) 12%,transparent);box-shadow:0 0 20px color-mix(in srgb,var(--c) 30%,transparent),inset 0 0 12px color-mix(in srgb,var(--c) 20%,transparent)}
 .tile .orb svg{width:28px;height:28px}
-.tile b{font-size:21px;display:block;letter-spacing:-.01em}.tile small{color:var(--mut);font-size:14px}
-.tile::before{content:"";position:absolute;right:-30px;bottom:-40px;width:140px;height:140px;border-radius:50%;background:var(--c);opacity:.28;filter:blur(30px)}
+.tile b{font:700 28px/1 var(--cond);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px}.tile small{color:var(--mut);font:13px/1.3 var(--mono)}
+.stripe{position:absolute;left:0;right:0;top:0;height:6px;background:repeating-linear-gradient(-45deg,var(--c) 0 10px,#111 10px 20px);opacity:.9}
 .c-red{--c:var(--red)}.c-amb{--c:var(--amb)}.c-blue{--c:var(--blue)}.c-grn{--c:var(--acc)}
-.orb{background:linear-gradient(160deg,color-mix(in srgb,var(--c) 85%,#fff),var(--c))}
-.fly{margin-top:14px;display:flex;align-items:center;gap:14px;border-radius:24px;padding:16px 18px;cursor:pointer;overflow:hidden}
-.fly b{display:block}.fly small{color:var(--mut)}
-h2{font:700 20px/1.2 inherit;letter-spacing:-.01em;margin:28px 4px 12px}
-.chips{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 14px;scrollbar-width:none}
-.chip{flex:0 0 auto;border-radius:20px;padding:12px 16px;max-width:240px}
-.chip small{display:block;color:var(--mut);font-size:12px}
-.list{border-radius:26px;overflow:hidden;padding:4px 0}
-.li{display:flex;align-items:center;gap:14px;padding:13px 18px;position:relative;cursor:pointer}
-.li+.li::before{content:"";position:absolute;top:0;left:62px;right:0;height:1px;background:var(--edge);opacity:.5}
-.li .ic{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#fff;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 80%,#fff),var(--c))}
+.fly{margin-top:12px;display:flex;align-items:center;gap:14px;border-radius:14px;padding:16px 18px;cursor:pointer;overflow:hidden}
+.fly .orb{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:#05140b;background:var(--acc);box-shadow:0 0 22px color-mix(in srgb,var(--acc) 55%,transparent)}
+.fly b{display:block;font:700 24px/1 var(--cond);text-transform:uppercase;letter-spacing:.05em}.fly small{color:var(--mut);font:13px var(--mono)}
+h2{font:600 12px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin:28px 2px 12px;display:flex;align-items:center;gap:10px}
+h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--edge),transparent)}
+.chips{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:none}
+.chip{flex:0 0 auto;border-radius:10px;padding:12px 16px;max-width:240px;font-weight:600}
+.chip small{display:block;color:var(--acc);font:600 11px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.list{border-radius:14px;overflow:hidden;padding:2px 0}
+.li{display:flex;align-items:center;gap:14px;padding:14px 18px;position:relative;cursor:pointer;font-weight:600}
+.li+.li::before{content:"";position:absolute;top:0;left:18px;right:18px;height:1px;background:repeating-linear-gradient(90deg,var(--edge) 0 6px,transparent 6px 10px)}
+.li .ic{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;color:var(--c);border:1.5px solid color-mix(in srgb,var(--c) 60%,transparent);background:color-mix(in srgb,var(--c) 10%,transparent)}
 .li .ic svg{width:19px;height:19px}
-.li span{flex:1}.li em{font-style:normal;color:var(--mut)}
-.badge{background:var(--acc);color:#04210f;font-weight:700;border-radius:20px;padding:2px 10px;font-size:14px}
-.btn{display:inline-flex;align-items:center;gap:6px;margin-top:12px;border-radius:999px;padding:11px 18px;font-weight:700;color:#04210f;background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 70%,#fff),var(--acc));box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 6px 18px color-mix(in srgb,var(--acc) 45%,transparent);cursor:pointer}
-.book{border-radius:28px;padding:20px;display:flex;gap:20px;align-items:center;margin-bottom:14px}
-.cover{width:84px;height:112px;border-radius:10px;background:linear-gradient(160deg,#2f6b52,#123326);display:grid;place-items:center;font-weight:800;color:#d9ffe9;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),6px 10px 24px rgba(0,0,0,.4);transform:perspective(400px) rotateY(-12deg)}
-.big{border-radius:28px;padding:22px;display:flex;align-items:center;gap:18px;margin-bottom:14px}
-.ring{--p:.6;width:74px;height:74px;border-radius:50%;display:grid;place-items:center;font:800 26px/1 inherit;background:conic-gradient(var(--acc) calc(var(--p)*1turn),rgba(255,255,255,.12) 0);-webkit-mask:radial-gradient(circle,transparent 0 0) ;position:relative}
-.ring i{position:absolute;inset:7px;border-radius:50%;background:var(--bg1);display:grid;place-items:center;font-style:normal;opacity:.92}
+.li span{flex:1}.li em{font:600 15px var(--mono);font-style:normal;color:var(--mut)}
+.badge{background:var(--amb);color:#140c00;font:700 14px/1 var(--mono);border-radius:5px;padding:5px 8px}
+.btn{display:inline-flex;align-items:center;gap:6px;margin-top:12px;border-radius:8px;padding:12px 18px;font:700 18px/1 var(--cond);letter-spacing:.08em;text-transform:uppercase;color:#05140b;background:var(--acc);box-shadow:0 0 22px color-mix(in srgb,var(--acc) 45%,transparent),inset 0 -3px 0 rgba(0,0,0,.25);cursor:pointer}
+.book{border-radius:14px;padding:20px;display:flex;gap:20px;align-items:center;margin-bottom:12px}
+.cover{width:84px;height:112px;border-radius:4px;background:linear-gradient(160deg,#3b4a2c,#1b2414);display:grid;place-items:center;font:700 20px var(--cond);color:#e8f0c0;letter-spacing:.05em;border:1px solid rgba(255,255,255,.15);box-shadow:inset 6px 0 0 rgba(0,0,0,.35),8px 10px 24px rgba(0,0,0,.6)}
+.book b{font:700 28px/1 var(--cond)!important;text-transform:uppercase;letter-spacing:.04em}
+.big{border-radius:14px;padding:22px;display:flex;align-items:center;gap:18px;margin-bottom:12px}
+.big b{font:700 26px/1 var(--cond)!important;text-transform:uppercase;letter-spacing:.04em}
+.ring{--p:.6;width:78px;height:78px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--acc) calc(var(--p)*1turn),rgba(255,255,255,.08) 0);position:relative;box-shadow:0 0 20px color-mix(in srgb,var(--acc) 30%,transparent)}
+.ring i{position:absolute;inset:6px;border-radius:50%;background:#0b0e0d;display:grid;place-items:center;font:700 30px/1 var(--cond);font-style:normal;color:var(--acc)}
 .lamps{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.lamp{background:#07080a;border:3px solid #2b2e33;border-radius:8px;padding:16px 8px;text-align:center;font:700 13px/1.2 inherit;text-transform:uppercase;box-shadow:inset 0 0 18px rgba(0,0,0,.9),0 6px 16px rgba(0,0,0,.35)}
-.l-r{color:#ff6b6b;text-shadow:0 0 10px #f33}.l-y{color:#ffd84a;text-shadow:0 0 10px #fc0}.l-g{color:#6dff98;text-shadow:0 0 10px #3f6}
-/* плавающая стеклянная панель вкладок */
-.tab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:9;display:flex;border-radius:999px;padding:6px;width:min(560px,calc(100% - 24px))}
-.tab .thumb{position:absolute;top:6px;bottom:6px;left:6px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.1));border:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--hi);transition:transform .5s cubic-bezier(.3,1.35,.45,1)}
-.tab button{flex:1;position:relative;z-index:1;border:0;background:none;color:var(--mut);font:600 11px/1.1 inherit;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;cursor:pointer;transition:color .3s}
+.lamp{background:#050606;border:4px solid #23272b;outline:1px solid #3a3f44;border-radius:4px;padding:18px 8px;text-align:center;font:700 16px/1.15 var(--cond);letter-spacing:.06em;text-transform:uppercase;box-shadow:inset 0 0 22px rgba(0,0,0,.95),0 8px 18px rgba(0,0,0,.5)}
+.l-r{color:#ff5b52;text-shadow:0 0 12px #f22,0 0 2px #fbb}.l-y{color:#ffd23a;text-shadow:0 0 12px #fb0,0 0 2px #ffe}.l-g{color:#5dff8f;text-shadow:0 0 12px #2f6,0 0 2px #dfd}
+.tab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:9;display:flex;border-radius:16px;padding:6px;width:min(580px,calc(100% - 24px))}
+.tab .thumb{position:absolute;top:6px;bottom:6px;left:6px;border-radius:11px;background:linear-gradient(180deg,rgba(61,255,138,.22),rgba(61,255,138,.04));border:1px solid color-mix(in srgb,var(--acc) 45%,transparent);transition:transform .45s cubic-bezier(.3,1.3,.45,1)}
+.tab .thumb::after{content:"";position:absolute;left:30%;right:30%;bottom:-1px;height:3px;border-radius:2px;background:var(--acc);box-shadow:0 0 10px var(--acc)}
+.tab button{flex:1;position:relative;z-index:1;border:0;background:none;color:var(--mut);font:700 14px/1 var(--cond);letter-spacing:.08em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 0 8px;cursor:pointer;transition:color .3s}
 .tab button.on{color:var(--acc)}
-.page{display:none}.page.on{display:block;animation:in .45s cubic-bezier(.2,.9,.3,1)}
-@keyframes in{from{opacity:0;transform:translateY(10px) scale(.985)}}
-.note{margin-top:30px;color:var(--mut);font-size:13px;text-align:center}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glass{background:rgba(30,36,50,.92)}html.light .glass{background:rgba(255,255,255,.92)}}
+.page{display:none}.page.on{display:block;animation:in .35s cubic-bezier(.2,.9,.3,1)}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.note{margin-top:30px;color:var(--mut);font:12px var(--mono);letter-spacing:.06em;text-align:center;text-transform:uppercase}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glass{background:rgba(20,24,26,.94)}}
 </style></head><body>
 <div class="bg"></div>
-<div class="mock glass">Макет · Liquid Glass · кнопки не открывают карты</div>
+<div class="mock glass">МАКЕТ // КНОПКИ НЕ АКТИВНЫ</div>
 <svg style="display:none"><defs>
 <symbol id="fire" viewBox="0 0 24 24"><path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.8 2.5-5 .3 1.6 1 2.5 2 2.8C11 8.5 11.3 5.6 12 3z"/></symbol>
 <symbol id="warn" viewBox="0 0 24 24"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4.5M12 17.2v.1"/></symbol>
@@ -101,19 +116,19 @@ h2{font:700 20px/1.2 inherit;letter-spacing:-.01em;margin:28px 4px 12px}
 </defs></svg>
 
 <header>
- <div class="hrow"><h1 id="ttl">Карты</h1><button class="circle glass press" id="mode" aria-label="Светлая / тёмная"><svg><use href="#moon"/></svg></button></div>
- <div class="seg glass" id="seg"><div class="thumb"></div><button class="on">Ми-8Т</button><button>Ми-8АМТ</button><button>Ми-8МТВ</button></div>
- <div class="search glass"><svg><use href="#search"/></svg><span>Пожар, генератор, обледенение…</span></div>
+ <div class="hrow"><div style="flex:1"><div class="kick">МИ-8 // ЭКИПАЖ</div><h1 id="ttl">Карты</h1></div><button class="circle glass press" id="mode" aria-label="Режим NVG">NVG</button></div>
+ <div class="seg glass hud" id="seg"><div class="thumb"></div><button class="on">Ми-8Т</button><button>Ми-8АМТ</button><button>Ми-8МТВ</button></div>
+ <div class="search glass"><svg><use href="#search"/></svg><span>ПОИСК: пожар, генератор, ПОС…</span></div>
 </header>
 
 <main>
  <section class="page on" id="p0">
   <div class="tiles">
-   <div class="tile glass press c-red"><div class="orb"><svg><use href="#fire"/></svg></div><div><b>Аварийные</b><small>Пожар, отказ двигателя, посадка</small></div></div>
-   <div class="tile glass press c-amb"><div class="orb"><svg><use href="#warn"/></svg></div><div><b>Неисправности</b><small>Топливо, гидро, электро</small></div></div>
-   <div class="tile glass press c-blue"><div class="orb"><svg><use href="#book"/></svg></div><div><b>Эксплуатация</b><small>Нормальные процедуры</small></div></div>
+   <div class="tile glass press hud c-red"><div class="stripe"></div><div class="top"><div class="orb"><svg><use href="#fire"/></svg></div><div class="no">01</div></div><div><b>Аварийные</b><small>Пожар, отказ двигателя, посадка</small></div></div>
+   <div class="tile glass press hud c-amb"><div class="top"><div class="orb"><svg><use href="#warn"/></svg></div><div class="no">02</div></div><div><b>Неисправности</b><small>Топливо, гидро, электро</small></div></div>
+   <div class="tile glass press hud c-blue"><div class="top"><div class="orb"><svg><use href="#book"/></svg></div><div class="no">03</div></div><div><b>Эксплуатация</b><small>Нормальные процедуры</small></div></div>
   </div>
-  <div class="fly glass press c-grn"><div class="orb" style="width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:#fff"><svg><use href="#plane"/></svg></div><div style="flex:1"><b>Режим «В полёт»</b><small>Крупные кнопки, ночная подсветка, экран не гаснет</small></div><svg style="color:var(--mut)"><use href="#chev"/></svg></div>
+  <div class="fly glass press hud c-grn"><div class="orb"><svg><use href="#plane"/></svg></div><div style="flex:1"><b>Режим «В полёт»</b><small>Крупные кнопки, ночная подсветка, экран не гаснет</small></div><svg style="color:var(--mut)"><use href="#chev"/></svg></div>
   <h2>Недавние</h2>
   <div class="chips"><div class="chip glass press"><small>Аварийные</small>Пожар двигателя</div><div class="chip glass press"><small>Неисправности</small>Отказ генератора</div><div class="chip glass press"><small>Эксплуатация</small>Запуск АИ-9</div></div>
   <h2>Избранное</h2>
@@ -121,7 +136,7 @@ h2{font:700 20px/1.2 inherit;letter-spacing:-.01em;margin:28px 4px 12px}
  </section>
 
  <section class="page" id="p1">
-  <div class="book glass"><div class="cover" id="cov">Ми-8Т</div><div><b id="bt" style="font-size:21px">РЛЭ Ми-8</b><br><small style="color:var(--mut)" id="be">ред. 01.04.2025, Изм. 76 · 580 стр.</small><br><span class="btn press">Продолжить · стр. 259</span></div></div>
+  <div class="book glass hud"><div class="cover" id="cov">Ми-8Т</div><div><b id="bt" style="font-size:21px">РЛЭ Ми-8</b><br><small style="color:var(--mut)" id="be">ред. 01.04.2025, Изм. 76 · 580 стр.</small><br><span class="btn press">Продолжить · стр. 259</span></div></div>
   <div class="list glass">
    <div class="li press c-blue"><div class="ic"><svg><use href="#list"/></svg></div><span>Оглавление</span><em>›</em></div>
    <div class="li press c-amb"><div class="ic"><svg><use href="#star"/></svg></div><span>Закладки</span><em>3 ›</em></div>
@@ -138,7 +153,7 @@ h2{font:700 20px/1.2 inherit;letter-spacing:-.01em;margin:28px 4px 12px}
  </section>
 
  <section class="page" id="p3">
-  <div class="big glass"><div class="ring"><i>12</i></div><div style="flex:1"><b style="font-size:20px">Повторение на сегодня</b><br><small style="color:var(--mut)">Серия 5 дней</small></div><span class="btn press" style="margin:0">Начать</span></div>
+  <div class="big glass hud"><div class="ring"><i>12</i></div><div style="flex:1"><b style="font-size:20px">Повторение на сегодня</b><br><small style="color:var(--mut)">Серия 5 дней</small></div><span class="btn press" style="margin:0">Начать</span></div>
   <div class="list glass">
    <div class="li press c-blue"><div class="ic"><svg><use href="#cards"/></svg></div><span>Самопроверка — карточки</span><em>›</em></div>
    <div class="li press c-grn"><div class="ic"><svg><use href="#list"/></svg></div><span>Мой лист на изучение</span><em>8 ›</em></div>
@@ -150,7 +165,7 @@ h2{font:700 20px/1.2 inherit;letter-spacing:-.01em;margin:28px 4px 12px}
  <section class="page" id="p4">
   <div class="list glass">
    <div class="li press c-amb"><div class="ic"><svg><use href="#note"/></svg></div><span>Мои заметки</span><em>›</em></div>
-   <div class="li press c-blue"><div class="ic"><svg><use href="#moon"/></svg></div><span>Тема</span><em>Авто ›</em></div>
+   <div class="li press c-blue"><div class="ic"><svg><use href="#moon"/></svg></div><span>Тема</span><em>Кабина ›</em></div>
    <div class="li press c-grn"><div class="ic"><svg><use href="#save"/></svg></div><span>Резервная копия</span><em>›</em></div>
    <div class="li press c-grn"><div class="ic"><svg><use href="#wifi"/></svg></div><span>Готов к офлайну</span><em style="color:var(--acc)">✓ ›</em></div>
    <div class="li press c-blue"><div class="ic"><svg><use href="#gear"/></svg></div><span>Настройки</span><em>›</em></div>
@@ -169,7 +184,7 @@ function slide(box,i){var bs=box.querySelectorAll("button"),th=box.querySelector
 var tab=document.getElementById("tab"),seg=document.getElementById("seg"),ti=0,si=0;
 tab.querySelectorAll("button").forEach(function(b,i){b.onclick=function(){ti=i;slide(tab,i);document.querySelectorAll(".page").forEach(function(p,j){p.classList.toggle("on",i==j)});document.getElementById("ttl").textContent=T[i];scrollTo({top:0,behavior:"smooth"})}});
 seg.querySelectorAll("button").forEach(function(b,i){b.onclick=function(){si=i;slide(seg,i);var k=b.textContent;document.getElementById("cov").textContent=k;document.getElementById("bt").textContent=B[k][0];document.getElementById("be").textContent=B[k][1]}});
-document.getElementById("mode").onclick=function(){document.documentElement.classList.toggle("light")};
+document.getElementById("mode").onclick=function(){document.documentElement.classList.toggle("nvg")};
 function lay(){slide(tab,ti);slide(seg,si)}addEventListener("resize",lay);requestAnimationFrame(lay);
 </script>
 </body></html>
