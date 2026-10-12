@@ -1321,6 +1321,15 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       @media (prefers-color-scheme: dark) { :root:not([data-theme]) .x-rv__img { filter: invert(1) brightness(0.88); } }
       :root[data-theme="night"] .x-rv__img { filter: invert(1) sepia(1) saturate(4) hue-rotate(-50deg) brightness(0.7); }
 
+      .x-upd { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 2000; display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 18px; border-radius: 14px; background: #1f6f43; color: #fff; font: var(--type-label); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+      .x-upd .x-btn { background: #fff; color: #000; border: 0; }
+      /* v12 compact reader bar */
+      .x-rv > .x-rv__bar { flex-wrap: nowrap; gap: 4px; padding: calc(env(safe-area-inset-top, 0px) + 4px) max(8px, env(safe-area-inset-right)) 4px max(8px, env(safe-area-inset-left)); }
+      .x-rv > .x-rv__bar .x-btn { min-width: 44px; min-height: 44px; padding: 0 10px; font-size: 18px; }
+      .x-rv > .x-rv__bar [data-act="rv-close"] { min-width: 52px; font-size: 22px; font-weight: 600; }
+      .x-rv__cap { font-size: 15px; }
+      .x-rv__grid > .x-rv__bar { padding-top: calc(env(safe-area-inset-top, 0px) + 4px); flex-wrap: nowrap; }
+      .x-rv__foot .x-rv__pg { width: 64px; height: 40px; }
       /* v11 reader */
       .x-rv__pages { display: flex; justify-content: center; align-items: flex-start; gap: 6px; min-height: 100%; }
       .x-rv.is-imm .x-rv__bar, .x-rv.is-imm .x-rv__foot { display: none; }
@@ -1592,14 +1601,10 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         <div class="x-rv__bar">
           <button class="x-btn" type="button" data-act="rv-close" aria-label="Закрыть просмотр">✕</button>
           <p class="x-rv__cap" id="rv-cap"></p>
-          <button class="x-btn" type="button" data-act="rv-prev" aria-label="Предыдущая страница">‹</button>
-          <button class="x-btn" type="button" data-act="rv-next" aria-label="Следующая страница">›</button>
-          <input class="x-rv__pg" id="rv-pg" type="number" inputmode="numeric" min="1" aria-label="Номер страницы PDF" />
           <button class="x-btn" type="button" data-act="rv-bm" aria-pressed="false" aria-label="Закладка">☆</button>
           <button class="x-btn" type="button" data-act="rv-toc" aria-label="Оглавление книги">☰</button>
-          <button class="x-btn" type="button" data-act="rv-zout" aria-label="Уменьшить">−</button>
-          <span class="x-rv__z" id="rv-z" aria-live="polite">100%</span>
-          <button class="x-btn" type="button" data-act="rv-zin" aria-label="Увеличить">+</button>
+          <button class="x-btn" type="button" data-act="rv-aa" aria-label="Вид страницы">Aa</button>
+          <span hidden><button class="x-btn" type="button" data-act="rv-zout" aria-label="Уменьшить">−</button><span class="x-rv__z" id="rv-z">100%</span><button class="x-btn" type="button" data-act="rv-zin" aria-label="Увеличить">+</button></span>
         </div>
         <div class="x-rv__box" id="rv-box">
           <div class="x-rv__pages" id="rv-pages"><img class="x-rv__img" id="rv-img" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" /><img class="x-rv__img" id="rv-img2" alt="" hidden src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" /></div>
@@ -1607,11 +1612,13 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         </div>
         <div class="x-rv__foot" id="rv-foot">
           <button class="x-btn" type="button" data-act="rv-back" id="rv-back" hidden aria-label="Вернуться">←</button>
+          <button class="x-btn" type="button" data-act="rv-prev" aria-label="Предыдущая страница">‹</button>
+          <input class="x-rv__pg" id="rv-pg" type="number" inputmode="numeric" min="1" aria-label="Номер страницы PDF" />
+          <button class="x-btn" type="button" data-act="rv-next" aria-label="Следующая страница">›</button>
           <input class="x-rv__sl" id="rv-sl" type="range" min="1" value="1" aria-label="Перейти к странице" />
           <span class="x-rv__sll" id="rv-sll"></span>
           <button class="x-btn" type="button" data-act="rv-note" aria-pressed="false" aria-label="Заметка к странице">✎</button>
           <button class="x-btn" type="button" data-act="rv-grid" aria-label="Страницы и закладки">▦</button>
-          <button class="x-btn" type="button" data-act="rv-aa" aria-label="Вид страницы">Aa</button>
         </div>
         <div class="x-rv__pop" id="rv-pop" hidden></div>
         <div class="x-rv__grid" id="rv-grid" hidden>
@@ -2896,7 +2903,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
+        var APP_BUILD = "v19";
         var CHANGELOG = [
+          { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
           { v: "2026-10-12 · 10", d: "2026-10-12", items: ["Библиотека РЛЭ: РЛЭ Ми-8 (ред. 01.04.2025, Изм. 76), Ми-8АМТ (08.2025) и Ми-8МТВ-1 (01.04.2025) целиком — оглавление, поиск по тексту, закладки, переход по номеру страницы", "Просмотр страницы из карты теперь листает всю книгу", "Номера страниц РЛЭ Ми-8 пересчитаны под новую редакцию; 18 карт Ми-8Т помечены: раздел РЛЭ изменён Изм. 75 (пожары, управление)", "Раздел «Что изменилось в редакциях» и эти карты в очереди сверки"] },
           { v: "2026-10-12 · 9", d: "2026-10-12", items: ["Новая страница «Табло»: сигнальные табло Ми-8Т и Ми-8АМТ / МТВ по системам, цвет, значение и переход к аварийной карте", "Мастерская табло (в Настройках и на странице «Табло»): своя картинка, цвет или надпись для любого табло, экспорт и импорт набора"] },
@@ -3090,9 +3099,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
             var p = [];
             try {
               p.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
-              if (window.caches) p.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+              if (window.caches) p.push(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf("mi8-rle") !== 0; }).map(function (k) { return caches.delete(k); })); }));
             } catch (e) { p.push(Promise.reject(e)); }
-            Promise.all(p).then(function () { location.reload(); }, function (e) { window.mi8Log(e, "fix-cache"); setRes.fix = "Не удалось обновить кэш: " + ((e && e.message) || e); setKeep(); });
+            Promise.all(p).then(function () { mi8HardReload(); }, function (e) { window.mi8Log(e, "fix-cache"); setRes.fix = "Не удалось обновить кэш: " + ((e && e.message) || e); setKeep(); });
           },
           "fix-all": function () {
             if (!confirm("Полный сброс удалит заметки, лист на изучение, избранное, самопроверку и повторение. Сначала сделайте экспорт («Резервная копия сейчас»). Продолжить?")) return;
@@ -3162,6 +3171,22 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         try {
           if (!IS_FILE && "serviceWorker" in navigator && /^https?:$/.test(location.protocol))
             fetch("sw.js", { method: "HEAD", cache: "no-store" }).then(function (r) { if (r.ok) return navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) { try { reg.update(); } catch (e) {} }); }).catch(function () {});
+          window.mi8HardReload = function () { try { location.replace(location.pathname + "?v=" + Date.now() + location.hash); } catch (e) { location.reload(); } };
+          if (!IS_FILE && /^https?:$/.test(location.protocol) && window.fetch) setTimeout(function () {
+            fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+              if (!j || !j.v || j.v === APP_BUILD) return;
+              var bar = document.createElement("div"); bar.className = "x-upd";
+              bar.innerHTML = '<span>Есть новая версия приложения</span><button type="button" class="x-btn">Обновить</button>';
+              bar.querySelector("button").onclick = function () {
+                bar.querySelector("span").textContent = "Обновляю…";
+                var p = [];
+                try { p.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); })); } catch (e) {}
+                try { p.push(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf("mi8-rle") !== 0; }).map(function (k) { return caches.delete(k); })); })); } catch (e) {}
+                Promise.all(p).then(mi8HardReload, mi8HardReload);
+              };
+              document.body.appendChild(bar);
+            }).catch(function () {});
+          }, 2500);
           /* new version took control right after launch: reload once so the user sees it immediately */
           if (!IS_FILE && "serviceWorker" in navigator && navigator.serviceWorker.controller) {
             var swT0 = Date.now(), swReloaded = false;
@@ -3874,7 +3899,8 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         }
         function rvAaRender() {
           rvPop.innerHTML = "<h4>Режим чтения</h4>" + rvSegHtml("rm", rvPref.rm, [["auto", "Как тема"], ["paper", "Бумага"], ["sepia", "Сепия"], ["dark", "Тёмный"], ["night", "Ночь"]]) +
-            "<h4>Масштаб</h4>" + rvSegHtml("fit", rvPref.fit, [["w", "По ширине"], ["p", "Страница целиком"]]) +
+            "<h4>Масштаб · " + rv.z + "%</h4>" + rvSegHtml("fit", rvPref.fit, [["w", "По ширине"], ["p", "Страница целиком"]]) +
+            '<div class="x-rv__seg" style="margin-top:6px"><button type="button" data-act="rv-zout2">− Меньше</button><button type="button" data-act="rv-zin2">+ Больше</button></div>' +
             "<h4>Горизонтально</h4>" + rvSegHtml("spread", rvPref.spread, [[true, "Разворот 2 стр."], [false, "Одна страница"]]) +
             "<h4>Экран</h4>" + rvSegHtml("wake", rvPref.wake, [[true, "Не гаснет при чтении"], [false, "Как обычно"]]) +
             '<p class="x-rv__hint">Касание края — листать, середины — скрыть панели. Свайп влево/вправо — листать. Двойное касание — увеличить.</p>';
@@ -3973,6 +3999,8 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           "rv-close": function () { rvClose(false); },
           "rv-prev": function () { rvStep(-1); },
           "rv-next": function () { rvStep(1); },
+          "rv-zin2": function () { if (rv) { rvZoom(50); rvAaRender(); } },
+          "rv-zout2": function () { if (rv) { rvZoom(-50); rvAaRender(); } },
           "rv-back": function () { if (rv && rv.hist.length) { rv.p = rv.hist.pop(); rvShow(); } },
           "rv-aa": function () { if (!rv) return; if (rvPop.hidden) { rvAaRender(); rvPop.hidden = false; } else rvPop.hidden = true; },
           "rv-set": function (btn) { var k = btn.getAttribute("data-k"), v = btn.getAttribute("data-v"); rvPref[k] = (v === "true" ? true : v === "false" ? false : v); rvPrefSave(); if (k === "wake") rvWakeSet(rvPref.wake); rvAaRender(); rvShow(); },
