@@ -2008,11 +2008,56 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
         function norm(s) { return String(s).toLowerCase().replace(/ё/g, "е"); }
         function terms(q) { return norm(q).split(/\s+/).filter(Boolean); }
+        /* v34: smarter search: Russian endings + aviation abbreviations/synonyms */
+        var SYN = [["пос", "противообледенительная", "обледенение"], ["пзу", "пылезащитное"], ["всу", "вспомогательная силовая", "аи-9"], ["нв", "несущий винт"], ["рв", "рулевой винт"],
+          ["гр", "главный редуктор"], ["ко-50", "обогреватель"], ["акб", "аккумулятор"], ["тк", "турбокомпрессор"], ["ст", "свободная турбина"], ["эрд", "электронный регулятор"],
+          ["рт", "регулятор температуры"], ["тг", "температура газов"], ["пвд", "приемник воздушного давления"], ["аг", "авиагоризонт"], ["дисс", "доплеровский"], ["ап", "автопилот"],
+          ["арк", "радиокомпас"], ["спу", "переговорное"], ["лпг", "лебедка"], ["чр", "чрезвычайный режим"], ["вп", "внешняя подвеска"], ["топливо", "керосин"],
+          ["пожар", "возгорание", "загорание"], ["отказ", "неисправность"], ["вибрация", "тряска"], ["висение", "зависание"], ["авторотация", "самовращение"],
+          ["приводнение", "посадка на воду"], ["гидросистема", "гидравлическая"], ["обороты", "частота вращения"], ["шаг-газ", "шаг газ", "общий шаг"], ["аварийный остаток", "270 л"]];
+        var SUF = ["иями", "ями", "ами", "ией", "ием", "иях", "ого", "его", "ому", "ему", "ыми", "ими", "ая", "яя", "ое", "ее", "ые", "ие", "ый", "ий", "ой", "ей", "ую", "юю", "ом", "ем", "ах", "ях", "ам", "ям", "ов", "ев", "ия", "ья", "ью", "ии", "ть", "а", "я", "о", "е", "ы", "и", "у", "ю", "ь", "й"];
+        function stem(w) {
+          if (w.length < 5 || /[0-9a-z]/.test(w)) return w;
+          for (var i = 0; i < SUF.length; i++) { var f = SUF[i]; if (w.length - f.length >= 4 && w.slice(-f.length) === f) return w.slice(0, -f.length); }
+          return w;
+        }
+        function reEsc(x) { return x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+        var WB = "[^а-яёa-z0-9]";
+        function needle(alt) {
+          var ws = norm(alt).split(/\s+/).filter(Boolean);
+          if (ws.length === 1 && ws[0].length <= 3) return new RegExp("(?:^|" + WB + ")(" + reEsc(ws[0]) + ")(?=" + WB + "|$)", "g");
+          return new RegExp("()" + ws.map(function (w) { return reEsc(stem(w)); }).join("[а-яё]*[\\s-]+"), "g");
+        }
+        var synMap = null;
+        function synOf(key) {
+          if (!synMap) { synMap = {}; SYN.forEach(function (g) { g.forEach(function (a) { synMap[norm(a).split(/\s+/).map(stem).join(" ")] = g; }); }); }
+          return synMap[key];
+        }
+        var qgCache = {};
+        function qGroups(q) {
+          var key = norm(q).trim(); if (qgCache[key]) return qgCache[key];
+          var ws = key.split(/\s+/).filter(Boolean), out = [];
+          for (var i = 0; i < ws.length; i++) {
+            var g = null;
+            if (i + 1 < ws.length) { g = synOf(stem(ws[i]) + " " + stem(ws[i + 1])); if (g) { i++; } }
+            if (!g) g = synOf(stem(ws[i]));
+            var alts = g ? g.slice() : [];
+            if (!g) alts.push(ws[i]);
+            out.push(alts.map(needle));
+          }
+          return (qgCache[key] = out);
+        }
+        function reHit(re, n) { re.lastIndex = 0; return re.test(n); }
+        function reFind(re, n) { re.lastIndex = 0; var m = re.exec(n); return m ? { i: m.index + (m[0].length - (m[0].length - (m[1] ? m[0].indexOf(m[1]) : 0))), m: m } : null; }
+        function qMatch(groups, n) { return groups.every(function (g) { return g.some(function (re) { return reHit(re, n); }); }); }
+        function qFirst(groups, n) { var best = -1; (groups[0] || []).forEach(function (re) { var f = reFind(re, n); if (f && (best < 0 || f.i < best)) best = f.i; }); return best; }
+
         function hl(text, ts) {
           text = String(text);
           if (!ts || !ts.length) return esc(text);
           var n = norm(text), ranges = [];
           ts.forEach(function (t) { var i = 0; while ((i = n.indexOf(t, i)) >= 0) { ranges.push([i, i + t.length]); i += t.length; } });
+          try { qGroups(ts.join(" ")).forEach(function (g) { g.forEach(function (re) { re.lastIndex = 0; var m, c = 0; while ((m = re.exec(n)) && c++ < 400) { var st = m.index + (m[1] ? m[0].indexOf(m[1]) : (m[0].length && /[^а-яёa-z0-9]/.test(m[0][0]) && m[0].length > 1 ? 1 : 0)), en = m.index + m[0].length; var w = n.slice(en).match(/^[а-яё]*/); en += w ? w[0].length : 0; if (en > st) ranges.push([st, en]); if (re.lastIndex === m.index) re.lastIndex++; } }); }); } catch (e) {}
           if (!ranges.length) return esc(text);
           ranges.sort(function (a, b) { return a[0] - b[0]; });
           var merged = [ranges[0]];
@@ -2350,8 +2395,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           var res = [];
           SCREENS.forEach(function (s) {
             var nt = notes[s.id] ? norm(notes[s.id].text) : "";
-            if (!ts.every(function (t) { return s.hay.indexOf(t) >= 0 || (nt && nt.indexOf(t) >= 0); })) return;
-            var inTitle = ts.every(function (t) { return s.hayTitle.indexOf(t) >= 0; });
+            var qg = qGroups(ts.join(" "));
+            if (!qg.every(function (g) { return g.some(function (re) { return reHit(re, s.hay) || (nt && reHit(re, nt)); }); })) return;
+            var inTitle = qMatch(qg, s.hayTitle);
             var inNote = !!nt && ts.some(function (t) { return nt.indexOf(t) >= 0; });
             res.push({ s: s, rank: inTitle ? 0 : inNote ? 1 : 2, note: inNote });
           });
@@ -3264,9 +3310,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
-        var APP_BUILD = "v33";
+        var APP_BUILD = "v36";
         var CHANGELOG = [
-          { v: "2026-10-12 · 33", d: "2026-10-12", items: ["Страницы РЛЭ перерисованы в 200 dpi: шрифт тонкий и ровный, как в оригинальном PDF (страницы загрузятся заново)", "Страницы РЛЭ можно увеличивать двумя пальцами (до 400%), листание при увеличении — прокруткой", "Плотность текста в РЛЭ (кнопка Aa): «Чётче» по умолчанию и «Жирнее» для мелкого шрифта", "РЛЭ как электронная книга: полка с обложками, «Читаете сейчас», процент прочитанного, закладки-ленточки", "В читалке: полоса прогресса книги, «до конца раздела N стр.», анимация перелистывания", "Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
+          { v: "2026-10-13 · 34", d: "2026-10-13", items: ["Умный поиск: находит слово в любой форме (двигатель / двигателя) и понимает сокращения: ПЗУ, ПОС, ВСУ, НВ, РВ, АГ, ЭРД и др.", "Страницы РЛЭ перерисованы в 200 dpi: шрифт тонкий и ровный, как в оригинальном PDF (страницы загрузятся заново)", "Страницы РЛЭ можно увеличивать двумя пальцами (до 400%), листание при увеличении — прокруткой", "Плотность текста в РЛЭ (кнопка Aa): «Чётче» по умолчанию и «Жирнее» для мелкого шрифта", "РЛЭ как электронная книга: полка с обложками, «Читаете сейчас», процент прочитанного, закладки-ленточки", "В читалке: полоса прогресса книги, «до конца раздела N стр.», анимация перелистывания", "Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
           { v: "2026-10-12 · 20", d: "2026-10-12", items: ["Новый вид «Кабина»: тёмная тема, трафаретные заголовки, цвет по смыслу", "Нижние вкладки: Карты, РЛЭ, Табло, Учёба, Ещё", "Переключатель Ми-8Т / АМТ / МТВ на главной (запоминается)", "Чек-лист: подсветка текущего пункта и «Карта выполнена»"] },
           { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
@@ -3728,17 +3774,20 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         function libSearch(q) {
           var ts = terms(q).filter(function (t) { return t.length >= 2; }), out = [], total = 0;
           if (!ts.length || !window.MI8_TXT) return { ts: ts, hits: out, total: 0 };
+          var qg = qGroups(ts.join(" ")); var lit = ts.join(" ");
           Object.keys(LIB.books).forEach(function (k) {
             var arr = window.MI8_TXT[k] || [];
             if (!libNormCache[k]) libNormCache[k] = arr.map(function (t) { return norm(t); });
             libNormCache[k].forEach(function (n, i) {
-              if (!ts.every(function (t) { return n.indexOf(t) >= 0; })) return;
+              if (!qMatch(qg, n)) return;
               total++;
-              if (out.length >= 120) return;
-              var j = n.indexOf(ts[0]), a = Math.max(0, j - 70), txt = arr[i].slice(a, j + 150);
-              out.push({ k: k, p: i + 1, snip: (a > 0 ? "…" : "") + txt + "…" });
+              var sc = 0; qg.forEach(function (g) { var c = 0; g.forEach(function (re) { re.lastIndex = 0; var m; while (c < 6 && (m = re.exec(n))) { c++; if (re.lastIndex === m.index) re.lastIndex++; } }); sc += c; });
+              if (lit && n.indexOf(lit) >= 0) sc += 8;
+              var j = Math.max(0, qFirst(qg, n)), a = Math.max(0, j - 70), txt = arr[i].slice(a, j + 150);
+              out.push({ k: k, p: i + 1, sc: sc, snip: (a > 0 ? "…" : "") + txt + "…" });
             });
           });
+          out.sort(function (x, y) { return y.sc - x.sc; }); out = out.slice(0, 120);
           return { ts: ts, hits: out, total: total };
         }
         function libResHtml() {
