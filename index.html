@@ -1314,7 +1314,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       .x-rv__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px max(8px, env(safe-area-inset-right)) 8px max(8px, env(safe-area-inset-left)); border-bottom: 1px solid var(--stroke-secondary); }
       .x-rv__cap { flex: 1 1 160px; min-width: 0; margin: 0 6px; font: var(--type-label); font-weight: var(--weight-medium); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .x-rv__z { min-width: 48px; text-align: center; font: var(--type-small); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
-      .x-rv__box { flex: 1 1 auto; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y pinch-zoom; }
+      .x-rv__box { flex: 1 1 auto; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; }
       .x-rv__img { display: block; width: 100%; max-width: none; height: auto; margin: 0 auto; background: #fff; }
       .x-rv__err { max-width: 560px; margin: 32px auto; padding: 0 var(--gutter); font: var(--type-body); color: var(--text-secondary); overflow-wrap: anywhere; }
       :root[data-theme="dark"] .x-rv__img { filter: invert(1) brightness(0.88); }
@@ -3264,9 +3264,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
-        var APP_BUILD = "v31";
+        var APP_BUILD = "v32";
         var CHANGELOG = [
-          { v: "2026-10-12 · 31", d: "2026-10-12", items: ["Плотность текста в РЛЭ (кнопка Aa): «Чётче» по умолчанию и «Жирнее» для мелкого шрифта", "РЛЭ как электронная книга: полка с обложками, «Читаете сейчас», процент прочитанного, закладки-ленточки", "В читалке: полоса прогресса книги, «до конца раздела N стр.», анимация перелистывания", "Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
+          { v: "2026-10-12 · 32", d: "2026-10-12", items: ["Страницы РЛЭ можно увеличивать двумя пальцами (до 400%), листание при увеличении — прокруткой", "Плотность текста в РЛЭ (кнопка Aa): «Чётче» по умолчанию и «Жирнее» для мелкого шрифта", "РЛЭ как электронная книга: полка с обложками, «Читаете сейчас», процент прочитанного, закладки-ленточки", "В читалке: полоса прогресса книги, «до конца раздела N стр.», анимация перелистывания", "Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
           { v: "2026-10-12 · 20", d: "2026-10-12", items: ["Новый вид «Кабина»: тёмная тема, трафаретные заголовки, цвет по смыслу", "Нижние вкладки: Карты, РЛЭ, Табло, Учёба, Ещё", "Переключатель Ми-8Т / АМТ / МТВ на главной (запоминается)", "Чек-лист: подсветка текущего пункта и «Карта выполнена»"] },
           { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
@@ -4290,7 +4290,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           try { var nx = new Image(); nx.src = rvSrcOf(src.key + "-" + (p + (sp ? 2 : 1))); } catch (e) {}
         }
         function rvZoom(d) {
-          rv.z = Math.max(100, Math.min(300, rv.z + d));
+          rv.z = Math.round(Math.max(100, Math.min(400, rv.z + d)));
           var sp = !rvImg2.hidden;
           [rvImg, rvImg2].forEach(function (im) {
             if (rvPref.fit === "p") { im.style.width = "auto"; im.style.height = Math.max(200, rvBox.clientHeight - 4) * rv.z / 100 + "px"; im.style.maxWidth = "none"; }
@@ -4298,7 +4298,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           });
           rvZ.textContent = rv.z + "%";
           rvEl.querySelector('[data-act="rv-zout"]').disabled = rv.z <= 100;
-          rvEl.querySelector('[data-act="rv-zin"]').disabled = rv.z >= 300;
+          rvEl.querySelector('[data-act="rv-zin"]').disabled = rv.z >= 400;
         }
         function rvInk() {
           var pg = document.getElementById("rv-pages"); if (!pg) return;
@@ -4360,7 +4360,23 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         rvSl.addEventListener("change", function () { if (rv) rvGo(+rvSl.value, true); });
         /* touch: edge taps turn pages, centre tap toggles bars, swipe turns, double tap zooms */
         (function () {
-          var t0 = null, lastTap = 0, tapTimer = null;
+          var t0 = null, lastTap = 0, tapTimer = null, pz = null;
+          /* v32: two-finger pinch zoom, anchored at the fingers' midpoint */
+          function pzMid(e) { var a = e.touches[0], b = e.touches[1], r = rvBox.getBoundingClientRect(); return { x: (a.clientX + b.clientX) / 2 - r.left, y: (a.clientY + b.clientY) / 2 - r.top, d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) || 1 }; }
+          rvBox.addEventListener("touchstart", function (e) {
+            if (!rv || e.touches.length !== 2) return;
+            var m = pzMid(e); pz = { d: m.d, z: rv.z, cx: rvBox.scrollLeft + m.x, cy: rvBox.scrollTop + m.y, moved: false }; t0 = null;
+          }, { passive: true });
+          rvBox.addEventListener("touchmove", function (e) {
+            if (!pz || !rv || e.touches.length !== 2) return;
+            e.preventDefault();
+            var m = pzMid(e), z = Math.max(100, Math.min(400, pz.z * m.d / pz.d));
+            if (Math.abs(z - rv.z) < 1) return;
+            pz.moved = true; rv.z = z; rvZoom(0);
+            var f = rv.z / pz.z; rvBox.scrollLeft = pz.cx * f - m.x; rvBox.scrollTop = pz.cy * f - m.y;
+          }, { passive: false });
+          rvBox.addEventListener("touchend", function (e) { if (pz && e.touches.length < 2) { pz = null; t0 = null; lastTap = 0; } }, { passive: true });
+          ["gesturestart", "gesturechange"].forEach(function (ev) { rvBox.addEventListener(ev, function (e) { e.preventDefault(); }, { passive: false }); });
           rvBox.addEventListener("touchstart", function (e) { if (e.touches.length !== 1) { t0 = null; return; } var t = e.touches[0]; t0 = { x: t.clientX, y: t.clientY, tm: Date.now(), sl: rvBox.scrollLeft }; }, { passive: true });
           rvBox.addEventListener("touchend", function (e) {
             if (!t0 || !rv) return; var t = e.changedTouches[0], dx = t.clientX - t0.x, dy = t.clientY - t0.y, dt = Date.now() - t0.tm, s0 = t0; t0 = null;
