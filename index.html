@@ -1555,7 +1555,8 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       .x-book__m small { display: block; margin-top: 4px; color: var(--text-secondary); font: 12px/1.3 ui-monospace, Menlo, monospace; }
       .x-book__bar { margin-top: 8px; height: 4px; border-radius: 2px; background: rgb(127 127 127 / .22); overflow: hidden; }
       .x-book__bar i { display: block; height: 100%; background: var(--fill-system-green); }
-      .x-book--cur .x-cover { outline: 2px solid var(--fill-system-green); outline-offset: 4px; }
+      .x-book--cur .x-cover { outline: none; }
+      .x-book__tag { display: inline-block; margin-bottom: 6px; padding: 3px 8px; border-radius: 4px; background: rgba(48,209,88,.14); color: var(--fill-system-green); font: 600 11px/1.2 ui-monospace, Menlo, monospace; letter-spacing: .06em; text-transform: uppercase; font-style: normal; }
       .x-now { display: grid; grid-template-columns: 110px 1fr; gap: 20px; align-items: center; margin-top: 26px; padding: 18px; border-radius: 14px; border: 1px solid var(--stroke-primary); background: var(--fill-tertiary); }
       .x-now .x-cover { padding: 12% 8% 8% 14%; } .x-now .x-cover__t { font-size: 20px; } .x-now .x-cover__k, .x-now .x-cover__e { font-size: 6px; }
       .x-now__t small { display: block; font: 600 11px/1 ui-monospace, Menlo, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--fill-system-green); }
@@ -3263,9 +3264,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
-        var APP_BUILD = "v29";
+        var APP_BUILD = "v30";
         var CHANGELOG = [
-          { v: "2026-10-12 · 29", d: "2026-10-12", items: ["РЛЭ как электронная книга: полка с обложками, «Читаете сейчас», процент прочитанного, закладки-ленточки", "В читалке: полоса прогресса книги, «до конца раздела N стр.», анимация перелистывания", "Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
+          { v: "2026-10-12 · 30", d: "2026-10-12", items: ["РЛЭ как электронная книга: полка с обложками, «Читаете сейчас», процент прочитанного, закладки-ленточки", "В читалке: полоса прогресса книги, «до конца раздела N стр.», анимация перелистывания", "Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
           { v: "2026-10-12 · 20", d: "2026-10-12", items: ["Новый вид «Кабина»: тёмная тема, трафаретные заголовки, цвет по смыслу", "Нижние вкладки: Карты, РЛЭ, Табло, Учёба, Ещё", "Переключатель Ми-8Т / АМТ / МТВ на главной (запоминается)", "Чек-лист: подсветка текущего пункта и «Карта выполнена»"] },
           { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
@@ -3776,7 +3777,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           html += '<div class="x-shelf">' + ks.map(function (k) {
             var b = LIB.books[k], pc = libPct(k), st = libStat(k);
             return '<button class="x-book' + (k === cur ? " x-book--cur" : "") + '" type="button" data-act="lib-book" data-k="' + k + '" aria-label="' + esc(b.t) + '">' + coverHtml(k) +
-              '<span class="x-book__m"><b>' + esc(COVER_T[k] || b.t) + "</b><small>" + b.n + " стр." + (pc ? " · " + pc + "%" : " · не начата") + (st.bm ? " · ★" + st.bm : "") + "</small>" +
+              '<span class="x-book__m">' + '<em class="x-book__tag"' + (k === cur ? "" : ' style="visibility:hidden"') + '>✓ Выбран тип</em>' + '<b>' + esc(COVER_T[k] || b.t) + "</b><small>" + b.n + " стр." + (pc ? " · " + pc + "%" : " · не начата") + (st.bm ? " · ★" + st.bm : "") + "</small>" +
               '<span class="x-book__bar"><i style="width:' + pc + '%"></i></span></span></button>';
           }).join("") + "</div>";
           return html;
