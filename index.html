@@ -1317,8 +1317,8 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       .x-rv__box { flex: 1 1 auto; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y pinch-zoom; }
       .x-rv__img { display: block; width: 100%; max-width: none; height: auto; margin: 0 auto; background: #fff; }
       .x-rv__err { max-width: 560px; margin: 32px auto; padding: 0 var(--gutter); font: var(--type-body); color: var(--text-secondary); overflow-wrap: anywhere; }
-      :root[data-theme="dark"] .x-rv__img { filter: invert(0.9); }
-      @media (prefers-color-scheme: dark) { :root:not([data-theme]) .x-rv__img { filter: invert(0.9); } }
+      :root[data-theme="dark"] .x-rv__img { filter: invert(1) brightness(0.88); }
+      @media (prefers-color-scheme: dark) { :root:not([data-theme]) .x-rv__img { filter: invert(1) brightness(0.88); } }
       :root[data-theme="night"] .x-rv__img { filter: invert(1) sepia(1) saturate(4) hue-rotate(-50deg) brightness(0.7); }
       @media (prefers-reduced-motion: reduce) { .x-rotor { animation: none; } .x-splash { transition: none; } }
 
