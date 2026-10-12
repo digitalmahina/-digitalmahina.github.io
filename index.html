@@ -2491,9 +2491,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         var rf = { on: false, n: 0, N: 0, err: 0 };
         function rleTotal() { var t = 0; Object.keys(LIB.books).forEach(function (k) { t += LIB.books[k].n || 0; }); return t; }
         function rleUrls() { var a = []; Object.keys(LIB.books).forEach(function (k) { for (var i = 1; i <= LIB.books[k].n; i++) a.push("rle/" + k + "-" + i + ".webp"); }); return a; }
-        function rleCacheName() { return caches.keys().then(function (ks) { return ks.filter(function (k) { return /^mi8-rle-/.test(k); }).sort().pop() || null; }); }
+        function rleCacheName() { return caches.keys().then(function (ks) { return ks.filter(function (k) { return /^mi8-rle-/.test(k); }).sort().pop() || "mi8-rle-2025-10c"; }); }
         function rleHave() {
-          return rleCacheName().then(function (nm) { if (!nm) return { nm: null, set: {} }; return caches.open(nm).then(function (c) { return c.keys(); }).then(function (rs) {
+          return rleCacheName().then(function (nm) { return caches.open(nm).then(function (c) { return c.keys(); }).then(function (rs) {
             var set = {}; rs.forEach(function (r) { var m = /\/rle\/([A-Z]+-\d+)\.webp/.exec(r.url); if (m) set[m[1]] = 1; }); return { nm: nm, set: set }; }); });
         }
         function rleCount() { if (!window.caches || IS_FILE) return Promise.resolve(0); return rleHave().then(function (h) { return Object.keys(h.set).length; }); }
@@ -2509,8 +2509,8 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         function rfHtml() { return '<div class="x-rf2" data-rfbar' + (rf.on || (rf.N && rf.n < rf.N) ? "" : " hidden") + '><span></span><b><i></i></b></div>'; }
         function rleFill() {
           if (rf.on || IS_FILE || !window.caches || !window.fetch || navigator.onLine === false) return;
+          if (!rf.N) { rf.N = rleTotal(); rfPaint(); }
           rleHave().then(function (h) {
-            if (!h.nm) { setTimeout(rleFill, 5000); return; }
             var all = rleUrls(), miss = all.filter(function (u) { return !h.set[u.slice(4, -5)]; });
             rf.N = all.length; rf.n = all.length - miss.length; rf.err = 0; rfPaint();
             if (!miss.length) { rdCache = null; return; }
@@ -3105,9 +3105,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
-        var APP_BUILD = "v24";
+        var APP_BUILD = "v25";
         var CHANGELOG = [
-          { v: "2026-10-12 · 23", d: "2026-10-12", items: ["Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
+          { v: "2026-10-12 · 25", d: "2026-10-12", items: ["Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
           { v: "2026-10-12 · 20", d: "2026-10-12", items: ["Новый вид «Кабина»: тёмная тема, трафаретные заголовки, цвет по смыслу", "Нижние вкладки: Карты, РЛЭ, Табло, Учёба, Ещё", "Переключатель Ми-8Т / АМТ / МТВ на главной (запоминается)", "Чек-лист: подсветка текущего пункта и «Карта выполнена»"] },
           { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
