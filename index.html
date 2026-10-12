@@ -1321,8 +1321,89 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       @media (prefers-color-scheme: dark) { :root:not([data-theme]) .x-rv__img { filter: invert(1) brightness(0.88); } }
       :root[data-theme="night"] .x-rv__img { filter: invert(1) sepia(1) saturate(4) hue-rotate(-50deg) brightness(0.7); }
 
-      .x-upd { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 2000; display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 18px; border-radius: 14px; background: #1f6f43; color: #fff; font: var(--type-label); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+      .x-upd { position: fixed; left: 50%; bottom: calc(92px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 2000; display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 18px; border-radius: 14px; background: #1f6f43; color: #fff; font: var(--type-label); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
       .x-upd .x-btn { background: #fff; color: #000; border: 0; }
+
+      /* ===== v20: tab bar, home, checklist (all themes) ===== */
+      .x-tabbar { position: fixed; z-index: 25; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 10px); width: min(580px, calc(100% - 20px));
+        display: flex; padding: 6px; border-radius: 18px; background: color-mix(in srgb, var(--fill-primary-on) 72%, transparent); -webkit-backdrop-filter: blur(22px) saturate(150%); backdrop-filter: blur(22px) saturate(150%);
+        border: 1px solid var(--stroke-primary); box-shadow: 0 12px 34px rgb(0 0 0 / .35), inset 0 1px 0 rgb(255 255 255 / .08); }
+      .x-tabbar__th { position: absolute; top: 6px; bottom: 6px; left: 6px; border-radius: 12px; background: var(--fill-tertiary); transition: transform .4s cubic-bezier(.3,1.3,.45,1), width .4s; }
+      .x-tabbar button { flex: 1; position: relative; z-index: 1; min-height: 52px; border: 0; background: none; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font: var(--weight-medium) 12px/1 var(--sans); cursor: pointer; }
+      .x-tabbar button[aria-current="page"] { color: var(--text-primary); }
+      .x-tabbar svg, .x-home svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; stroke-linejoin: miter; }
+      body:has(.x-app[data-cabin]) .x-tabbar, body:has(.x-rv:not([hidden])) .x-tabbar { display: none; }
+      .x-doc, .x-list { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px) !important; }
+      .x-tools, .x-bar > [data-act="home"], .x-bar > [data-act="font-down"], .x-bar > [data-act="font-up"], .x-bar > .x-btn--theme, .x-bar > [data-act="sheet"], .x-crumbs { display: none !important; }
+      .x-app:not([data-cabin])[data-root] #backbtn { visibility: hidden; }
+      .x-kick { font: 600 12px/1 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .18em; text-transform: uppercase; color: var(--fill-system-green); margin-bottom: 6px; }
+      .x-htitle { font: 700 44px/0.95 "DIN Condensed", "Bahnschrift", "Oswald", "Arial Narrow", var(--sans); text-transform: uppercase; letter-spacing: .03em; }
+      .x-tseg { position: relative; display: flex; margin: 16px 0 6px; padding: 4px; border-radius: 12px; background: var(--fill-tertiary); border: 1px solid var(--stroke-primary); }
+      .x-tseg__th { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 3); transform: translateX(calc(var(--i) * 100%)); border-radius: 9px; background: var(--fill-primary-on); border: 1px solid var(--stroke-primary); box-shadow: 0 2px 8px rgb(0 0 0 / .2); transition: transform .4s cubic-bezier(.3,1.3,.45,1); }
+      .x-tseg button { flex: 1; position: relative; z-index: 1; min-height: 50px; border: 0; background: none; color: var(--text-secondary); font: 700 20px/1 "DIN Condensed", "Bahnschrift", "Arial Narrow", var(--sans); letter-spacing: .05em; text-transform: uppercase; cursor: pointer; }
+      .x-tseg button[aria-pressed="true"] { color: var(--text-primary); }
+      .x-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+      @media (max-width: 620px) { .x-tiles { grid-template-columns: 1fr; } }
+      .x-tile { --c: #4a9eff; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 172px; padding: 18px; border-radius: 14px; text-decoration: none; color: var(--text-primary);
+        background: var(--fill-tertiary); border: 1px solid var(--stroke-primary); }
+      .x-tile:active, .x-fly:active, .x-chip:active, .x-attn:active { transform: scale(.98); }
+      .x-tile--red { --c: #ff3b30; } .x-tile--amb { --c: #ffb000; } .x-tile--blue { --c: #47b8ff; }
+      .x-tile__stripe { position: absolute; left: 0; right: 0; top: 0; height: 6px; background: repeating-linear-gradient(-45deg, var(--c) 0 10px, #111 10px 20px); }
+      .x-tile__top { display: flex; justify-content: space-between; align-items: flex-start; }
+      .x-tile__ic { width: 50px; height: 50px; border-radius: 10px; display: grid; place-items: center; color: var(--c); border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent); background: color-mix(in srgb, var(--c) 12%, transparent); }
+      .x-tile__ic svg { width: 28px; height: 28px; }
+      .x-tile__no { font: 700 40px/1 "DIN Condensed", "Bahnschrift", "Arial Narrow", var(--sans); color: var(--c); }
+      .x-tile__t { display: block; margin-top: 18px; font: 700 28px/1 "DIN Condensed", "Bahnschrift", "Arial Narrow", var(--sans); text-transform: uppercase; letter-spacing: .04em; }
+      .x-tile small, .x-fly small, .x-attn small { display: block; margin-top: 4px; color: var(--text-secondary); font: 13px/1.3 ui-monospace, "SF Mono", Menlo, monospace; }
+      .x-fly, .x-attn { width: 100%; margin-top: 12px; display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 14px; background: var(--fill-tertiary); border: 1px solid var(--stroke-primary); color: var(--text-primary); text-align: left; cursor: pointer; font: inherit; }
+      .x-fly > span:last-child, .x-attn > span:last-child { margin-left: auto; font-size: 1.5em; color: var(--text-secondary); }
+      .x-fly__ic { width: 46px; height: 46px; flex: none; border-radius: 10px; display: grid; place-items: center; color: #05140b; background: #3dff8a; }
+      .x-fly__t, .x-attn > span:nth-child(2) { font: 700 24px/1 "DIN Condensed", "Bahnschrift", "Arial Narrow", var(--sans); text-transform: uppercase; letter-spacing: .05em; }
+      .x-attn { border-color: color-mix(in srgb, #ffb000 55%, transparent); }
+      .x-attn > b { min-width: 46px; height: 46px; border-radius: 10px; display: grid; place-items: center; background: #ffb000; color: #140c00; font: 700 22px/1 ui-monospace, Menlo, monospace; }
+      .x-sec { margin: 28px 2px 12px; font: 600 12px/1 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .2em; text-transform: uppercase; color: var(--text-secondary); display: flex; align-items: center; gap: 10px; }
+      .x-sec::after { content: ""; flex: 1; height: 1px; background: var(--stroke-primary); }
+      .x-chips { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: none; }
+      .x-chip { flex: 0 0 auto; max-width: 260px; padding: 12px 16px; border-radius: 10px; background: var(--fill-tertiary); border: 1px solid var(--stroke-primary); text-decoration: none; color: var(--text-primary); font-weight: 600; }
+      .x-chip small { display: block; color: var(--fill-system-green); font: 600 11px/1.4 ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; }
+      .x-glist { display: grid; gap: 8px; }
+      .x-seg2 { display: flex; flex-wrap: wrap; gap: 8px; }
+      .x-seg2 button { min-height: 48px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--stroke-primary); background: var(--fill-tertiary); color: var(--text-primary); font: var(--type-label); cursor: pointer; }
+      .x-seg2 button[aria-pressed="true"] { background: var(--fill-primary); color: var(--text-primary-on); border-color: var(--fill-primary); }
+      .x-ck__item.is-cur { outline: 2px solid var(--fill-system-green); outline-offset: -2px; background: color-mix(in srgb, var(--fill-system-green) 10%, transparent); }
+      .x-ck__done { margin-top: 10px; padding: 14px 16px; border-radius: 10px; text-align: center; font: 700 22px/1 "DIN Condensed", "Bahnschrift", "Arial Narrow", var(--sans); text-transform: uppercase; letter-spacing: .08em; color: #05140b; background: var(--fill-system-green); }
+
+      /* ===== theme «Кабина» ===== */
+      :root[data-theme="cab"] {
+        color-scheme: dark;
+        --text-primary: #e9ece6; --text-secondary: #8f978f; --text-tertiary: #6b726b; --text-primary-on: #05140b; --text-secondary-on: #1a3324;
+        --fill-primary: #3dff8a; --fill-primary-on: #0b0d0f; --fill-secondary: #2a3a30; --fill-tertiary: rgb(255 255 255 / .045); --fill-segment: #151a1c;
+        --fill-system-green: #3dff8a; --fill-system-orange: #ffb000; --fill-system-red: #ff3b30;
+        --transparent-primary: rgb(61 255 138 / .3);
+        --stroke-primary: rgb(255 255 255 / .12); --stroke-secondary: rgb(255 255 255 / .07); --stroke-primary-on: rgb(255 255 255 / .12); --stroke-composer: rgb(255 255 255 / .12); --stroke-system-orange: #5a3d00;
+        --hover-wash: rgb(255 255 255 / .05); --hover-wash-primary-on: rgb(0 0 0 / .2);
+        --mat-regular: rgb(14 17 19 / .85); --mat-thin: rgb(14 17 19 / .7); --mat-agent: rgb(14 17 19 / .92); --mat-inverse: #e9ece6;
+        --hark-shadow: 0 12px 40px rgb(0 0 0 / .6);
+        background: #0a0c0e; color: #e9ece6; accent-color: #3dff8a; scrollbar-color: #2a2f33 #0a0c0e;
+      }
+      :root[data-theme="cab"] body, :root[data-theme="cab"] .x-app { background: radial-gradient(70% 45% at 50% -10%, rgb(61 255 138 / .07), transparent 70%), radial-gradient(130% 100% at 50% 30%, transparent 40%, rgb(0 0 0 / .7)), repeating-linear-gradient(45deg, #0f1214 0 3px, #0b0d0f 3px 6px), #0a0c0e; }
+      :root[data-theme="cab"] .x-side { background: rgb(8 10 11 / .55); }
+      :root[data-theme="cab"] .x-bar { background: rgb(10 12 14 / .72); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+      :root[data-theme="cab"] .x-btn { border-radius: 10px; background: rgb(255 255 255 / .05); }
+      :root[data-theme="cab"] .x-go, :root[data-theme="cab"] .x-tile, :root[data-theme="cab"] .x-fly, :root[data-theme="cab"] .x-attn, :root[data-theme="cab"] .x-chip, :root[data-theme="cab"] .x-tseg {
+        background: linear-gradient(160deg, rgb(255 255 255 / .07), rgb(18 22 24 / .6) 40%); -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%);
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / .12), 0 10px 30px rgb(0 0 0 / .45); border-radius: 12px; }
+      :root[data-theme="cab"] .x-tseg__th { background: linear-gradient(180deg, rgb(61 255 138 / .26), rgb(61 255 138 / .06)); border-color: rgb(61 255 138 / .55); }
+      :root[data-theme="cab"] .x-tseg button[aria-pressed="true"] { color: #fff; }
+      :root[data-theme="cab"] .x-tabbar { background: rgb(14 17 19 / .62); border-color: rgb(255 255 255 / .12); }
+      :root[data-theme="cab"] .x-tabbar__th { background: linear-gradient(180deg, rgb(61 255 138 / .2), rgb(61 255 138 / .04)); border: 1px solid rgb(61 255 138 / .4); }
+      :root[data-theme="cab"] .x-tabbar button { font: 700 14px/1 "DIN Condensed", "Bahnschrift", "Arial Narrow", var(--sans); letter-spacing: .08em; text-transform: uppercase; }
+      :root[data-theme="cab"] .x-tabbar button[aria-current="page"] { color: #3dff8a; }
+      :root[data-theme="cab"] .x-title { font-family: "DIN Condensed", "Bahnschrift", "Arial Narrow", var(--sans); font-weight: 700; text-transform: uppercase; letter-spacing: .02em; font-size: calc(var(--x-fs) * 1.8); line-height: 1.05; }
+      :root[data-theme="cab"] .x-eyebrow, :root[data-theme="cab"] .x-group h3, :root[data-theme="cab"] .x-mine h3, :root[data-theme="cab"] .x-list__head { font-family: ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .16em; text-transform: uppercase; font-size: 12px; color: var(--text-secondary); }
+      :root[data-theme="cab"] .x-rv__img { filter: invert(1) brightness(0.88); }
+      :root[data-theme="cab"] mark.x-mark { background: rgb(255 176 0 / .35); color: #fff; }
+      @media (prefers-reduced-motion: reduce) { .x-tabbar__th, .x-tseg__th { transition: none; } }
       /* v12 compact reader bar */
       .x-rv > .x-rv__bar { flex-wrap: nowrap; gap: 4px; padding: calc(env(safe-area-inset-top, 0px) + 4px) max(8px, env(safe-area-inset-right)) 4px max(8px, env(safe-area-inset-left)); }
       .x-rv > .x-rv__bar .x-btn { min-width: 44px; min-height: 44px; padding: 0 10px; font-size: 18px; }
@@ -1532,7 +1613,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
             <button class="x-btn x-cab-only x-cab-keep" type="button" data-act="timer-menu" id="tmenu" aria-expanded="false" aria-controls="tpre">⏱︎ Таймер</button>
             <button class="x-btn" type="button" data-act="font-down" aria-label="Уменьшить шрифт">A−</button>
             <button class="x-btn" type="button" data-act="font-up" aria-label="Увеличить шрифт">A+</button>
-            <button class="x-btn x-cab-keep" type="button" data-act="cabin" id="cabbtn" aria-pressed="false">Кабина</button>
+            <button class="x-btn x-cab-keep" type="button" data-act="cabin" id="cabbtn" aria-pressed="false">В полёт</button>
             <button class="x-btn x-btn--theme x-cab-keep" type="button" data-act="theme" aria-label="Переключить тему"></button>
             <button class="x-btn x-btn--star" type="button" data-act="star" id="star" aria-pressed="false" aria-label="Добавить в избранное" hidden>☆</button>
             <button class="x-btn" type="button" data-act="sheet" aria-label="Мои данные: экспорт и импорт" aria-haspopup="dialog">⋯</button>
@@ -1568,7 +1649,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           <div class="x-set">
             <div class="x-set__row"><span>Тема</span>
               <div class="x-seg x-seg--plain" role="group" aria-label="Тема" id="theme-seg">
-                <button type="button" data-act="theme-set" data-theme-opt="auto" aria-pressed="false">Авто</button><button type="button" data-act="theme-set" data-theme-opt="light" aria-pressed="false">Светлая</button><button type="button" data-act="theme-set" data-theme-opt="dark" aria-pressed="false">Тёмная</button><button type="button" data-act="theme-set" data-theme-opt="night" aria-pressed="false">Ночь</button><button type="button" data-act="theme-set" data-theme-opt="orig" aria-pressed="false">Оригинал</button>
+                <button type="button" data-act="theme-set" data-theme-opt="cab" aria-pressed="false">В полёт</button><button type="button" data-act="theme-set" data-theme-opt="auto" aria-pressed="false">Авто</button><button type="button" data-act="theme-set" data-theme-opt="light" aria-pressed="false">Светлая</button><button type="button" data-act="theme-set" data-theme-opt="dark" aria-pressed="false">Тёмная</button><button type="button" data-act="theme-set" data-theme-opt="night" aria-pressed="false">Ночь</button><button type="button" data-act="theme-set" data-theme-opt="orig" aria-pressed="false">Оригинал</button>
               </div>
             </div>
             <div class="x-set__row"><span>Повторение: новые карточки берутся из</span>
@@ -2046,11 +2127,11 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- theme ---------- */
         var mq = window.matchMedia("(prefers-color-scheme: dark)");
-        var THEMES = ["auto", "light", "dark", "night", "orig"], THEME_NAME = { auto: "Авто", light: "Светлая", dark: "Тёмная", night: "Ночь", orig: "Оригинал" };
-        function themePref() { var t = root.getAttribute("data-theme"); return t === "light" || t === "dark" || t === "night" || t === "orig" ? t : "auto"; }
+        var THEMES = ["cab", "auto", "light", "dark", "night", "orig"], THEME_NAME = { cab: "Кабина", auto: "Авто", light: "Светлая", dark: "Тёмная", night: "Ночь", orig: "Оригинал" };
+        function themePref() { var t = root.getAttribute("data-theme"); return t === "cab" || t === "light" || t === "dark" || t === "night" || t === "orig" ? t : "auto"; }
         function currentTheme() { var t = themePref(); return t !== "auto" ? t : (mq.matches ? "dark" : "light"); }
         function syncThemeColor() {
-          var t = currentTheme(), c = t === "night" ? "#000000" : t === "orig" ? "#373737" : t === "dark" ? "#1d1d1f" : "#f5f5f7";
+          var t = currentTheme(), c = t === "cab" ? "#0a0c0e" : t === "night" ? "#000000" : t === "orig" ? "#373737" : t === "dark" ? "#1d1d1f" : "#f5f5f7";
           [].forEach.call(document.querySelectorAll('meta[name="theme-color"]'), function (m) { m.setAttribute("content", c); m.removeAttribute("media"); });
         }
         function syncThemeUI() {
@@ -2065,7 +2146,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         }
         /* The theme button cycles Авто → Светлая → Тёмная → Ночь. */
         function toggleTheme() { var t = THEMES[(THEMES.indexOf(themePref()) + 1) % THEMES.length]; setTheme(t); toast("Тема: " + THEME_NAME[t]); }
-        try { var savedTheme = localStorage.getItem("hark-theme"); if (THEME_NAME[savedTheme] && savedTheme !== "auto") { root.setAttribute("data-theme", savedTheme); syncThemeColor(); } } catch (e) { /* follow system */ }
+        try { var savedTheme = localStorage.getItem("hark-theme"); if (!savedTheme || !localStorage.getItem("mi8.cabTheme")) { savedTheme = "cab"; localStorage.setItem("hark-theme", "cab"); localStorage.setItem("mi8.cabTheme", "1"); } if (THEME_NAME[savedTheme] && savedTheme !== "auto") { root.setAttribute("data-theme", savedTheme); syncThemeColor(); } } catch (e) { root.setAttribute("data-theme", "cab"); }
         syncThemeUI();
 
         /* ---------- navigation stack (in memory; history API only in try/catch) ----------
@@ -2076,7 +2157,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         window.mi8CurScreen = function () { var e = currentEntry(); return !e ? "home" : e.v ? e.v + (e.id ? ":" + e.id : e.f ? ":" + e.f : "") : e.id; };
         function syncHistory(push) {
           var e = currentEntry();
-          var hash = !e ? "#" : e.v === "pairs" ? "#compare" : e.v === "set" ? "#settings" : e.v === "new" ? "#new" : e.v === "rle" ? "#rle~" + e.f : e.v === "verify" ? "#verify" : e.v === "lib" ? "#rle-lib" : e.v === "libb" ? "#rle-lib~" + e.f : e.v === "tablo" ? "#tablo" : e.v === "tlE" ? "#tablo-edit" : e.v === "vrev" ? "#verify~" + encodeURIComponent(e.id) : e.v === "cmp" ? "#" + encodeURIComponent(e.id) + "~cmp" : "#" + encodeURIComponent(e.id) + (e.q ? "?q=" + encodeURIComponent(e.q) : "");
+          var hash = !e ? "#" : e.v === "pairs" ? "#compare" : e.v === "set" ? "#settings" : e.v === "new" ? "#new" : e.v === "rle" ? "#rle~" + e.f : e.v === "verify" ? "#verify" : e.v === "study" ? "#study" : e.v === "more" ? "#more" : e.v === "lib" ? "#rle-lib" : e.v === "libb" ? "#rle-lib~" + e.f : e.v === "tablo" ? "#tablo" : e.v === "tlE" ? "#tablo-edit" : e.v === "vrev" ? "#verify~" + encodeURIComponent(e.id) : e.v === "cmp" ? "#" + encodeURIComponent(e.id) + "~cmp" : "#" + encodeURIComponent(e.id) + (e.q ? "?q=" + encodeURIComponent(e.q) : "");
           try {
             if (push) history.pushState({ depth: stack.length }, "", hash);
             else history.replaceState({ depth: stack.length }, "", hash);
@@ -2295,10 +2376,17 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           var boxes = g.querySelectorAll("[data-ck]"), n = 0;
           [].forEach.call(boxes, function (x) { x.parentNode.classList.toggle("is-on", x.checked); if (x.checked) n++; });
           g.querySelector(".x-ck__count").textContent = n + " из " + boxes.length;
+          var cur = null; [].forEach.call(boxes, function (x) { x.parentNode.classList.remove("is-cur"); if (!cur && !x.checked) cur = x.parentNode; });
+          if (cur && n) cur.classList.add("is-cur");
+          var done = boxes.length && n === boxes.length; g.classList.toggle("is-done", !!done);
+          var dn = g.querySelector(".x-ck__done");
+          if (done && !dn) { dn = document.createElement("p"); dn.className = "x-ck__done"; dn.setAttribute("role", "status"); dn.textContent = "✓ Карта выполнена"; g.appendChild(dn); }
+          if (!done && dn) dn.remove();
+          return cur;
         }
         docEl.addEventListener("change", function (e) {
           var t = e.target;
-          if (t && t.hasAttribute && t.hasAttribute("data-ck")) ckSync(t.closest(".x-ck"));
+          if (t && t.hasAttribute && t.hasAttribute("data-ck")) { var nx = ckSync(t.closest(".x-ck")); if (nx && t.checked && nx.scrollIntoView) { try { var r = nx.getBoundingClientRect(); if (r.bottom > window.innerHeight - 110) nx.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (er) {} } }
         });
 
         /* ---------- compare Т ↔ АМТ ---------- */
@@ -2389,39 +2477,98 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           var m10 = n % 10, m100 = n % 100;
           return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many;
         }
+
+        /* ---------- v20: type switch, bottom tabs, new home ---------- */
+        var TYPES = [["T", "Ми-8Т"], ["AMT", "Ми-8АМТ"], ["MTV", "Ми-8МТВ"]];
+        var acType = store.get("mi8.type", "T"); if (!/^(T|AMT|MTV)$/.test(acType)) acType = "T";
+        function typeGroup() { return ROOT[acType === "T" ? 0 : 1] || ROOT[0]; }
+        var SVG = {
+          fire: '<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.8 2.5-5 .3 1.6 1 2.5 2 2.8C11 8.5 11.3 5.6 12 3z"/>',
+          warn: '<path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4.5M12 17.2v.1"/>',
+          book: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M8 7h8M8 10.5h6"/>',
+          cards: '<rect x="3" y="6" width="14" height="15" rx="3"/><path d="M7 3h11a3 3 0 0 1 3 3v12"/>',
+          lamp: '<rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M7 10h10M7 14h6"/>',
+          cap: '<path d="M2 9.5 12 5l10 4.5L12 14z"/><path d="M6 11.5V16c3.5 2.5 8.5 2.5 12 0v-4.5"/>',
+          more: '<circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/>',
+          plane: '<path d="M21 15.5 13.5 11V5a1.5 1.5 0 0 0-3 0v6L3 15.5V18l7.5-2.5V20L8 21.5V23l4-1 4 1v-1.5L13.5 20v-4.5L21 18z"/>'
+        };
+        function svgI(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + SVG[n] + "</svg>"; }
+        var TABS = [["home", "Карты", "cards"], ["rle", "РЛЭ", "book"], ["tablo", "Табло", "lamp"], ["study", "Учёба", "cap"], ["more", "Ещё", "more"]];
+        function tabOf() {
+          if (quizVisible()) return "study";
+          var e0 = stack[0]; if (!e0) return "home";
+          if (e0.v === "lib" || e0.v === "libb" || e0.v === "rle") return "rle";
+          if (e0.v === "tablo" || e0.v === "tlE") return "tablo";
+          if (e0.v === "study" || e0.v === "pairs" || e0.v === "cmp" || e0.v === "verify" || e0.v === "vrev") return "study";
+          if (e0.v === "more" || e0.v === "set" || e0.v === "new") return "more";
+          return "home";
+        }
+        var tabEl = document.createElement("nav"); tabEl.className = "x-tabbar"; tabEl.setAttribute("aria-label", "Разделы");
+        tabEl.innerHTML = '<span class="x-tabbar__th" aria-hidden="true"></span>' + TABS.map(function (t) { return '<button type="button" data-act="tab" data-tab="' + t[0] + '">' + svgI(t[2]) + "<span>" + t[1] + "</span></button>"; }).join("");
+        document.body.appendChild(tabEl);
+        function syncTabs() {
+          var cur = tabOf(), bs = tabEl.querySelectorAll("button"), th = tabEl.querySelector(".x-tabbar__th");
+          [].forEach.call(bs, function (b, i) { var on = b.getAttribute("data-tab") === cur; b.setAttribute("aria-current", on ? "page" : "false"); if (on && b.offsetWidth) { th.style.width = b.offsetWidth + "px"; th.style.transform = "translateX(" + (b.offsetLeft - bs[0].offsetLeft) + "px)"; } });
+        }
+        window.addEventListener("resize", function () { syncTabs(); });
+        function goTab(t) {
+          if (quiz) quiz.show = false;
+          if (t === "home") stack = [];
+          else if (t === "rle") stack = [{ v: "libb", f: acType }];
+          else if (t === "tablo") stack = [{ v: "tablo" }];
+          else stack = [{ v: t }];
+          syncHistory(true); render(); try { mainEl.scrollTop = 0; } catch (e) {}
+        }
+        function typeSeg() {
+          var i = TYPES.map(function (t) { return t[0]; }).indexOf(acType);
+          return '<div class="x-tseg" role="group" aria-label="Тип вертолёта" style="--i:' + i + '"><span class="x-tseg__th" aria-hidden="true"></span>' +
+            TYPES.map(function (t) { return '<button type="button" data-act="actype" data-t="' + t[0] + '" aria-pressed="' + (t[0] === acType) + '">' + t[1] + "</button>"; }).join("") + "</div>";
+        }
+        var TILE = [["red", "fire", "Пожар, отказ двигателя, посадка"], ["amb", "warn", "Топливо, гидро, электро и др."], ["blue", "book", "Эксплуатация авиатехники"]];
+        function tileName(t) { return /аварийн/i.test(t) ? "Аварийные" : /неиспр/i.test(t) ? "Неисправности" : /эксплуат/i.test(t) ? "Эксплуатация" : t; }
         function renderHome() {
           starEl.hidden = true;
           if (cabin) { renderCabinHome(); return; }
-          var html = '<article><p class="x-eyebrow">Аварийные карты · неисправности · РЛЭ</p><h2 class="x-title">Ми-8 Экипаж</h2>' +
-            '<div class="x-body"><p>Главное меню приложения. Выберите тип вертолета и раздел.</p></div>' + readyChip() + newBanner() + bkBanner() + '<div class="x-groups">';
-          ROOT.forEach(function (g) {
-            html += '<section class="x-group"><h3>' + esc(g.group) + "</h3>" +
-              g.items.map(function (it) {
-                return '<a class="x-go' + ocB(it) + '" data-open="' + esc(it.to) + '" href="#' + encodeURIComponent(it.to) + '">' + esc(it.text) + "</a>";
-              }).join("") + "</section>";
+          var g = typeGroup();
+          var html = '<article class="x-home"><p class="x-kick">Ми-8 // Экипаж</p><h2 class="x-htitle">Карты</h2>' + typeSeg() +
+            newBanner() + bkBanner() + (rdCache && rdCache.lvl === "ok" ? "" : readyChip()) + '<div class="x-tiles">';
+          g.items.forEach(function (it, i) {
+            var c = TILE[i] || TILE[2];
+            html += '<a class="x-tile x-tile--' + c[0] + '" data-open="' + esc(it.to) + '" href="#' + encodeURIComponent(it.to) + '">' + (i === 0 ? '<span class="x-tile__stripe"></span>' : "") +
+              '<span class="x-tile__top"><span class="x-tile__ic">' + svgI(c[1]) + '</span><span class="x-tile__no">0' + (i + 1) + "</span></span>" +
+              '<span class="x-tile__t">' + esc(tileName(it.text)) + "</span><small>" + c[2] + "</small></a>";
           });
-          html += "</div>";
-          var inQuiz = quiz && quiz.phase === "card";
-          html += '<section class="x-group" id="home-quiz" style="margin-top:28px"><h3>Самопроверка</h3>' + srsTile() + '<div style="height:8px"></div>' +
-            '<button class="x-go x-go--btn" type="button" data-act="quiz-home"><span class="x-go__txt">' +
-            (inQuiz ? "Продолжить самопроверку<small>" + quiz.nSeen + " из " + quiz.N + ", верно " + quiz.correct + "</small>"
-              : "Самопроверка по карточкам<small>Аварийные карты Ми-8Т, Ми-8АМТ / МТВ или мой лист на изучение</small>") + "</span></button></section>";
-          html += '<section class="x-group" style="margin-top:28px"><h3>Табло</h3><button class="x-go x-go--btn" type="button" data-act="tablo"><span class="x-go__txt">Сигнальные табло<small>' +
-            TABLO.items.length + " табло Ми-8Т и Ми-8АМТ / МТВ: цвет, что означает, переход к аварийной карте</small></span></button></section>";
-          html += '<section class="x-group" style="margin-top:28px"><h3>Сравнение Т / АМТ</h3><button class="x-go x-go--btn" type="button" data-act="pairs"><span class="x-go__txt">Сравнение Т / АМТ<small>' +
-            PAIRS.length + " " + plural(PAIRS.length, "пара", "пары", "пар") + " аварийных карт Ми-8Т ↔ Ми-8АМТ / МТВ, бок о бок</small></span></button></section>";
-          if (favs.size) {
-            html += '<section class="x-group" style="margin-top:28px"><h3>★ Избранное</h3>' +
-              Array.from(favs).map(function (id) {
-                var s = byId[id];
-                return s ? '<a class="x-go" data-open="' + esc(id) + '" href="#' + encodeURIComponent(id) + '">' + esc(s.title) + flag(id) + "</a>" : "";
-              }).join("") + "</section>";
-          }
-          html += rleHome() + renderStudyHome() + renderNotesHome() + renderRecentHome();
-          html += '<p class="fineprint" style="margin-top:28px">Всего экранов: ' + SCREENS.length + ". Любой экран можно отметить звёздочкой ☆, добавить на изучение или снабдить заметкой ✎. Экспорт и импорт — в меню ⋯.</p>" +
-            '<p class="fineprint" style="margin-top:12px"><a class="link" href="#settings" data-act="settings">Настройки</a> · <a class="link" href="#new" data-act="news">Что нового</a> <span class="x-hint">версия ' + esc(APP_VERSION) + "</span></p></article>";
+          html += "</div>" + '<button class="x-fly" type="button" data-act="cabin"><span class="x-fly__ic">' + svgI("plane") + '</span><span class="x-fly__t">Режим «В полёт»<small>Крупные кнопки, таймеры, экран не гаснет</small></span><span aria-hidden="true">›</span></button>';
+          var d = dailyIds(), due = d.due.length + d.fresh.length;
+          if (due && srsMeta.last !== dayStr()) html += '<button class="x-attn" type="button" data-act="quiz-daily"><b>' + due + "</b><span>Повторение на сегодня<small>Нажмите, чтобы начать</small></span><span aria-hidden=\"true\">›</span></button>";
+          if (recent.length) html += '<h3 class="x-sec">Недавние</h3><div class="x-chips">' + recent.slice(0, 8).map(function (id) { var s = byId[id]; return s ? '<a class="x-chip" data-open="' + esc(id) + '" href="#' + encodeURIComponent(id) + '"><small>' + esc(branchName(id) || "") + "</small>" + esc(s.title) + "</a>" : ""; }).join("") + "</div>";
+          if (favs.size) html += '<h3 class="x-sec">Избранное</h3><div class="x-glist">' + Array.from(favs).map(function (id) { var s = byId[id]; return s ? '<a class="x-go" data-open="' + esc(id) + '" href="#' + encodeURIComponent(id) + '">' + esc(s.title) + flag(id) + "</a>" : ""; }).join("") + "</div>";
+          html += '<p class="fineprint" style="margin-top:28px">Неофициальная памятка. Сверяйте с действующим РЛЭ. <span class="x-hint">версия ' + esc(APP_VERSION) + "</span></p></article>";
           docEl.innerHTML = html;
           mainEl.scrollTop = 0;
+        }
+        function renderStudy() {
+          starEl.hidden = true;
+          var html = '<article class="x-home"><p class="x-kick">Подготовка</p><h2 class="x-htitle">Учёба</h2>' + srsTile() +
+            '<div class="x-glist" style="margin-top:14px">' +
+            '<button class="x-go x-go--btn" type="button" data-act="quiz-home"><span class="x-go__txt">Самопроверка по карточкам<small>Аварийные карты или мой лист на изучение</small></span></button>' +
+            '<button class="x-go x-go--btn" type="button" data-act="pairs"><span class="x-go__txt">Сравнение Т / АМТ<small>' + PAIRS.length + " " + plural(PAIRS.length, "пара", "пары", "пар") + " карт бок о бок</small></span></button>" +
+            '<a class="x-go" href="#verify" data-act="verify">Очередь сверки с РЛЭ</a></div>' +
+            renderStudyHome() + "</article>";
+          docEl.innerHTML = html; mainEl.scrollTop = 0;
+        }
+        function renderMore() {
+          starEl.hidden = true;
+          var p = themePref();
+          var html = '<article class="x-home"><p class="x-kick">Настройки и данные</p><h2 class="x-htitle">Ещё</h2>' +
+            '<h3 class="x-sec">Тема</h3><div class="x-seg2">' + THEMES.map(function (t) { return '<button type="button" data-act="theme-set2" data-t="' + t + '" aria-pressed="' + (t === p) + '">' + THEME_NAME[t] + "</button>"; }).join("") + "</div>" +
+            '<h3 class="x-sec">Размер текста · ' + state.fs + ' px</h3><div class="x-seg2"><button type="button" data-act="font-down">A−</button><button type="button" data-act="font-up">A+</button></div>' +
+            '<h3 class="x-sec">Данные</h3><div class="x-glist">' +
+            '<button class="x-go x-go--btn" type="button" data-act="sheet"><span class="x-go__txt">Мои данные<small>Резервная копия, экспорт и импорт</small></span></button>' +
+            '<a class="x-go" href="#settings" data-act="settings">Настройки и готовность к офлайну</a>' +
+            '<a class="x-go" href="#new" data-act="news">Что нового</a></div>' + renderNotesHome() +
+            '<p class="fineprint" style="margin-top:28px">Неофициальная памятка по структуре приложения Ми-8 ПАК2. Сверяйте с действующим РЛЭ. Версия ' + esc(APP_VERSION) + "</p></article>";
+          docEl.innerHTML = html; mainEl.scrollTop = 0;
         }
         function renderScreen(s, q) {
           var ts = q ? terms(q) : [];
@@ -2903,8 +3050,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
-        var APP_BUILD = "v19";
+        var APP_BUILD = "v20";
         var CHANGELOG = [
+          { v: "2026-10-12 · 20", d: "2026-10-12", items: ["Новый вид «Кабина»: тёмная тема, трафаретные заголовки, цвет по смыслу", "Нижние вкладки: Карты, РЛЭ, Табло, Учёба, Ещё", "Переключатель Ми-8Т / АМТ / МТВ на главной (запоминается)", "Чек-лист: подсветка текущего пункта и «Карта выполнена»"] },
           { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
           { v: "2026-10-12 · 10", d: "2026-10-12", items: ["Библиотека РЛЭ: РЛЭ Ми-8 (ред. 01.04.2025, Изм. 76), Ми-8АМТ (08.2025) и Ми-8МТВ-1 (01.04.2025) целиком — оглавление, поиск по тексту, закладки, переход по номеру страницы", "Просмотр страницы из карты теперь листает всю книгу", "Номера страниц РЛЭ Ми-8 пересчитаны под новую редакцию; 18 карт Ми-8Т помечены: раздел РЛЭ изменён Изм. 75 (пожары, управление)", "Раздел «Что изменилось в редакциях» и эти карты в очереди сверки"] },
@@ -3090,7 +3238,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           "fix-ui": function () {
             if (!confirm("Сбросить тему, размер шрифта и недавние? Заметки, лист, избранное и повторение останутся.")) return;
             ["hark-theme", "mi8-fs", "mi8-recent"].forEach(rmKey);
-            setTheme("auto"); state.fs = 18; app.style.setProperty("--x-fs", "18px"); recent = [];
+            setTheme("cab"); state.fs = 18; app.style.setProperty("--x-fs", "18px"); recent = [];
             setRes.fix = "Интерфейс сброшен: тема «Авто», шрифт 18 px, недавние очищены."; setKeep(); renderList();
           },
           "fix-cache": function () {
@@ -3300,7 +3448,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           wakeOn(); timerTick();
         });
         function syncCabinUI() {
-          cabBtn.textContent = cabin ? "Кабина ✕" : "Кабина";
+          cabBtn.textContent = cabin ? "В полёт ✕" : "В полёт";
           cabBtn.setAttribute("aria-pressed", String(cabin));
           cabBtn.setAttribute("aria-label", cabin ? "Выйти из режима «Кабина»" : "Режим «Кабина»");
           if (!cabin) tpreShow(false);
@@ -3820,7 +3968,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           flushNote();
           var e = currentEntry();
           docEl.classList.toggle("x-doc--wide", !!e && (e.v === "cmp" || e.v === "vrev"));
-          if (e && e.v === "set") { renderSettings(); app.setAttribute("data-view", "detail"); }
+          if (e && e.v === "study") { renderStudy(); app.setAttribute("data-view", "detail"); }
+          else if (e && e.v === "more") { renderMore(); app.setAttribute("data-view", "detail"); }
+          else if (e && e.v === "set") { renderSettings(); app.setAttribute("data-view", "detail"); }
           else if (e && e.v === "new") { renderNews(); app.setAttribute("data-view", "detail"); }
           else if (e && e.v === "pairs") { renderPairs(); app.setAttribute("data-view", "detail"); }
           else if (e && e.v === "rle") { renderRleList(e.f); app.setAttribute("data-view", "detail"); }
@@ -3834,7 +3984,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           else if (e && byId[e.id]) { renderScreen(byId[e.id], e.q); app.setAttribute("data-view", "detail"); }
           else if (quizVisible() && !cabin) { renderQuiz(); app.setAttribute("data-view", "detail"); }
           else { renderHome(); app.setAttribute("data-view", cabin ? "detail" : "list"); }
-          backEl.disabled = stack.length === 0 && !quizVisible();
+          backEl.disabled = (stack.length === 0 || (stack.length === 1 && /^(study|more|tablo|libb)$/.test(stack[0].v || ""))) && !quizVisible();
+          app.toggleAttribute("data-root", backEl.disabled);
+          try { syncTabs(); } catch (er) {}
           renderCrumbs();
           renderList();
         }
@@ -4317,6 +4469,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           else if (TL_ACTS[act]) TL_ACTS[act](btn);
           else if (LIB_ACTS[act]) LIB_ACTS[act](btn);
           else if (act === "srs-pool") { srsMeta.pool = btn.getAttribute("data-pool"); saveSrs(); sheetSummary(); if (!stack.length) render(); }
+          else if (act === "tab") goTab(btn.getAttribute("data-tab"));
+          else if (act === "actype") { acType = btn.getAttribute("data-t"); store.set("mi8.type", acType); render(); }
+          else if (act === "theme-set2") { setTheme(btn.getAttribute("data-t")); render(); }
           else if (act === "back") backAction();
           else if (act === "home") { if (quiz) quiz.show = false; goHome(); }
           else if (act.indexOf("quiz-") === 0) quizAct(act, btn);
@@ -4476,7 +4631,8 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           if (h) {
             var i = h.indexOf("?q="), id = decodeURIComponent(i < 0 ? h : h.slice(0, i));
             var cid = id.replace(/~cmp$/, ""), cp0 = pairOf[cid];
-            if (id === "compare") stack.push({ v: "pairs" });
+            if (id === "study" || id === "more") stack.push({ v: id });
+            else if (id === "compare") stack.push({ v: "pairs" });
             else if (id === "settings") stack.push({ v: "set" });
             else if (id === "tablo" && !byId.tablo) stack.push({ v: "tablo" });
             else if (id === "rle-lib") stack.push({ v: "lib" });
