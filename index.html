@@ -1367,6 +1367,11 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       .x-chip { flex: 0 0 auto; max-width: 260px; padding: 12px 16px; border-radius: 10px; background: var(--fill-tertiary); border: 1px solid var(--stroke-primary); text-decoration: none; color: var(--text-primary); font-weight: 600; }
       .x-chip small { display: block; color: var(--fill-system-green); font: 600 11px/1.4 ui-monospace, Menlo, monospace; letter-spacing: .1em; text-transform: uppercase; }
       .x-glist { display: grid; gap: 8px; }
+      .x-rf2 { margin: 12px 0 4px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--stroke-primary); background: var(--fill-tertiary); }
+      .x-rf2[hidden] { display: none; }
+      .x-rf2 span { display: block; font: 600 13px/1.3 ui-monospace, "SF Mono", Menlo, monospace; color: var(--text-secondary); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+      .x-rf2 b { display: block; height: 8px; border-radius: 4px; background: rgb(127 127 127 / .2); overflow: hidden; }
+      .x-rf2 i { display: block; height: 100%; width: 0; border-radius: 4px; background: var(--fill-system-green); transition: width .4s; }
       .x-hsearch { width: 100%; margin-top: 16px; min-height: 50px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--stroke-primary); background: var(--fill-tertiary); color: var(--text-secondary); font: var(--type-body); text-align: left; cursor: pointer; }
       .x-hsearch svg { width: 20px !important; height: 20px !important; }
       .x-side__foot { display: none; }
@@ -2481,6 +2486,51 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many;
         }
 
+
+        /* ---------- v23: РЛЭ offline download with progress (page-side, works while app is open) ---------- */
+        var rf = { on: false, n: 0, N: 0, err: 0 };
+        function rleTotal() { var t = 0; Object.keys(LIB.books).forEach(function (k) { t += LIB.books[k].n || 0; }); return t; }
+        function rleUrls() { var a = []; Object.keys(LIB.books).forEach(function (k) { for (var i = 1; i <= LIB.books[k].n; i++) a.push("rle/" + k + "-" + i + ".webp"); }); return a; }
+        function rleCacheName() { return caches.keys().then(function (ks) { return ks.filter(function (k) { return /^mi8-rle-/.test(k); }).sort().pop() || null; }); }
+        function rleHave() {
+          return rleCacheName().then(function (nm) { if (!nm) return { nm: null, set: {} }; return caches.open(nm).then(function (c) { return c.keys(); }).then(function (rs) {
+            var set = {}; rs.forEach(function (r) { var m = /\/rle\/([A-Z]+-\d+)\.webp/.exec(r.url); if (m) set[m[1]] = 1; }); return { nm: nm, set: set }; }); });
+        }
+        function rleCount() { if (!window.caches || IS_FILE) return Promise.resolve(0); return rleHave().then(function (h) { return Object.keys(h.set).length; }); }
+        function rfPaint() {
+          var pct = rf.N ? Math.floor(rf.n * 100 / rf.N) : 0;
+          [].forEach.call(document.querySelectorAll("[data-rfbar]"), function (el) {
+            el.hidden = !(rf.on || (rf.N && rf.n < rf.N));
+            var f = el.querySelector("i"), t = el.querySelector("span");
+            if (f) f.style.width = pct + "%";
+            if (t) t.textContent = (rf.on ? "Загрузка РЛЭ для офлайна: " : "РЛЭ загружено: ") + rf.n + " из " + rf.N + " стр. · " + pct + "%" + (!rf.on && rf.n < rf.N ? (navigator.onLine === false ? " · нет сети" : " · пауза") : "");
+          });
+        }
+        function rfHtml() { return '<div class="x-rf2" data-rfbar' + (rf.on || (rf.N && rf.n < rf.N) ? "" : " hidden") + '><span></span><b><i></i></b></div>'; }
+        function rleFill() {
+          if (rf.on || IS_FILE || !window.caches || !window.fetch || navigator.onLine === false) return;
+          rleHave().then(function (h) {
+            if (!h.nm) { setTimeout(rleFill, 5000); return; }
+            var all = rleUrls(), miss = all.filter(function (u) { return !h.set[u.slice(4, -5)]; });
+            rf.N = all.length; rf.n = all.length - miss.length; rf.err = 0; rfPaint();
+            if (!miss.length) { rdCache = null; return; }
+            rf.on = true; rfPaint();
+            caches.open(h.nm).then(function (c) {
+              var i = 0, active = 0;
+              function next() {
+                if (navigator.onLine === false || rf.err > 30) { if (!active) { rf.on = false; rfPaint(); } return; }
+                if (i >= miss.length) { if (!active) { rf.on = false; rdCache = null; rfPaint(); try { toast("РЛЭ полностью загружено для офлайна"); } catch (e) {} } return; }
+                var u = miss[i++]; active++;
+                fetch(u, { cache: "no-store" }).then(function (r) { if (r.ok) return c.put(u, r).then(function () { rf.n++; }); rf.err++; })
+                  .catch(function () { rf.err++; }).then(function () { active--; if (rf.n % 10 === 0 || i >= miss.length) rfPaint(); next(); });
+              }
+              for (var k = 0; k < 4; k++) next();
+            });
+          }).catch(function () {});
+        }
+        window.addEventListener("online", function () { setTimeout(rleFill, 1500); });
+        window.addEventListener("offline", function () { rfPaint(); });
+        setTimeout(rleFill, 4000);
         /* ---------- v20: type switch, bottom tabs, new home ---------- */
         var TYPES = [["T", "Ми-8Т"], ["AMT", "Ми-8АМТ"], ["MTV", "Ми-8МТВ"]];
         var searchMode = false;
@@ -2536,7 +2586,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           if (cabin) { renderCabinHome(); return; }
           var g = typeGroup();
           var html = '<article class="x-home"><p class="x-kick">Ми-8 // Экипаж</p><h2 class="x-htitle">Карты</h2>' + '<button class="x-hsearch" type="button" data-act="search-open"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>Поиск по всем экранам</button>' + typeSeg() +
-            newBanner() + bkBanner() + (rdCache && rdCache.lvl === "ok" ? "" : readyChip()) + '<div class="x-tiles">';
+            newBanner() + bkBanner() + rfHtml() + (rdCache && rdCache.lvl === "ok" ? "" : readyChip()) + '<div class="x-tiles">';
           g.items.forEach(function (it, i) {
             var c = TILE[i] || TILE[2];
             html += '<a class="x-tile x-tile--' + c[0] + '" data-open="' + esc(it.to) + '" href="#' + encodeURIComponent(it.to) + '">' + (i === 0 ? '<span class="x-tile__stripe"></span>' : "") +
@@ -2550,7 +2600,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           if (favs.size) html += '<h3 class="x-sec">Избранное</h3><div class="x-glist">' + Array.from(favs).map(function (id) { var s = byId[id]; return s ? '<a class="x-go" data-open="' + esc(id) + '" href="#' + encodeURIComponent(id) + '">' + esc(s.title) + flag(id) + "</a>" : ""; }).join("") + "</div>";
           html += '<p class="fineprint" style="margin-top:28px">Неофициальная памятка. Сверяйте с действующим РЛЭ. <span class="x-hint">версия ' + esc(APP_VERSION) + "</span></p></article>";
           docEl.innerHTML = html;
-          mainEl.scrollTop = 0;
+          mainEl.scrollTop = 0; rfPaint();
         }
         function renderStudy() {
           starEl.hidden = true;
@@ -3055,8 +3105,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
-        var APP_BUILD = "v22";
+        var APP_BUILD = "v24";
         var CHANGELOG = [
+          { v: "2026-10-12 · 23", d: "2026-10-12", items: ["Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
           { v: "2026-10-12 · 20", d: "2026-10-12", items: ["Новый вид «Кабина»: тёмная тема, трафаретные заголовки, цвет по смыслу", "Нижние вкладки: Карты, РЛЭ, Табло, Учёба, Ещё", "Переключатель Ми-8Т / АМТ / МТВ на главной (запоминается)", "Чек-лист: подсветка текущего пункта и «Карта выполнена»"] },
           { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
@@ -3366,8 +3417,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           if (emb) { rle.lvl = emb >= RLE_KEYS.length ? "ok" : "warn"; rle.d = emb + " из " + RLE_KEYS.length + " встроены в файл"; }
           else if (!IS_FILE && window.caches) {
             rle.d = "проверяю кэш…";
-            wait.push(Promise.resolve().then(function () { return Promise.all(RLE_KEYS.map(function (k) { return caches.match("rle/" + k + ".webp", { ignoreSearch: true }).then(function (r) { return r ? 1 : 0; }, function () { return 0; }); })); })
-              .then(function (a) { var n = a.reduce(function (x, y) { return x + y; }, 0); rle.lvl = n >= RLE_KEYS.length ? "ok" : "warn"; rle.d = n + " из " + RLE_KEYS.length + " в кэше" + (n < RLE_KEYS.length ? " — откройте приложение онлайн и подождите минуту" : ""); }, function () { rle.d = "кэш недоступен"; }));
+            wait.push(rleCount().then(function (n) { var N = rleTotal(); rle.lvl = n >= N ? "ok" : "warn"; rle.d = n + " из " + N + " в кэше" + (n < N ? (rf.on ? " — идёт загрузка" : " — подключитесь к сети, загрузка начнётся сама") : ""); }, function () { rle.d = "не удалось проверить кэш"; }));
           } else rle.d = "в этом файле нет страниц — для офлайна держите файл «с РЛЭ»";
           var app = { k: "app", t: "Работа без сети", lvl: "ok", d: "" }; R.push(app);
           if (IS_FILE) app.d = "файл открыт с устройства — сеть не нужна";
@@ -3375,6 +3425,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           else {
             app.d = "проверяю…";
             wait.push(navigator.serviceWorker.getRegistration().then(function (reg) {
+              if (reg) return reg;
+              return Promise.race([navigator.serviceWorker.ready, new Promise(function (r) { setTimeout(function () { r(null); }, 6000); })]);
+            }).then(function (reg) {
               var ctl = !!navigator.serviceWorker.controller;
               return (window.caches ? caches.keys() : Promise.resolve([])).then(function (ks) {
                 var c = ks.filter(function (k) { return /^mi8-pak2-/.test(k); });
@@ -3409,7 +3462,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           r.warn = r.items.filter(function (x) { return x.lvl === "warn"; }).length; r.bad = r.items.filter(function (x) { return x.lvl === "bad"; }).length;
           r.lvl = r.bad ? "bad" : r.warn ? "warn" : "ok";
           return '<section class="x-mine" aria-labelledby="set-rd-h"><h3 id="set-rd-h">Готовность к офлайну</h3>' +
-            '<p class="x-ready x-ready--' + r.lvl + '" role="status" style="cursor:default">' + esc(readyLabel(r)) + "</p>" +
+            '<p class="x-ready x-ready--' + r.lvl + '" role="status" style="cursor:default">' + esc(readyLabel(r)) + "</p>" + rfHtml() +
             '<ul class="x-rdl">' + r.items.map(function (x) { return '<li class="' + x.lvl + '"><b aria-hidden="true">' + ic[x.lvl] + "</b><span>" + esc(x.t) + "</span><small>" + esc(x.d) + "</small></li>"; }).join("") + "</ul>" +
             '<div class="x-acts"><button class="x-btn" type="button" data-act="ready-recheck">Проверить снова</button>' +
             (r.items.some(function (x) { return x.k === "bk" && x.lvl !== "ok"; }) ? '<button class="x-btn" type="button" data-act="backup-share">Сохранить копию</button>' : "") +
@@ -3994,6 +4047,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           try { syncTabs(); } catch (er) {}
           renderCrumbs();
           renderList();
+          try { rfPaint(); } catch (er) {}
         }
 
         /* ---------- РЛЭ: full-screen page viewer; images come from window.MI8_RLE or rle/KEY-N.png ---------- */
