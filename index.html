@@ -1530,6 +1530,48 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       @media (prefers-reduced-motion: reduce) {
         .x-side, .x-main { transition: none !important; }
       }
+      /* v28: bookshelf + e-reader */
+      .x-shelf { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 22px; margin-top: 28px; }
+      @media (max-width: 560px) { .x-shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      .x-book { display: block; width: 100%; padding: 0; border: 0; background: none; color: var(--text-primary); text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+      .x-book:active .x-cover { transform: translateY(2px) scale(.985); }
+      .x-cover { --cv: #1f3a2a; --cv2: #12241a; position: relative; aspect-ratio: 3 / 4.2; border-radius: 3px 10px 10px 3px; overflow: hidden; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 14% 10% 10% 16%;
+        background: radial-gradient(120% 80% at 70% 20%, rgb(255 255 255 / .10), transparent 60%), linear-gradient(160deg, var(--cv), var(--cv2));
+        box-shadow: 0 18px 30px rgb(0 0 0 / .55), 0 2px 4px rgb(0 0 0 / .5), inset 0 0 0 1px rgb(255 255 255 / .06); transition: transform .2s; }
+      .x-cover::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 9%; background: linear-gradient(90deg, rgb(0 0 0 / .45), rgb(255 255 255 / .08) 55%, rgb(0 0 0 / .25)); }
+      .x-cover::after { content: ""; position: absolute; inset: 6% 6% 6% 13%; border: 1px solid rgb(214 178 94 / .45); border-radius: 2px; pointer-events: none; }
+      .x-cover--AMT { --cv: #1d2c44; --cv2: #0f1828; } .x-cover--MTV { --cv: #47201f; --cv2: #261010; }
+      .x-cover__k { font: 600 clamp(7px, 1.4vw, 10px)/1.3 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .14em; color: #d6b25e; text-transform: uppercase; }
+      .x-cover__h { margin: auto 0 6%; width: 62%; color: #d6b25e; opacity: .9; }
+      .x-cover__h svg { width: 100%; height: auto; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+      .x-cover__t { font: 700 clamp(22px, 4.6vw, 40px)/1 "DIN Condensed", "Bahnschrift", "Arial Narrow", var(--sans); letter-spacing: .04em; color: #ecd58f; text-shadow: 0 1px 0 rgb(0 0 0 / .5); }
+      .x-cover__e { margin-top: 8%; font: 500 clamp(7px, 1.3vw, 10px)/1.3 ui-monospace, Menlo, monospace; color: rgb(236 213 143 / .7); }
+      .x-cover__rib { position: absolute; right: 14%; top: -2px; width: 9%; height: 16%; background: #c0392b; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%); box-shadow: 0 2px 3px rgb(0 0 0 / .4); }
+      .x-book__m { margin-top: 12px; }
+      .x-book__m b { display: block; font: 700 18px/1.1 "DIN Condensed", "Bahnschrift", "Arial Narrow", var(--sans); text-transform: uppercase; letter-spacing: .05em; }
+      .x-book__m small { display: block; margin-top: 4px; color: var(--text-secondary); font: 12px/1.3 ui-monospace, Menlo, monospace; }
+      .x-book__bar { margin-top: 8px; height: 4px; border-radius: 2px; background: rgb(127 127 127 / .22); overflow: hidden; }
+      .x-book__bar i { display: block; height: 100%; background: var(--fill-system-green); }
+      .x-book--cur .x-cover { outline: 2px solid var(--fill-system-green); outline-offset: 4px; }
+      .x-now { display: grid; grid-template-columns: 110px 1fr; gap: 20px; align-items: center; margin-top: 26px; padding: 18px; border-radius: 14px; border: 1px solid var(--stroke-primary); background: var(--fill-tertiary); }
+      .x-now .x-cover { padding: 12% 8% 8% 14%; } .x-now .x-cover__t { font-size: 20px; } .x-now .x-cover__k, .x-now .x-cover__e { font-size: 6px; }
+      .x-now__t small { display: block; font: 600 11px/1 ui-monospace, Menlo, monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--fill-system-green); }
+      .x-now__t b { display: block; margin-top: 8px; font: 700 26px/1.05 "DIN Condensed", "Bahnschrift", "Arial Narrow", var(--sans); text-transform: uppercase; }
+      .x-now__t span { display: block; margin-top: 6px; color: var(--text-secondary); font-size: 14px; }
+      .x-now__t .x-btn { margin-top: 14px; min-height: 48px; padding: 0 20px; background: #3dff8a; color: #05140b; border-color: #3dff8a; font-weight: 700; }
+      .x-bhead { display: grid; grid-template-columns: 150px 1fr; gap: 22px; align-items: end; margin-top: 8px; }
+      @media (max-width: 480px) { .x-bhead { grid-template-columns: 110px 1fr; } }
+      .x-bhead .x-cover__t { font-size: 26px; }
+      .x-bstat { display: flex; gap: 18px; margin-top: 10px; font: 600 12px/1.3 ui-monospace, Menlo, monospace; color: var(--text-secondary); }
+      .x-bstat b { display: block; font: 700 24px/1 "DIN Condensed", "Bahnschrift", var(--sans); color: var(--text-primary); }
+      .x-rv__prog { position: absolute; left: 0; right: 0; top: 0; height: 3px; z-index: 6; pointer-events: none; }
+      .x-rv__prog i { display: block; height: 100%; background: var(--fill-system-green, #3dff8a); transition: width .25s; }
+      .x-rv__left { font: 600 12px/1 ui-monospace, Menlo, monospace; color: var(--text-secondary); white-space: nowrap; }
+      @keyframes rvInR { from { opacity: .2; transform: translateX(6%); } to { opacity: 1; transform: none; } }
+      @keyframes rvInL { from { opacity: .2; transform: translateX(-6%); } to { opacity: 1; transform: none; } }
+      .x-rv__box.is-fwd img { animation: rvInR .22s ease-out; } .x-rv__box.is-bwd img { animation: rvInL .22s ease-out; }
+      @media (prefers-reduced-motion: reduce) { .x-rv__box.is-fwd img, .x-rv__box.is-bwd img { animation: none; } }
+      .x-lib.x-home .x-lib__books { display: none; }
       /* v27: card↔RLE, RLE in search, preflight */
       .x-rq { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; }
       .x-rq button { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 18px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--fill-system-green) 45%, transparent); background: color-mix(in srgb, var(--fill-system-green) 8%, transparent); color: var(--text-primary); font: 600 16px/1.2 var(--sans); cursor: pointer; }
@@ -2644,7 +2686,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           if (quiz) quiz.show = false;
           searchMode = false; if (state.query) { qEl.value = ""; state.query = ""; }
           if (t === "home") stack = [];
-          else if (t === "rle") stack = [{ v: "libb", f: acType }];
+          else if (t === "rle") stack = [{ v: "lib" }];
           else if (t === "tablo") stack = [{ v: "tablo" }];
           else stack = [{ v: t }];
           syncHistory(true); render(); try { mainEl.scrollTop = 0; } catch (e) {}
@@ -3218,9 +3260,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
-        var APP_BUILD = "v27";
+        var APP_BUILD = "v28";
         var CHANGELOG = [
-          { v: "2026-10-12 · 27", d: "2026-10-12", items: ["Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
+          { v: "2026-10-12 · 28", d: "2026-10-12", items: ["РЛЭ как электронная книга: полка с обложками, «Читаете сейчас», процент прочитанного, закладки-ленточки", "В читалке: полоса прогресса книги, «до конца раздела N стр.», анимация перелистывания", "Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
           { v: "2026-10-12 · 20", d: "2026-10-12", items: ["Новый вид «Кабина»: тёмная тема, трафаретные заголовки, цвет по смыслу", "Нижние вкладки: Карты, РЛЭ, Табло, Учёба, Ещё", "Переключатель Ми-8Т / АМТ / МТВ на главной (запоминается)", "Чек-лист: подсветка текущего пункта и «Карта выполнена»"] },
           { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
@@ -3707,10 +3749,39 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           }).join("");
         }
         function libChangedScreens() { return SCREENS.filter(function (s) { return (s.rle || {}).changed; }); }
+        var HELI_SVG = '<svg viewBox="0 0 120 50" aria-hidden="true"><path d="M8 6h104M60 6v8"/><path d="M34 26c4-9 14-12 30-12 14 0 22 4 26 12l2 6c0 4-4 6-10 6H44c-8 0-12-4-10-12z"/><path d="M64 15v11h24M48 20h10"/><path d="M90 26h22l4-8M112 26v-6"/><path d="M42 38l-4 6h44l-4-6M50 44v-6M72 44v-6"/></svg>';
+        var COVER_T = { T: "Ми-8Т", AMT: "Ми-8АМТ", MTV: "Ми-8МТВ" };
+        function coverHtml(k) {
+          var b = LIB.books[k] || { ed: "" }, yr = (String(b.ed).match(/20\d\d/) || [""])[0];
+          return '<span class="x-cover x-cover--' + k + '" aria-hidden="true">' + (libBm.some(function (x) { return x.k === k; }) ? '<span class="x-cover__rib"></span>' : "") +
+            '<span class="x-cover__k">Руководство по лётной эксплуатации</span><span class="x-cover__h">' + HELI_SVG + '</span><span class="x-cover__t">' + (COVER_T[k] || k) + '</span><span class="x-cover__e">' + (yr ? "ред. " + yr : "") + "</span></span>";
+        }
+        function libPct(k) { var b = LIB.books[k]; return b && libLast[k] ? Math.max(1, Math.round(libLast[k] / b.n * 100)) : 0; }
+        function libStat(k) {
+          var nb = libBm.filter(function (x) { return x.k === k; }).length, nn = Object.keys(rleNotes || {}).filter(function (x) { return x.indexOf(k + "-") === 0 && rleNotes[x]; }).length;
+          return { bm: nb, nt: nn };
+        }
+        function shelfHtml() {
+          var ks = Object.keys(LIB.books), cur = acType;
+          var lastK = store.get("mi8-rle-lastk", "") || "", nowK = libLast[lastK] ? lastK : (libLast[cur] ? cur : "");
+          var html = "";
+          if (nowK) {
+            var b = LIB.books[nowK], p = libLast[nowK];
+            html += '<div class="x-now">' + coverHtml(nowK) + '<div class="x-now__t"><small>Читаете сейчас</small><b>' + esc(b.t) + "</b><span>стр. " + p + " из " + b.n + " · " + libPct(nowK) + "%" + (libSecOf(nowK, p) ? " · " + esc(libSecOf(nowK, p)) : "") + "</span>" +
+              '<button class="x-btn" type="button" data-act="lib-open" data-k="' + nowK + '" data-p="' + p + '">Продолжить чтение</button></div></div>';
+          }
+          html += '<div class="x-shelf">' + ks.map(function (k) {
+            var b = LIB.books[k], pc = libPct(k), st = libStat(k);
+            return '<button class="x-book' + (k === cur ? " x-book--cur" : "") + '" type="button" data-act="lib-book" data-k="' + k + '" aria-label="' + esc(b.t) + '">' + coverHtml(k) +
+              '<span class="x-book__m"><b>' + esc(COVER_T[k] || b.t) + "</b><small>" + b.n + " стр." + (pc ? " · " + pc + "%" : " · не начата") + (st.bm ? " · ★" + st.bm : "") + "</small>" +
+              '<span class="x-book__bar"><i style="width:' + pc + '%"></i></span></span></button>';
+          }).join("") + "</div>";
+          return html;
+        }
         function renderLib() {
           starEl.hidden = true;
-          var html = '<article class="x-lib"><p class="x-eyebrow">РЛЭ целиком</p><h2 class="x-title">Библиотека РЛЭ</h2>' +
-            '<div class="x-body"><p>Три книги РЛЭ постранично. Откройте оглавление, найдите слово по всему тексту или вернитесь к закладке. Из любой карты кнопка страницы открывает книгу на нужном месте, дальше можно листать.</p></div>' +
+          var html = '<article class="x-lib x-home"><p class="x-kick">Библиотека</p><h2 class="x-htitle">РЛЭ</h2>' + shelfHtml() +
+            '<div class="x-body" hidden><p>Три книги РЛЭ постранично. Откройте оглавление, найдите слово по всему тексту или вернитесь к закладке. Из любой карты кнопка страницы открывает книгу на нужном месте, дальше можно листать.</p></div>' +
             '<div class="x-lib__books">' + Object.keys(LIB.books).map(function (k) {
               var b = LIB.books[k];
               return '<button class="x-go x-go--btn" type="button" data-act="lib-book" data-k="' + k + '"><span class="x-go__txt">' + esc(b.t) + "<small>" + esc(b.ed) + " · " + b.n + " стр." + (libLast[k] ? " · вы остановились на стр. " + libLast[k] : "") + "</small></span></button>";
@@ -3741,8 +3812,10 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           b.toc.forEach(function (x) { var c = String(x[0]); if (!groups[c]) { groups[c] = []; order.push(c); } groups[c].push(x); });
           var focusCh = "";
           if (libTocFocus) { var sec = null; b.toc.forEach(function (x) { if (x[3] <= libTocFocus) sec = x; }); focusCh = sec ? String(sec[0]) : ""; }
-          docEl.innerHTML = '<article class="x-lib"><p class="x-eyebrow">Библиотека РЛЭ</p><h2 class="x-title">' + esc(b.t) + "</h2>" +
-            '<div class="x-body"><p>' + esc(b.ed) + " · " + b.n + " страниц PDF.</p></div>" +
+          var stt = libStat(k), pc = libPct(k);
+          docEl.innerHTML = '<article class="x-lib"><div class="x-bhead">' + coverHtml(k) + '<div><p class="x-eyebrow">Библиотека РЛЭ</p><h2 class="x-title">' + esc(b.t) + "</h2>" +
+            '<p class="x-hint" style="margin-top:6px">' + esc(b.ed) + "</p>" +
+            '<div class="x-bstat"><span><b>' + b.n + "</b>страниц</span><span><b>" + pc + "%</b>прочитано</span><span><b>" + stt.bm + "</b>закладок</span><span><b>" + stt.nt + "</b>заметок</span></div></div></div>" +
             '<div class="x-lib__row"><button class="x-btn" type="button" data-act="lib-open" data-k="' + k + '" data-p="' + (libLast[k] || 1) + '">' + (libLast[k] ? "Продолжить со стр. " + libLast[k] : "Открыть с начала") + "</button>" +
             '<input type="number" id="libpg" min="1" max="' + b.n + '" inputmode="numeric" placeholder="стр." aria-label="Номер страницы" /><button class="x-btn" type="button" data-act="lib-go" data-k="' + k + '">Перейти</button></div>' +
             order.map(function (c) {
@@ -4159,7 +4232,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           else if (e && byId[e.id]) { renderScreen(byId[e.id], e.q); app.setAttribute("data-view", "detail"); }
           else if (quizVisible() && !cabin) { renderQuiz(); app.setAttribute("data-view", "detail"); }
           else { renderHome(); app.setAttribute("data-view", cabin || !searchMode ? "detail" : "list"); }
-          backEl.disabled = (stack.length === 0 || (stack.length === 1 && /^(study|more|tablo|libb)$/.test(stack[0].v || ""))) && !quizVisible();
+          backEl.disabled = (stack.length === 0 || (stack.length === 1 && /^(study|more|tablo|libb|lib)$/.test(stack[0].v || ""))) && !quizVisible();
           app.toggleAttribute("data-root", backEl.disabled);
           try { syncTabs(); } catch (er) {}
           renderCrumbs();
@@ -4334,7 +4407,29 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           var ids = rvCardIds(); b.hidden = !ids.length; b.textContent = ids.length > 1 ? "⇄ Карты · " + ids.length : "⇄ Карта";
           rvCardsEl.hidden = true;
         }
-        var rvShow0 = rvShow; rvShow = function () { var r = rvShow0.apply(this, arguments); try { rvCardsPaint(); } catch (e) {} return r; };
+        var rvProg = document.createElement("div"); rvProg.className = "x-rv__prog"; rvProg.innerHTML = "<i></i>"; rvEl.appendChild(rvProg);
+        var rvLeft = document.createElement("span"); rvLeft.className = "x-rv__left"; try { rvSll.parentNode.insertBefore(rvLeft, rvSll.nextSibling); } catch (e) {}
+        var rvPrevP = 0, rvPrevK = "";
+        function rvChapLeft(k, p) {
+          var b = LIB.books[k]; if (!b) return "";
+          var nx = 0; b.toc.forEach(function (x) { if (x[3] > p && (!nx || x[3] < nx)) nx = x[3]; });
+          var left = (nx || b.n + 1) - p - 1;
+          return left > 0 ? "до конца раздела " + left + " стр." : "последняя стр. раздела";
+        }
+        var rvShow0 = rvShow; rvShow = function () {
+          var r = rvShow0.apply(this, arguments);
+          try {
+            rvCardsPaint();
+            var k = rv.src.key, p = rv.p;
+            rvProg.firstChild.style.width = (rv.n ? Math.round(p / rv.n * 100) : 0) + "%";
+            rvLeft.textContent = rvChapLeft(k, p);
+            store.set("mi8-rle-lastk", k);
+            rvBox.classList.remove("is-fwd", "is-bwd");
+            if (rvPrevK === k && rvPrevP && rvPrevP !== p && Math.abs(p - rvPrevP) <= 2) { void rvBox.offsetWidth; rvBox.classList.add(p > rvPrevP ? "is-fwd" : "is-bwd"); }
+            rvPrevK = k; rvPrevP = p;
+          } catch (e) {}
+          return r;
+        };
         function rvGoCard(id) {
           rvCardsEl.hidden = true; rvClose(false);
           setTimeout(function () { open(id, "", false); }, 350);
