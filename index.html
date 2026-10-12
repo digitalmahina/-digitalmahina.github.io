@@ -3264,9 +3264,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
-        var APP_BUILD = "v30";
+        var APP_BUILD = "v31";
         var CHANGELOG = [
-          { v: "2026-10-12 · 30", d: "2026-10-12", items: ["РЛЭ как электронная книга: полка с обложками, «Читаете сейчас», процент прочитанного, закладки-ленточки", "В читалке: полоса прогресса книги, «до конца раздела N стр.», анимация перелистывания", "Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
+          { v: "2026-10-12 · 31", d: "2026-10-12", items: ["Плотность текста в РЛЭ (кнопка Aa): «Чётче» по умолчанию и «Жирнее» для мелкого шрифта", "РЛЭ как электронная книга: полка с обложками, «Читаете сейчас», процент прочитанного, закладки-ленточки", "В читалке: полоса прогресса книги, «до конца раздела N стр.», анимация перелистывания", "Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
           { v: "2026-10-12 · 20", d: "2026-10-12", items: ["Новый вид «Кабина»: тёмная тема, трафаретные заголовки, цвет по смыслу", "Нижние вкладки: Карты, РЛЭ, Табло, Учёба, Ещё", "Переключатель Ми-8Т / АМТ / МТВ на главной (запоминается)", "Чек-лист: подсветка текущего пункта и «Карта выполнена»"] },
           { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
@@ -4252,7 +4252,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           rvPop = document.getElementById("rv-pop"), rvGrid = document.getElementById("rv-grid"), rvGBody = document.getElementById("rv-gbody"),
           rvToastEl = document.getElementById("rv-toast"), rvBackBtn = document.getElementById("rv-back");
         var rvPref = store.get("mi8-rle-view", {}) || {};
-        if (!rvPref.rm) rvPref.rm = "auto"; if (!rvPref.fit) rvPref.fit = "w"; if (rvPref.spread == null) rvPref.spread = true; if (rvPref.wake == null) rvPref.wake = true;
+        if (!rvPref.rm) rvPref.rm = "auto"; if (!rvPref.fit) rvPref.fit = "w"; if (rvPref.spread == null) rvPref.spread = true; if (rvPref.wake == null) rvPref.wake = true; if (rvPref.ink == null) rvPref.ink = "1";
         var rleNotes = store.get("mi8-rle-notes", {}) || {};
         function rvPrefSave() { store.set("mi8-rle-view", rvPref); }
         function rvSrcOf(k) { return (window.MI8_RLE && window.MI8_RLE[k]) || ("rle/" + k + ".webp"); }
@@ -4285,6 +4285,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           var last = rv.hist.length ? rv.hist[rv.hist.length - 1] : 0;
           rvBackBtn.hidden = !last; rvBackBtn.textContent = last ? "← " + last : "←"; rvBackBtn.setAttribute("aria-label", "Вернуться на стр. " + last);
           rvEl.setAttribute("data-rm", rvPref.rm === "auto" ? "" : rvPref.rm);
+          rvInk();
           rvZoom(0);
           try { var nx = new Image(); nx.src = rvSrcOf(src.key + "-" + (p + (sp ? 2 : 1))); } catch (e) {}
         }
@@ -4299,11 +4300,23 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           rvEl.querySelector('[data-act="rv-zout"]').disabled = rv.z <= 100;
           rvEl.querySelector('[data-act="rv-zin"]').disabled = rv.z >= 300;
         }
+        function rvInk() {
+          var pg = document.getElementById("rv-pages"); if (!pg) return;
+          if (!document.getElementById("rv-ink-svg")) {
+            var d = document.createElement("div"); d.id = "rv-ink-svg"; d.setAttribute("aria-hidden", "true"); d.style.cssText = "position:absolute;width:0;height:0;overflow:hidden";
+            d.innerHTML = '<svg width="0" height="0"><filter id="rvInkE" color-interpolation-filters="sRGB"><feMorphology operator="erode" radius="0.6"/></filter><filter id="rvInkD" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.6"/></filter></svg>';
+            document.body.appendChild(d);
+          }
+          var inv = false; try { inv = /invert/.test(getComputedStyle(rvImg).filter || ""); } catch (e) {}
+          var lv = String(rvPref.ink);
+          pg.style.filter = lv === "2" ? "url(#" + (inv ? "rvInkD" : "rvInkE") + ") contrast(1.5)" : lv === "1" ? "contrast(1.4)" : "";
+        }
         function rvSegHtml(name, cur, opts) {
           return '<div class="x-rv__seg">' + opts.map(function (o) { return '<button type="button" data-act="rv-set" data-k="' + name + '" data-v="' + o[0] + '" aria-pressed="' + (String(cur) === String(o[0])) + '">' + o[1] + "</button>"; }).join("") + "</div>";
         }
         function rvAaRender() {
           rvPop.innerHTML = "<h4>Режим чтения</h4>" + rvSegHtml("rm", rvPref.rm, [["auto", "Как тема"], ["paper", "Бумага"], ["sepia", "Сепия"], ["dark", "Тёмный"], ["night", "Ночь"]]) +
+            "<h4>Плотность текста</h4>" + rvSegHtml("ink", rvPref.ink, [["0", "Как в скане"], ["1", "Чётче"], ["2", "Жирнее"]]) +
             "<h4>Масштаб · " + rv.z + "%</h4>" + rvSegHtml("fit", rvPref.fit, [["w", "По ширине"], ["p", "Страница целиком"]]) +
             '<div class="x-rv__seg" style="margin-top:6px"><button type="button" data-act="rv-zout2">− Меньше</button><button type="button" data-act="rv-zin2">+ Больше</button></div>' +
             "<h4>Горизонтально</h4>" + rvSegHtml("spread", rvPref.spread, [[true, "Разворот 2 стр."], [false, "Одна страница"]]) +
