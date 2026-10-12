@@ -1530,6 +1530,29 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       @media (prefers-reduced-motion: reduce) {
         .x-side, .x-main { transition: none !important; }
       }
+      /* v27: card↔RLE, RLE in search, preflight */
+      .x-rq { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 4px; }
+      .x-rq button { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 18px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--fill-system-green) 45%, transparent); background: color-mix(in srgb, var(--fill-system-green) 8%, transparent); color: var(--text-primary); font: 600 16px/1.2 var(--sans); cursor: pointer; }
+      .x-rq button svg { width: 22px; height: 22px; fill: none; stroke: var(--fill-system-green); stroke-width: 2; }
+      .x-rq button small { color: var(--text-secondary); font: 600 13px/1 ui-monospace, "SF Mono", Menlo, monospace; }
+      .x-rv__cards { position: absolute; right: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 76px); z-index: 30; width: min(420px, calc(100vw - 24px)); max-height: 50vh; overflow: auto; padding: 8px; border-radius: 14px; background: var(--mat-agent, #111); border: 1px solid var(--stroke-primary); box-shadow: 0 12px 40px rgb(0 0 0 / .5); }
+      .x-rv__cards[hidden] { display: none; }
+      .x-rv__cards button { display: block; width: 100%; text-align: left; min-height: 48px; padding: 10px 12px; border: 0; border-radius: 10px; background: none; color: var(--text-primary); font: 600 15px/1.3 var(--sans); cursor: pointer; }
+      .x-rv__cards button small { display: block; color: var(--text-secondary); font-weight: 400; font-size: 12px; }
+      .x-rv__cards button:active { background: var(--hover-wash); }
+      .x-pre__st { margin-top: 24px; padding: 22px; border-radius: 14px; border: 1px solid var(--stroke-primary); font: 700 30px/1 "DIN Condensed", "Bahnschrift", "Arial Narrow", var(--sans); text-transform: uppercase; letter-spacing: .06em; }
+      .x-pre__st small { display: block; margin-top: 8px; font: 500 14px/1.3 var(--sans); text-transform: none; letter-spacing: 0; color: var(--text-secondary); }
+      .x-pre__st--ok { color: #05140b; background: #3dff8a; border-color: #3dff8a; } .x-pre__st--ok small { color: #0b2a17; }
+      .x-pre__st--warn { color: #ffb000; border-color: color-mix(in srgb, #ffb000 55%, transparent); background: color-mix(in srgb, #ffb000 8%, transparent); }
+      .x-pre ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+      .x-pre li label, .x-pre li > div { display: grid; grid-template-columns: 34px 1fr; gap: 2px 12px; align-items: center; min-height: 60px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--stroke-primary); background: var(--fill-tertiary); cursor: pointer; }
+      .x-pre input { width: 26px; height: 26px; accent-color: #3dff8a; margin: 0; }
+      .x-pre li b { grid-row: span 2; font-size: 20px; text-align: center; }
+      .x-pre li .ok b { color: #3dff8a; } .x-pre li .warn b { color: #ffb000; } .x-pre li .bad b { color: #ff3b30; }
+      .x-pre li span { font-weight: 600; } .x-pre li small { grid-column: 2; color: var(--text-secondary); font-size: 13px; }
+      .x-pre li label:has(input:checked) { border-color: color-mix(in srgb, #3dff8a 50%, transparent); }
+      .x-fly--pre .x-fly__ic { background: #ffb000; color: #140c00; }
+      .x-item--rle .x-item__cat { color: var(--fill-system-green); }
       /* v26: air + carbon visible */
       :root[data-theme="cab"] .x-main { background: transparent; }
       :root[data-theme="cab"] .x-bar { border-bottom-color: transparent; }
@@ -1724,6 +1747,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           <span class="x-rv__sll" id="rv-sll"></span>
           <button class="x-btn" type="button" data-act="rv-note" aria-pressed="false" aria-label="Заметка к странице">✎</button>
           <button class="x-btn" type="button" data-act="rv-grid" aria-label="Страницы и закладки">▦</button>
+          <button class="x-btn" type="button" data-act="rv-cards" id="rv-cards" hidden aria-label="Карты на этой странице">⇄ Карта</button>
         </div>
         <div class="x-rv__pop" id="rv-pop" hidden></div>
         <div class="x-rv__grid" id="rv-grid" hidden>
@@ -2034,6 +2058,24 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
               return '<span class="x-rle__src">' + esc([x.man, x.section, x.pdf && x.pdf.length && !x.key ? "стр. PDF " + fmtPages(x.pdf) : ""].filter(Boolean).join(" · ")) + pg + "<small>файл: " + esc(x.file) + "</small></span>";
             }).join("") + '</summary><p class="x-rle__m">' + esc(RLE_INFO.method || "") + (RLE_INFO.checked ? " Дата сверки: " + esc(RLE_INFO.checked) + "." : "") + (RLE_INFO.updated ? " " + esc(RLE_INFO.updated) : "") + "</p></details>" + chg;
         }
+        var BOOK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M8 7h8M8 10.5h6"/></svg>';
+        function rleQuick(s) {
+          var seen = {}, out = [];
+          (rleOf(s).sources || []).forEach(function (x, si) {
+            if (!x.key || !x.pdf || !x.pdf.length || seen[x.key]) return; seen[x.key] = 1;
+            var a = x.pdf.slice().sort(function (m, n) { return m - n; });
+            out.push('<button type="button" data-act="rv-open" data-sid="' + esc(s.id) + '" data-si="' + si + '" data-p="' + a[0] + '">' + BOOK_SVG + "<span>" + esc(x.man) + " <small>стр. " + esc(fmtPages(a)) + "</small></span></button>");
+          });
+          return out.length ? '<div class="x-rq" role="group" aria-label="Открыть в РЛЭ">' + out.join("") + "</div>" : "";
+        }
+        var pgScrMap = null;
+        function pgScr(k, p) {
+          if (!pgScrMap) {
+            pgScrMap = {};
+            SCREENS.forEach(function (s) { (rleOf(s).sources || []).forEach(function (x) { if (x.key && x.pdf) x.pdf.forEach(function (q) { var kk = x.key + "-" + q; (pgScrMap[kk] = pgScrMap[kk] || []).indexOf(s.id) < 0 && pgScrMap[kk].push(s.id); }); }); });
+          }
+          return pgScrMap[k + "-" + p] || [];
+        }
         function rleWrap(html, i, r) {
           if (!r) return html;
           var f = (r.flags || []).indexOf(i) >= 0, n = (r.numflags || {})[i];
@@ -2181,7 +2223,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         window.mi8CurScreen = function () { var e = currentEntry(); return !e ? "home" : e.v ? e.v + (e.id ? ":" + e.id : e.f ? ":" + e.f : "") : e.id; };
         function syncHistory(push) {
           var e = currentEntry();
-          var hash = !e ? "#" : e.v === "pairs" ? "#compare" : e.v === "set" ? "#settings" : e.v === "new" ? "#new" : e.v === "rle" ? "#rle~" + e.f : e.v === "verify" ? "#verify" : e.v === "study" ? "#study" : e.v === "more" ? "#more" : e.v === "lib" ? "#rle-lib" : e.v === "libb" ? "#rle-lib~" + e.f : e.v === "tablo" ? "#tablo" : e.v === "tlE" ? "#tablo-edit" : e.v === "vrev" ? "#verify~" + encodeURIComponent(e.id) : e.v === "cmp" ? "#" + encodeURIComponent(e.id) + "~cmp" : "#" + encodeURIComponent(e.id) + (e.q ? "?q=" + encodeURIComponent(e.q) : "");
+          var hash = !e ? "#" : e.v === "pairs" ? "#compare" : e.v === "set" ? "#settings" : e.v === "new" ? "#new" : e.v === "rle" ? "#rle~" + e.f : e.v === "verify" ? "#verify" : e.v === "study" ? "#study" : e.v === "more" ? "#more" : e.v === "pre" ? "#preflight" : e.v === "lib" ? "#rle-lib" : e.v === "libb" ? "#rle-lib~" + e.f : e.v === "tablo" ? "#tablo" : e.v === "tlE" ? "#tablo-edit" : e.v === "vrev" ? "#verify~" + encodeURIComponent(e.id) : e.v === "cmp" ? "#" + encodeURIComponent(e.id) + "~cmp" : "#" + encodeURIComponent(e.id) + (e.q ? "?q=" + encodeURIComponent(e.q) : "");
           try {
             if (push) history.pushState({ depth: stack.length }, "", hash);
             else history.replaceState({ depth: stack.length }, "", hash);
@@ -2270,6 +2312,21 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           res.sort(function (a, b) { return a.rank - b.rank || a.s.title.localeCompare(b.s.title, "ru"); });
           return res;
         }
+        var rqCache = { q: null, r: null };
+        function rleHitsHtml(q) {
+          if (q.length < 3 || IS_FILE && !window.MI8_TXT) return "";
+          if (!window.MI8_TXT) {
+            if (libTxtState === "fail") return "";
+            if (libTxtState !== "loading") libLoadTxt(function () { if (state.query === q) renderList(); });
+            return '<p class="x-list__head">В тексте РЛЭ</p><p class="x-empty">Ищу в тексте РЛЭ…</p>';
+          }
+          if (rqCache.q !== q) { rqCache.q = q; rqCache.r = libSearch(q); }
+          var r = rqCache.r; if (!r.hits.length) return '<p class="x-list__head">В тексте РЛЭ · 0</p>';
+          var pref = acType === "T" ? "T" : acType, hits = r.hits.slice().sort(function (a, b) { return (a.k === pref ? 0 : 1) - (b.k === pref ? 0 : 1); }).slice(0, 15);
+          return '<p class="x-list__head">В тексте РЛЭ · ' + r.total + (r.total > hits.length ? ", первые " + hits.length : "") + "</p>" + hits.map(function (h) {
+            return '<a class="x-item x-item--rle" role="listitem" href="#" data-act="lib-open" data-k="' + h.k + '" data-p="' + h.p + '"><span class="x-item__cat">' + esc(libTitle(h.k)) + " · стр. " + h.p + '</span><span class="x-item__title">' + esc(libSecOf(h.k, h.p) || "Страница " + h.p) + '</span><span class="x-item__snip">' + hl(h.snip, r.ts) + "</span></a>";
+          }).join("");
+        }
         function renderList() {
           var html = "", curId = currentEntry() ? currentEntry().id : "";
           if (state.query) {
@@ -2284,7 +2341,8 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
                 '<span class="x-item__title">' + hl(s.title, ts) + rdot(s.id) + flag(s.id) + "</span>" +
                 '<span class="x-item__snip">' + (r.note ? noteSnippet(notes[s.id].text, ts) : snippet(s, ts)) + "</span></a>";
             }).join("");
-            if (!items.length) html += '<p class="x-empty">Ничего не найдено. Попробуйте другое слово или его часть.</p>';
+            if (!items.length) html += '<p class="x-empty">Ничего не найдено в картах. Попробуйте другое слово или его часть.</p>';
+            html += rleHitsHtml(state.query);
           } else {
             var menu = menuLevel();
             if (menu) {
@@ -2560,6 +2618,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           lamp: '<rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M7 10h10M7 14h6"/>',
           cap: '<path d="M2 9.5 12 5l10 4.5L12 14z"/><path d="M6 11.5V16c3.5 2.5 8.5 2.5 12 0v-4.5"/>',
           more: '<circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/>',
+          check: '<rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="m8 12 3 3 5-6"/>',
           plane: '<path d="M21 15.5 13.5 11V5a1.5 1.5 0 0 0-3 0v6L3 15.5V18l7.5-2.5V20L8 21.5V23l4-1 4 1v-1.5L13.5 20v-4.5L21 18z"/>'
         };
         function svgI(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + SVG[n] + "</svg>"; }
@@ -2609,7 +2668,8 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
               '<span class="x-tile__top"><span class="x-tile__ic">' + svgI(c[1]) + '</span><span class="x-tile__no">0' + (i + 1) + "</span></span>" +
               '<span class="x-tile__t">' + esc(tileName(it.text)) + "</span><small>" + c[2] + "</small></a>";
           });
-          html += "</div>" + '<button class="x-fly" type="button" data-act="cabin"><span class="x-fly__ic">' + svgI("plane") + '</span><span class="x-fly__t">Режим «В полёт»<small>Крупные кнопки, таймеры, экран не гаснет</small></span><span aria-hidden="true">›</span></button>';
+          html += "</div>" + '<button class="x-fly" type="button" data-act="cabin"><span class="x-fly__ic">' + svgI("plane") + '</span><span class="x-fly__t">Режим «В полёт»<small>Крупные кнопки, таймеры, экран не гаснет</small></span><span aria-hidden="true">›</span></button>' +
+            '<button class="x-fly x-fly--pre" type="button" data-act="pre"><span class="x-fly__ic">' + svgI("check") + '</span><span class="x-fly__t">Перед вылетом<small>' + esc(preSummary()) + '</small></span><span aria-hidden="true">›</span></button>';
           var d = dailyIds(), due = d.due.length + d.fresh.length;
           if (due && srsMeta.last !== dayStr()) html += '<button class="x-attn" type="button" data-act="quiz-daily"><b>' + due + "</b><span>Повторение на сегодня<small>Нажмите, чтобы начать</small></span><span aria-hidden=\"true\">›</span></button>";
           if (recent.length) html += '<h3 class="x-sec">Недавние</h3><div class="x-chips">' + recent.slice(0, 8).map(function (id) { var s = byId[id]; return s ? '<a class="x-chip" data-open="' + esc(id) + '" href="#' + encodeURIComponent(id) + '"><small>' + esc(branchName(id) || "") + "</small>" + esc(s.title) + "</a>" : ""; }).join("") + "</div>";
@@ -2618,6 +2678,42 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           docEl.innerHTML = html;
           mainEl.scrollTop = 0; rfPaint();
         }
+        var PRE_ITEMS = [["bat", "Заряд iPad не ниже 80 %", "и кабель / пауэрбанк в сумке"], ["air", "Проверка в авиарежиме", "авиарежим → закрыть и открыть приложение → открываются карта и страница РЛЭ"], ["type", "Тип вертолёта выбран верно", ""], ["scr", "Автоблокировка и яркость", "в полёте включите режим «В полёт», экран не гаснет"]];
+        function preState() { var o = store.get("mi8.pre", null); if (!o || o.d !== dayStr()) o = { d: dayStr(), c: {} }; return o; }
+        function preSummary() {
+          var o = preState(), n = PRE_ITEMS.filter(function (x) { return o.c[x[0]]; }).length;
+          var auto = rdCache ? rdCache.lvl === "ok" : null;
+          if (n === PRE_ITEMS.length && auto) return "Готов к вылету · проверено сегодня";
+          return "Отмечено " + n + " из " + PRE_ITEMS.length + (auto === false ? " · офлайн не готов" : "");
+        }
+        function renderPre() {
+          starEl.hidden = true;
+          if (!rdCache) readyCheck(function () { var e = currentEntry(); if (e && e.v === "pre") renderPre(); });
+          var o = preState(), ic = { ok: "✓", warn: "!", bad: "✕" }, items = rdCache ? rdCache.items : [];
+          var nMan = PRE_ITEMS.filter(function (x) { return o.c[x[0]]; }).length, autoOk = rdCache && rdCache.lvl === "ok";
+          var ok = autoOk && nMan === PRE_ITEMS.length;
+          var tname = (TYPES.filter(function (t) { return t[0] === acType; })[0] || ["", ""])[1];
+          var html = '<article class="x-home x-pre"><p class="x-kick">Подготовка</p><h2 class="x-htitle">Перед вылетом</h2>' +
+            '<div class="x-pre__st x-pre__st--' + (ok ? "ok" : "warn") + '" role="status">' + (ok ? "Готов к вылету" : "Не всё проверено") +
+            "<small>" + (ok ? "Всё скачано, офлайн работает, пункты отмечены сегодня." : (!rdCache ? "Проверяю офлайн-готовность…" : (autoOk ? "Офлайн готов. " : "Офлайн: есть замечания. ") + "Отмечено " + nMan + " из " + PRE_ITEMS.length + ".")) + "</small></div>" +
+            '<h3 class="x-sec">Офлайн · проверяется само</h3>' + rfHtml() +
+            "<ul>" + (items.length ? items.map(function (x) { return '<li><div class="' + x.lvl + '"><b aria-hidden="true">' + ic[x.lvl] + "</b><span>" + esc(x.t) + "</span><small>" + esc(x.d) + "</small></div></li>"; }).join("") : '<li><div class="warn"><b>…</b><span>Проверяю</span><small></small></div></li>') + "</ul>" +
+            '<h3 class="x-sec">Отметьте сами · сбрасывается каждый день</h3><ul>' + PRE_ITEMS.map(function (x) {
+              var d = x[0] === "type" ? "сейчас: " + tname : x[2];
+              return '<li><label><input type="checkbox" data-pre="' + x[0] + '"' + (o.c[x[0]] ? " checked" : "") + " /><span>" + esc(x[1]) + "</span><small>" + esc(d) + "</small></label></li>";
+            }).join("") + "</ul>" +
+            '<div class="x-acts" style="margin-top:24px"><button class="x-btn" type="button" data-act="pre-recheck">Проверить снова</button>' +
+            (items.some(function (x) { return x.k === "bk" && x.lvl !== "ok"; }) ? '<button class="x-btn" type="button" data-act="backup-share">Сохранить копию</button>' : "") +
+            (items.some(function (x) { return x.fix; }) ? '<button class="x-btn" type="button" data-act="persist">Защитить данные</button>' : "") +
+            '<button class="x-btn" type="button" data-act="cabin">Режим «В полёт»</button><button class="x-btn x-btn--quiet" type="button" data-act="pre-reset">Сбросить отметки</button></div>' +
+            '<p class="fineprint" style="margin-top:28px">Это личная памятка, она не заменяет предполётную подготовку по документам.</p></article>';
+          var y = mainEl.scrollTop; docEl.innerHTML = html; mainEl.scrollTop = y; try { rfPaint(); } catch (er) {}
+        }
+        document.addEventListener("change", function (e) {
+          var t = e.target; if (!t || !t.getAttribute || !t.hasAttribute("data-pre")) return;
+          var o = preState(); if (t.checked) o.c[t.getAttribute("data-pre")] = 1; else delete o.c[t.getAttribute("data-pre")];
+          store.set("mi8.pre", o); renderPre();
+        });
         function renderStudy() {
           starEl.hidden = true;
           var html = '<article class="x-home"><p class="x-kick">Подготовка</p><h2 class="x-htitle">Учёба</h2>' + srsTile() +
@@ -2637,7 +2733,8 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
             '<h3 class="x-sec">Данные</h3><div class="x-glist">' +
             '<button class="x-go x-go--btn" type="button" data-act="sheet"><span class="x-go__txt">Мои данные<small>Резервная копия, экспорт и импорт</small></span></button>' +
             '<a class="x-go" href="#settings" data-act="settings">Настройки и готовность к офлайну</a>' +
-            '<a class="x-go" href="#new" data-act="news">Что нового</a></div>' + renderNotesHome() +
+            '<a class="x-go" href="#new" data-act="news">Что нового</a>' +
+            '<a class="x-go" href="#preflight" data-act="pre">Перед вылетом</a></div>' + renderNotesHome() +
             '<p class="fineprint" style="margin-top:28px">Неофициальная памятка по структуре приложения Ми-8 ПАК2. Сверяйте с действующим РЛЭ. Версия ' + esc(APP_VERSION) + "</p></article>";
           docEl.innerHTML = html; mainEl.scrollTop = 0;
         }
@@ -2646,7 +2743,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           var over = s.menuLabel && s.menuLabel !== s.title ? s.menuLabel : "";
           var html = '<article>' +
             '<p class="x-eyebrow">' + esc(branchName(s.id) || "Экран") + (over ? " · " + esc(over) : "") + "</p>" +
-            '<h2 class="x-title' + (s.tc ? " oc-t-" + esc(s.tc) : "") + '">' + hl(s.title, ts) + "</h2>" + rleCard(s) + durChips(s) +
+            '<h2 class="x-title' + (s.tc ? " oc-t-" + esc(s.tc) : "") + '">' + hl(s.title, ts) + "</h2>" + rleQuick(s) + rleCard(s) + durChips(s) +
             '<div class="x-studybar" id="studybar"></div>' +
             '<div id="note-area"></div>' +
             (q ? '<p class="x-hits" id="hits"></p>' : "") +
@@ -3121,9 +3218,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
 
         /* ---------- settings: error log, repair, storage, backup reminder ---------- */
         /* ---------- что нового: newest first; the first label is the current version ---------- */
-        var APP_BUILD = "v26";
+        var APP_BUILD = "v27";
         var CHANGELOG = [
-          { v: "2026-10-12 · 26", d: "2026-10-12", items: ["Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
+          { v: "2026-10-12 · 27", d: "2026-10-12", items: ["Кнопка «РЛЭ · стр.» сразу под заголовком карты; в РЛЭ кнопка «⇄ Карта» ведёт к картам этой страницы", "Поиск ищет и в картах, и в тексте РЛЭ", "Экран «Перед вылетом»: офлайн-проверка + личный чек-лист на день", "Полоса загрузки РЛЭ для офлайна с процентами", "Проверка готовности считает все 3186 страниц РЛЭ и ждёт запуска офлайн-кэша", "Страницы РЛЭ АМТ и МТВ перерисованы с белым фоном"] },
           { v: "2026-10-12 · 20", d: "2026-10-12", items: ["Новый вид «Кабина»: тёмная тема, трафаретные заголовки, цвет по смыслу", "Нижние вкладки: Карты, РЛЭ, Табло, Учёба, Ещё", "Переключатель Ми-8Т / АМТ / МТВ на главной (запоминается)", "Чек-лист: подсветка текущего пункта и «Карта выполнена»"] },
           { v: "2026-10-12 · 12", d: "2026-10-12", items: ["Верхняя панель РЛЭ ниже и не залезает под часы; крупный ✕", "Листание и номер страницы перенесены вниз, масштаб — в «Aa»", "Приложение само сообщает о новой версии: кнопка «Обновить»"] },
           { v: "2026-10-12 · 11", d: "2026-10-12", items: ["РЛЭ как электронная книга: касание края — листать, середины — полный экран, свайп, двойное касание — увеличить", "Ползунок по всей книге с названием раздела и кнопка «← вернуться» после перехода", "Режимы чтения: Бумага, Сепия, Тёмный, Ночь; «Страница целиком»; разворот на 2 страницы в горизонтальном положении; экран не гаснет", "Миниатюры всех страниц, список закладок и заметок к страницам (✎), они попадают в экспорт", "Страницы РЛЭ Ми-8 перерисованы чётче: серый текст таблиц больше не пропадает"] },
@@ -3488,6 +3585,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
         SET_ACTS["backup-share"] = backupShare;
         SET_ACTS["undo-import"] = undoImport;
         SET_ACTS["ready-recheck"] = function () { rdCache = null; setKeep(); };
+        SET_ACTS.pre = function () { var e = currentEntry(); if (e && e.v === "pre") render(); else openView({ v: "pre" }); };
+        SET_ACTS["pre-reset"] = function () { store.set("mi8.pre", { d: dayStr(), c: {} }); renderPre(); };
+        SET_ACTS["pre-recheck"] = function () { rdCache = null; renderPre(); };
 
         /* ---------- режим «Кабина»: home, toggle, wake lock ---------- */
         var IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -4044,6 +4144,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           docEl.classList.toggle("x-doc--wide", !!e && (e.v === "cmp" || e.v === "vrev"));
           if (e && e.v === "study") { renderStudy(); app.setAttribute("data-view", "detail"); }
           else if (e && e.v === "more") { renderMore(); app.setAttribute("data-view", "detail"); }
+          else if (e && e.v === "pre") { renderPre(); app.setAttribute("data-view", "detail"); }
           else if (e && e.v === "set") { renderSettings(); app.setAttribute("data-view", "detail"); }
           else if (e && e.v === "new") { renderNews(); app.setAttribute("data-view", "detail"); }
           else if (e && e.v === "pairs") { renderPairs(); app.setAttribute("data-view", "detail"); }
@@ -4221,7 +4322,32 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
           try { if (rvRet && document.contains(rvRet)) rvRet.focus(); } catch (e) {}
           rvRet = null;
         }
+        var rvCardsEl = document.createElement("div"); rvCardsEl.className = "x-rv__cards"; rvCardsEl.hidden = true; rvEl.appendChild(rvCardsEl);
+        function rvCardIds() {
+          if (!rv || !rv.src) return [];
+          var ids = pgScr(rv.src.key, rv.p);
+          if (!rvImg2.hidden) ids = ids.concat(pgScr(rv.src.key, rv.p + 1).filter(function (x) { return ids.indexOf(x) < 0; }));
+          return ids;
+        }
+        function rvCardsPaint() {
+          var b = document.getElementById("rv-cards"); if (!b) return;
+          var ids = rvCardIds(); b.hidden = !ids.length; b.textContent = ids.length > 1 ? "⇄ Карты · " + ids.length : "⇄ Карта";
+          rvCardsEl.hidden = true;
+        }
+        var rvShow0 = rvShow; rvShow = function () { var r = rvShow0.apply(this, arguments); try { rvCardsPaint(); } catch (e) {} return r; };
+        function rvGoCard(id) {
+          rvCardsEl.hidden = true; rvClose(false);
+          setTimeout(function () { open(id, "", false); }, 350);
+        }
         var RV_ACTS = {
+          "rv-cards": function () {
+            var ids = rvCardIds(); if (!ids.length) return;
+            if (ids.length === 1) { rvGoCard(ids[0]); return; }
+            if (!rvCardsEl.hidden) { rvCardsEl.hidden = true; return; }
+            rvCardsEl.innerHTML = ids.map(function (id) { var s = byId[id]; return s ? '<button type="button" data-act="rv-card" data-id="' + esc(id) + '">' + esc(s.title) + "<small>" + esc(branchName(id) || "") + "</small></button>" : ""; }).join("");
+            rvCardsEl.hidden = false;
+          },
+          "rv-card": function (b) { rvGoCard(b.getAttribute("data-id")); },
           "rv-open": rvOpen,
           "rv-close": function () { rvClose(false); },
           "rv-prev": function () { rvStep(-1); },
@@ -4709,6 +4835,7 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
             var cid = id.replace(/~cmp$/, ""), cp0 = pairOf[cid];
             if (id === "study" || id === "more") stack.push({ v: id });
             else if (id === "compare") stack.push({ v: "pairs" });
+            else if (id === "preflight") stack.push({ v: "pre" });
             else if (id === "settings") stack.push({ v: "set" });
             else if (id === "tablo" && !byId.tablo) stack.push({ v: "tablo" });
             else if (id === "rle-lib") stack.push({ v: "lib" });
