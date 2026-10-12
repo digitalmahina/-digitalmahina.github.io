@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a5470"/><stop offset="0.55" stop-color="#12304a"/><stop offset="1" stop-color="#081826"/></linearGradient>
+<linearGradient id="hl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d4e3ee"/></linearGradient>
+</defs>
+<rect width="512" height="512" fill="url(#bg)"/>
+
+<g transform="translate(256 232) scale(0.88) translate(-262 -250)"><g fill="url(#hl)">
+ <!-- main rotor -->
+ <path d="M40 176 Q256 160 472 176 L472 183 Q256 172 40 183 Z"/>
+ <rect x="236" y="178" width="16" height="22" rx="4"/>
+ <!-- fuselage + engine hump + tail boom + fin -->
+ <path d="M70 262
+   C72 236 92 222 118 220
+   L170 214 C180 200 196 196 214 196 L292 196 C312 196 324 204 330 216
+   L350 226 L452 222 L462 192 L476 192 L474 246
+   L452 248 L350 262
+   C344 286 330 300 300 304 L120 304 C92 304 70 290 70 262 Z"/>
+</g>
+<!-- cockpit glazing -->
+<path d="M82 258 C84 242 98 234 116 232 L150 230 L150 258 Z" fill="#12304a"/>
+<!-- cabin windows -->
+<g fill="#12304a"><circle cx="190" cy="252" r="9"/><circle cx="222" cy="252" r="9"/><circle cx="254" cy="252" r="9"/><circle cx="286" cy="252" r="9"/></g>
+<!-- tail rotor -->
+<circle cx="466" cy="232" r="22" fill="none" stroke="#ffffff" stroke-opacity="0.6" stroke-width="4"/>
+<!-- gear -->
+<g fill="#d4e3ee"><rect x="117" y="300" width="8" height="14"/><circle cx="121" cy="326" r="15"/><rect x="268" y="300" width="10" height="14"/><circle cx="273" cy="326" r="16"/></g><g fill="#12304a"><circle cx="121" cy="326" r="5"/><circle cx="273" cy="326" r="5.5"/></g></g>
+<!-- title -->
+<text x="256" y="420" text-anchor="middle" font-family="DejaVu Sans, Helvetica, Arial, sans-serif" font-size="74" font-weight="700" fill="#ffffff" letter-spacing="1">Ми-8</text>
+<rect x="196" y="446" width="120" height="10" rx="5" fill="#ff5a3c"/>
+</svg>
