@@ -36,6 +36,8 @@ mark{background:var(--hl);color:inherit}mark.cur{outline:2px solid var(--acc)}
 .snip{font-size:14px;color:var(--mut);margin-top:6px}.snip b{color:var(--fg);background:var(--hl)}
 dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--fg);max-width:92vw;width:640px;max-height:80vh}
 .hidden{display:none!important}
+.seg{display:flex;gap:6px;margin-bottom:8px}.seg button{flex:1}.seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.jump{background:#0284c71f;outline:2px solid var(--acc);border-radius:6px}
 </style>
 </head>
 <body>
@@ -43,6 +45,7 @@ dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);co
 <main id="view"></main>
 <nav class="tabs"><button data-tab="docs" class="on">Документы</button><button data-tab="fav">Избранное</button><button data-tab="search">Поиск</button><button data-tab="updates">Обновления</button><button data-tab="about">О базе</button></nav>
 <dialog id="tocDlg"><div id="tocBody" class="toc"></div><p><button onclick="tocDlg.close()">Закрыть</button></p></dialog>
+<script src="sem.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
