@@ -14,6 +14,14 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y poppler-utils
       - name: Сбор текстов с favt.gov.ru и pravo.gov.ru
         run: python3 fap/scripts/update.py || echo "::warning::Источник недоступен, база не изменена"
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/cache@v4
+        with: { path: fap/.model-cache, key: e5-small-q8-v1 }
+      - name: Индекс для поиска по смыслу (multilingual-e5-small)
+        run: |
+          npm install --no-save --no-audit --no-fund --prefix fap/scripts @huggingface/transformers@3.8.1
+          node fap/scripts/embed.mjs || echo "::warning::Индекс для поиска по смыслу не обновлён"
       - name: Сохранить изменения (GitHub Pages опубликует сам)
         run: |
           git config user.name "fap-bot"; git config user.email "fap-bot@users.noreply.github.com"
