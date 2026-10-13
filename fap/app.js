@@ -60,7 +60,10 @@ async function renderDoc(id, hl){
   view.innerHTML = '<p class="muted">Загрузка…</p>';
   let text; try { text = await loadText(id); } catch { view.innerHTML = '<p>Нет сети, и документ ещё не сохранён офлайн.</p>'; return; }
   const lines = text.split('\n'), re = headingRe(), toc = [];
-  const html = lines.map((l, i) => { const t = l.trim(); if (t.length < 160 && re.test(t)) { toc.push([i, t]); return `<h3 id="h${i}">${esc(t)}</h3>`; } return esc(l); }).join('\n');
+  let js = -1, je = -1; if (hl && hl[0] === '@') { [js, je] = hl.slice(1).split('-').map(Number); hl = null; }
+  const html = lines.map((l, i) => { const t = l.trim(); let o;
+    if (t.length < 160 && re.test(t)) { toc.push([i, t]); o = `<h3 id="h${i}">${esc(t)}</h3>`; } else o = esc(l);
+    if (i === js) o = '<span id="jump" class="jump">' + o; if (i === je) o += '</span>'; return o; }).join('\n');
   LS.set('last', id);
   view.innerHTML = `<div class="toolbar"><input type="search" id="find" placeholder="Поиск в документе"><span class="muted" id="cnt"></span>
    <button id="prev">↑</button><button id="next">↓</button><button id="tocBtn">☰</button><button id="fsm">A−</button><button id="fsp">A+</button></div>
@@ -82,14 +85,37 @@ async function renderDoc(id, hl){
   let t; $('#find').oninput = () => { clearTimeout(t); t = setTimeout(find, 250); };
   $('#next').onclick = () => go(cur+1); $('#prev').onclick = () => go(cur-1);
   if (hl) { $('#find').value = hl; find(); }
+  const j = document.getElementById('jump'); if (j) { j.scrollIntoView({block:'start'}); scrollBy(0,-120); }
 }
+const stems = q => (q.toLowerCase().replace(/ё/g,'е').match(/[а-яa-z0-9]{4,}/g)||[]).map(w => w.slice(0, Math.max(4, w.length-2)));
 async function renderSearch(){
   $('#title').textContent = 'Поиск по всем документам';
-  view.innerHTML = `<input type="search" id="gq" placeholder="Например: минимум погоды, ПВП, эшелон перехода"><p class="muted" id="gs"></p><div id="gr"></div>`;
+  let mode = LS.get('smode', 'sem');
+  view.innerHTML = `<div class="seg"><button data-m="sem">По смыслу</button><button data-m="word">По словам</button></div>
+   <input type="search" id="gq" placeholder="Например: можно ли садиться на площадку, подобранную с воздуха">
+   <div id="semBox"></div><p class="muted" id="gs"></p><div id="gr"></div>`;
   const docs = INDEX.docs.filter(d => !d.error);
-  let t; $('#gq').oninput = () => { clearTimeout(t); t = setTimeout(run, 350); };
+  const setMode = m => { mode = m; LS.set('smode', m); view.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+    $('#gq').placeholder = m === 'sem' ? 'Спроси своими словами: можно ли садиться на площадку, подобранную с воздуха' : 'Точное слово или фраза: эшелон перехода';
+    semUI(); run(); };
+  view.querySelectorAll('.seg button').forEach(b => b.onclick = () => setMode(b.dataset.m));
+  function semUI(){
+    const box = $('#semBox');
+    if (mode !== 'sem' || SEM.ready()) { box.innerHTML = ''; return; }
+    if (SEM.wasEnabled()) { box.innerHTML = '<p class="muted" id="semP">Запускаю модель…</p>'; start(); return; }
+    box.innerHTML = `<div class="card" style="cursor:default"><b>Поиск по смыслу</b><p class="muted">Нейросеть понимает вопрос своими словами, сокращения (КВС, ПВП, RVSM) и находит нужный пункт, даже если слов из вопроса в нём нет. Работает на телефоне без интернета. Модель скачивается один раз, около 120 МБ, лучше по Wi-Fi.</p>
+      <button id="semOn">Скачать и включить</button> <span class="muted" id="semP"></span></div>`;
+    $('#semOn').onclick = start;
+  }
+  async function start(){
+    const b = $('#semOn'); if (b) b.disabled = true;
+    try { await SEM.load(m => { const p = $('#semP'); if (p) p.textContent = m; }); $('#semBox').innerHTML = ''; run(); }
+    catch (e) { const p = $('#semP'); if (p) p.textContent = 'Не удалось загрузить модель: ' + (e.message||e) + '. Нужен интернет для первой загрузки.'; if (b) b.disabled = false; }
+  }
+  let t; $('#gq').oninput = () => { clearTimeout(t); t = setTimeout(run, mode === 'sem' ? 600 : 350); };
   async function run(){
-    const q = $('#gq').value.trim(); if (q.length < 3) { $('#gr').innerHTML = ''; return; }
+    const q = $('#gq').value.trim(); if (q.length < 3) { $('#gr').innerHTML = ''; $('#gs').textContent = ''; return; }
+    if (mode === 'sem') return SEM.ready() ? runSem(q) : null;
     $('#gs').textContent = 'Ищу…'; const ql = q.toLowerCase(), out = [];
     for (const d of docs) { let tx; try { tx = await loadText(d.id); } catch { continue; }
       const low = tx.toLowerCase(); let i = low.indexOf(ql), n = 0, snips = [];
@@ -100,6 +126,23 @@ async function renderSearch(){
     $('#gr').innerHTML = out.map(o => `<div class="card" data-go="${o.d.id}"><div class="t">${esc(o.d.short)} <span class="badge">${o.n}</span></div>${o.snips.map(s => `<div class="snip">…${esc(s).replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>')}…</div>`).join('')}</div>`).join('');
     $('#gr').querySelectorAll('[data-go]').forEach(c => c.onclick = () => location.hash = 'doc/'+c.dataset.go+'/'+encodeURIComponent(q));
   }
+  async function runSem(q){
+    $('#gs').textContent = 'Думаю…';
+    let hits; try { hits = await SEM.search(q, 60); } catch (e) { $('#gs').textContent = 'Ошибка поиска: ' + (e.message||e); return; }
+    if ($('#gq').value.trim() !== q) return;
+    const qs = stems(SEM.expand(q)), byId = Object.fromEntries(INDEX.docs.map(d => [d.id, d]));
+    for (const h of hits) { let tx; try { tx = (await loadText(h.id)).split('\n'); } catch { tx = null; }
+      h.text = tx ? tx.slice(h.s, h.e+1).join(' ') : '';
+      const low = h.text.toLowerCase().replace(/ё/g,'е'); const m = qs.filter(w => low.includes(w)).length;
+      h.rank = h.score + (qs.length ? 0.04 * m / qs.length : 0) - (byId[h.id]?.repealed ? 0.02 : 0); }
+    hits.sort((a,b) => b.rank - a.rank);
+    const top = hits.slice(0, 15);
+    $('#gs').textContent = 'Самые подходящие пункты:';
+    const hl = s => { let o = esc(s.length > 420 ? s.slice(0, 420) + '…' : s); for (const w of qs) o = o.replace(new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '[а-яё]*)', 'gi'), '<b>$1</b>'); return o; };
+    $('#gr').innerHTML = top.map(h => `<div class="card" data-j="${h.id}/@${h.s}-${h.e}"><div class="t">${esc(byId[h.id]?.short || h.id)}</div><div class="snip">${hl(h.text)}</div></div>`).join('') || '<p class="muted">Ничего не найдено</p>';
+    $('#gr').querySelectorAll('[data-j]').forEach(c => c.onclick = () => location.hash = 'doc/' + c.dataset.j);
+  }
+  setMode(mode);
 }
 function renderUpdates(){
   $('#title').textContent = 'Обновления';
