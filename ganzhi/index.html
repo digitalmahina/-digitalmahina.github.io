@@ -35,26 +35,16 @@
         display: grid; grid-template-rows: auto minmax(0, 1fr) auto; justify-items: center; align-items: center;
         padding: max(14px, env(safe-area-inset-top)) 8px max(18px, env(safe-area-inset-bottom));
         background: var(--fill-primary-on);
-        transition: background-color 420ms var(--ease-out) 380ms, opacity 300ms ease 520ms;
       }
       .x-splash[hidden] { display: none; }
       .x-wordmark { font: var(--type-tag); letter-spacing: 0.32em; padding-left: 0.32em; color: var(--text-primary); }
-      .x-splash__rings {
-        width: min(calc(100vw - 16px), calc(100dvh - 104px)); cursor: pointer; border-radius: 50%;
-        transition: transform 760ms cubic-bezier(0.55, 0, 0.85, 0.25), opacity 520ms ease 260ms, filter 760ms ease;
-      }
+      .x-splash__rings { width: min(calc(100vw - 16px), calc(100dvh - 104px)); cursor: pointer; border-radius: 50%; }
       .x-splash__rings:focus-visible { outline-offset: -6px; }
       .x-splash__line { font: var(--type-caption); color: var(--text-secondary); text-align: center; }
-      .x-splash.is-falling { opacity: 0; pointer-events: none; }
-      .x-splash.is-falling .x-splash__rings { transform: scale(9); opacity: 0; filter: blur(2px); }
-      .x-splash.is-falling .x-wordmark, .x-splash.is-falling .x-splash__line { opacity: 0; transition: opacity 200ms ease; }
-      @media (prefers-reduced-motion: reduce) {
-        .x-splash, .x-splash__rings { transition: opacity 200ms ease; }
-        .x-splash.is-falling .x-splash__rings { transform: none; filter: none; }
-      }
 
-      .x-ripple { position: fixed; inset: 0; z-index: 9990; pointer-events: none; overflow: hidden; }
-      .x-ripple canvas { display: block; width: 100%; height: 100%; }
+      /* No motion anywhere */
+      html { scroll-behavior: auto !important; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
 
       /* Phone frame */
       .x-phone {
@@ -63,9 +53,6 @@
         background: var(--fill-primary-on); border: 1px solid var(--stroke-primary); border-radius: var(--r-xl); box-shadow: var(--hark-shadow);
       }
       .x-phone[hidden] { display: none; }
-      .x-phone.is-entering { animation: x-enter 520ms var(--ease-out); }
-      @keyframes x-enter { from { opacity: 0; transform: scale(1.06); } to { opacity: 1; transform: none; } }
-      @media (prefers-reduced-motion: reduce) { .x-phone.is-entering { animation: none; } }
       @media (max-width: 480px) {
         .x-phone { width: calc(100% + 2 * var(--gutter)); margin: -12px calc(-1 * var(--gutter)) -40px; height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }
       }
@@ -161,13 +148,12 @@
       .x-field { display: grid; gap: 6px; font: var(--type-label); }
 
       /* Bottom sheet */
-      .x-scrim { position: absolute; inset: 0; z-index: 30; background: rgb(0 0 0 / 0.28); opacity: 0; pointer-events: none; transition: opacity var(--dur-quick, 200ms) ease; }
-      .x-scrim.is-open { opacity: 1; pointer-events: auto; }
-      .x-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 31; max-height: 78%; overflow-y: auto; background: var(--fill-primary-on); border-radius: var(--r-l) var(--r-l) 0 0; box-shadow: var(--hark-shadow); padding: 10px 18px calc(22px + env(safe-area-inset-bottom)); display: grid; gap: 14px; transform: translateY(105%); transition: transform 320ms var(--ease-out); visibility: hidden; }
-      .x-sheet.is-open { transform: none; visibility: visible; }
+      .x-scrim { position: absolute; inset: 0; z-index: 30; background: rgb(0 0 0 / 0.28); display: none; }
+      .x-scrim.is-open { display: block; }
+      .x-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 31; max-height: 78%; overflow-y: auto; background: var(--fill-primary-on); border-radius: var(--r-l) var(--r-l) 0 0; box-shadow: var(--hark-shadow); padding: 10px 18px calc(22px + env(safe-area-inset-bottom)); gap: 14px; display: none; }
+      .x-sheet.is-open { display: grid; }
       .x-sheet__grab { justify-self: center; width: 40px; height: 4px; border-radius: 2px; background: var(--stroke-primary); }
       .x-sheet h3 { font: var(--type-heading); }
-      @media (prefers-reduced-motion: reduce) { .x-sheet { transition: none; } }
     </style>
   </head>
   <body>
@@ -229,16 +215,10 @@
       </main>
     </div>
 
-    <div class="x-ripple" id="ripple-plane" aria-hidden="true"><canvas id="ripple-canvas"></canvas></div>
-
     <script src="hark.js"></script>
     <script>
       (function () {
         var NS = 'http://www.w3.org/2000/svg';
-        var REDUCED =
-          typeof window.matchMedia === 'function' &&
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
         function mk(tag, attrs) {
           var e = document.createElementNS(NS, tag);
           if (attrs) {
@@ -337,22 +317,6 @@
           return { x: Math.round(ox + R * Math.cos(a)), y: Math.round(oy + R * Math.sin(a)), ox: ox, oy: oy };
         }
 
-        function appendRingMeshFilter(svg, fid) {
-          var defs = mk('defs');
-          if (!REDUCED) {
-            var f = mk('filter', { id: fid, x: '-38%', y: '-38%', width: '176%', height: '176%', 'color-interpolation-filters': 'sRGB' });
-            f.appendChild(mk('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '1.05', result: 'blur' }));
-            f.appendChild(mk('feColorMatrix', { in: 'blur', type: 'matrix', values: '1.06 0 0 0 0.04  0 1.03 0 0 0.03  0 0 1.1 0 0.06  0 0 0 0.48 0', result: 'glow' }));
-            var m = mk('feMerge');
-            m.appendChild(mk('feMergeNode', { in: 'glow' }));
-            m.appendChild(mk('feMergeNode', { in: 'SourceGraphic' }));
-            f.appendChild(m);
-            defs.appendChild(f);
-          }
-          svg.appendChild(defs);
-          return REDUCED ? null : fid;
-        }
-
         function buildSixRings(prefix) {
           var svg0 = document.getElementById(prefix + '-ring-0');
           if (!svg0) return;
@@ -370,7 +334,7 @@
           labelWinter.textContent = '🌑 зима · зимнее солнцестояние';
           svg0.appendChild(labelWinter);
 
-          function appendRingNodes(svg, k, fid) {
+          function appendRingNodes(svg, k) {
             for (var i = 0; i < 60; i++) {
               var n = i + 1;
               var p = nodeXY(k, i);
@@ -397,13 +361,7 @@
               c.setAttribute('pointer-events', 'none');
               if (isToday) c.setAttribute('id', prefix + '-today-hit');
 
-              if (fid) {
-                var glowWrap = mk('g', { filter: 'url(#' + fid + ')' });
-                glowWrap.appendChild(c);
-                g.appendChild(glowWrap);
-              } else {
-                g.appendChild(c);
-              }
+              g.appendChild(c);
 
               var num = mk('text', { x: x, y: y, 'text-anchor': 'middle', 'dominant-baseline': 'middle' });
               num.textContent = String(n);
@@ -416,8 +374,7 @@
           for (var k = 0; k < 6; k++) {
             var sk = document.getElementById(prefix + '-ring-' + k);
             if (!sk) continue;
-            var fid = k === 0 ? appendRingMeshFilter(sk, prefix + '-mesh-0') : appendRingMeshFilter(sk, prefix + '-mesh-' + k);
-            appendRingNodes(sk, k, fid);
+            appendRingNodes(sk, k);
           }
 
           var svg5 = document.getElementById(prefix + '-ring-5');
@@ -433,244 +390,6 @@
           hubTx.textContent = '1·60';
           hubTx.setAttribute('style', 'font-size:7px;font-weight:700;fill:var(--text-primary);pointer-events:none');
           svg5.appendChild(hubTx);
-        }
-
-        /* ---------- Burst / Bessel J0 wave (from the original initFullscreenRipples) ---------- */
-        function besselJ0(x) {
-          var ax = Math.abs(x);
-          if (ax < 1e-12) return 1;
-          if (ax <= 28) {
-            var x2 = ax * ax * 0.25, s = 1, term = 1;
-            for (var m = 1; m < 90; m++) {
-              term *= -x2 / (m * m);
-              s += term;
-              if (Math.abs(term) < 1e-15 * (Math.abs(s) + 1)) break;
-            }
-            return s;
-          }
-          var z = Math.sqrt(2 / (Math.PI * ax));
-          return z * Math.cos(ax - Math.PI / 4);
-        }
-
-        var Ripple = { origin: function () { return null; }, clip: function () { return null; }, stop: function () {}, kick: function () {} };
-
-        function initFullscreenRipples() {
-          var plane = document.getElementById('ripple-plane');
-          var canvas = document.getElementById('ripple-canvas');
-          if (!plane || !canvas) return;
-          var ctx = canvas.getContext('2d');
-          if (!ctx) return;
-          var reduced = REDUCED;
-
-          var durationMs = 2200, tSpreadMs = 1000, dr = 2.1;
-          var ringSpacingAlpha = 0.065, ringSpacingBeta = 0.00135;
-          var j01 = 2.404825557695773;
-          var tauPulseFast = 1380, tauPulseSlow = 1820;
-          var gammaViscFast = 1.95, gammaViscSlow = 0.92;
-          var j0TailWeight = 0.11, maxPulses = 36;
-          var burstRaf = null, burstT0 = 0, burstCx = 0, burstCy = 0;
-          var burstRgb = { r: 24, g: 95, b: 165 };
-          var dpr = 1, burstRadii = [], burstJ0 = [], burstRMax = 0, burstW = 0, burstH = 0, pulses = [];
-          var cFastPxPerMs = 0.55, cSlowPxPerMs = 0.4;
-
-          function isScreenActive() {
-            if (document.visibilityState !== 'visible') return false;
-            try {
-              if (typeof document.hasFocus === 'function' && !document.hasFocus()) return false;
-            } catch (e) {}
-            return !!Ripple.origin();
-          }
-
-          function parseRgbFromCssColor(s) {
-            var m = String(s || '').match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
-            if (m) return { r: +m[1], g: +m[2], b: +m[3] };
-            return { r: 24, g: 95, b: 165 };
-          }
-
-          function readRippleOriginAndColor() {
-            var hit = Ripple.origin();
-            var vx = window.innerWidth * 0.5, vy = window.innerHeight * 0.5;
-            var rgb = { r: 24, g: 95, b: 165 };
-            if (hit) {
-              var r = hit.getBoundingClientRect();
-              vx = r.left + r.width * 0.5;
-              vy = r.top + r.height * 0.5;
-              try {
-                var stroke = window.getComputedStyle(hit).stroke;
-                if (stroke && stroke !== 'none') rgb = parseRgbFromCssColor(stroke);
-              } catch (e2) {}
-            }
-            return { x: vx, y: vy, rgb: rgb };
-          }
-
-          function resizeCanvas() {
-            dpr = Math.min(2.5, window.devicePixelRatio || 1);
-            var w = Math.max(1, Math.floor(window.innerWidth));
-            var h = Math.max(1, Math.floor(window.innerHeight));
-            canvas.width = Math.floor(w * dpr);
-            canvas.height = Math.floor(h * dpr);
-            canvas.style.width = w + 'px';
-            canvas.style.height = h + 'px';
-          }
-
-          function cancelBurst() {
-            if (burstRaf) { window.cancelAnimationFrame(burstRaf); burstRaf = null; }
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            burstRadii.length = 0; burstJ0.length = 0; burstRMax = 0; pulses.length = 0;
-          }
-
-          function buildPulsePacket() {
-            pulses.length = 0;
-            var pkt = 7, dt = 12;
-            for (var i = 0; i < pkt; i++) {
-              var g = Math.pow(0.71, i);
-              pulses.push({ delayMs: i * dt, wF: 0.9 * g, wS: 0.7 * g });
-            }
-            pulses.push({ delayMs: 84, wF: 0.14, wS: 0.17 });
-            pulses.push({ delayMs: 152, wF: 0.085, wS: 0.1 });
-            if (pulses.length > maxPulses) pulses.length = maxPulses;
-          }
-
-          function updateWaveSpeeds() {
-            var tReach = 1020;
-            if (burstRMax > 48) { cFastPxPerMs = burstRMax / tReach; cSlowPxPerMs = cFastPxPerMs / 1.37; }
-            else { cFastPxPerMs = 0.52; cSlowPxPerMs = 0.38; }
-          }
-
-          function rebuildBurstJ0Cache() {
-            burstRadii.length = 0; burstJ0.length = 0;
-            var w = window.innerWidth, h = window.innerHeight;
-            burstW = w; burstH = h;
-            var bx = burstCx, by = burstCy;
-            var rCorner = Math.sqrt(Math.max(bx, w - bx) * Math.max(bx, w - bx) + Math.max(by, h - by) * Math.max(by, h - by));
-            var rFirstZeroPx = Math.max(28, Math.min(56, 0.09 * Math.min(w, h)));
-            var kk = j01 / rFirstZeroPx;
-            var r = dr * 0.5, iRing = 0;
-            while (r <= rCorner + dr * 2) {
-              burstRadii.push(r);
-              burstJ0.push(besselJ0(kk * r));
-              r += dr * (1 + ringSpacingAlpha * iRing + ringSpacingBeta * iRing * iRing);
-              iRing++;
-              if (iRing > 900) break;
-            }
-            burstRMax = burstRadii.length > 0 ? burstRadii[burstRadii.length - 1] : 0;
-          }
-
-          function drawBurstFrame(now) {
-            var elapsed = now - burstT0;
-            var t = elapsed / durationMs;
-            if (t >= 1) { cancelBurst(); return; }
-            var w = window.innerWidth, h = window.innerHeight;
-            if (w !== burstW || h !== burstH) { resizeCanvas(); rebuildBurstJ0Cache(); updateWaveSpeeds(); }
-            var bx = burstCx, by = burstCy;
-            var env = Math.exp(-2.85 * t) * (1 - t) * (1 - t);
-            if (env < 0.0028 && t > 0.18) { cancelBurst(); return; }
-
-            var rFrontJ = burstRMax <= 0 ? 0 : burstRMax * Math.min(1, elapsed / tSpreadMs);
-            var bandJ = Math.max(18, burstRMax * 0.032);
-            function frontMaskJ(r) {
-              if (rFrontJ <= 0) return 0;
-              if (r > rFrontJ + 1e-6) return 0;
-              var u = (rFrontJ - r) / bandJ;
-              if (u >= 1) return 1;
-              if (u <= 0) return 0;
-              return u * u * (3 - 2 * u);
-            }
-            var cosShim = Math.cos((elapsed / 1000) * (Math.PI * 2.35));
-
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            ctx.clearRect(0, 0, w, h);
-            ctx.lineCap = 'butt';
-            var rr = burstRgb.r, gg = burstRgb.g, bb = burstRgb.b;
-
-            var nJ = burstRadii.length;
-            var viscJ0 = Math.exp(-3.35 * t);
-            for (var ji = 0; ji < nJ; ji++) {
-              var rj = burstRadii[ji];
-              var fmj = frontMaskJ(rj);
-              if (fmj <= 0.001) continue;
-              var j0v = burstJ0[ji];
-              var aJ = Math.min(0.22, j0TailWeight * env * viscJ0 * fmj * (0.55 + 0.45 * Math.abs(j0v * cosShim)));
-              if (aJ < 0.003) continue;
-              ctx.beginPath();
-              ctx.arc(bx, by, rj, 0, Math.PI * 2);
-              ctx.strokeStyle = 'rgba(' + rr + ',' + gg + ',' + bb + ',' + aJ + ')';
-              ctx.lineWidth = Math.max(0.55, dr * 0.75 * Math.exp(-0.034 * ji) + 0.12);
-              ctx.stroke();
-            }
-
-            var rCap = burstRMax + 72;
-            for (var pi = 0; pi < pulses.length; pi++) {
-              var p = pulses[pi];
-              if (elapsed < p.delayMs) continue;
-              var age = elapsed - p.delayMs;
-              var visF = Math.exp(-(gammaViscFast * age) / 1000);
-              var visS = Math.exp(-(gammaViscSlow * age) / 1000);
-              var decF = Math.exp(-age / tauPulseFast);
-              var decS = Math.exp(-age / tauPulseSlow);
-              var rF = cFastPxPerMs * age;
-              if (rF >= 1.2 && rF <= rCap) {
-                var rN = burstRMax > 16 ? burstRMax * 0.08 : 12;
-                var nearBoost = burstRMax > 16 && rF < rN ? 0.32 + 0.68 * (rF / rN) : 1;
-                var aF = Math.min(0.58, p.wF * env * decF * visF * nearBoost);
-                if (aF >= 0.004) {
-                  ctx.beginPath();
-                  ctx.arc(bx, by, rF, 0, Math.PI * 2);
-                  ctx.strokeStyle = 'rgba(' + rr + ',' + gg + ',' + bb + ',' + aF + ')';
-                  ctx.lineWidth = 2.15;
-                  ctx.stroke();
-                }
-              }
-              var rS = cSlowPxPerMs * age;
-              if (rS >= 1.2 && rS <= rCap) {
-                var aS = Math.min(0.5, p.wS * env * decS * visS);
-                if (aS >= 0.004) {
-                  ctx.beginPath();
-                  ctx.arc(bx, by, rS, 0, Math.PI * 2);
-                  ctx.strokeStyle = 'rgba(' + rr + ',' + gg + ',' + bb + ',' + aS * 0.92 + ')';
-                  ctx.lineWidth = 2.85;
-                  ctx.stroke();
-                }
-              }
-            }
-            burstRaf = window.requestAnimationFrame(drawBurstFrame);
-          }
-
-          function spawnBurst() {
-            if (!isScreenActive() || reduced) return;
-            cancelBurst();
-            resizeCanvas();
-            plane.style.clipPath = Ripple.clip() || 'none';
-            var o = readRippleOriginAndColor();
-            burstCx = o.x; burstCy = o.y; burstRgb = o.rgb;
-            rebuildBurstJ0Cache();
-            updateWaveSpeeds();
-            buildPulsePacket();
-            burstT0 = performance.now();
-            burstRaf = window.requestAnimationFrame(drawBurstFrame);
-          }
-
-          var ticker = null;
-          function syncTicker() {
-            if (ticker) { window.clearInterval(ticker); ticker = null; }
-            cancelBurst();
-            if (reduced) return;
-            if (isScreenActive()) {
-              ticker = window.setInterval(spawnBurst, 2000);
-              window.requestAnimationFrame(function () { window.requestAnimationFrame(spawnBurst); });
-            }
-          }
-
-          window.addEventListener('resize', resizeCanvas);
-          document.addEventListener('visibilitychange', syncTicker);
-          window.addEventListener('focus', syncTicker);
-          window.addEventListener('blur', syncTicker);
-          window.addEventListener('pageshow', syncTicker);
-          Ripple.stop = function () { if (ticker) { window.clearInterval(ticker); ticker = null; } cancelBurst(); };
-          Ripple.kick = syncTicker;
-          resizeCanvas();
-          syncTicker();
         }
 
         /* ---------- Moon (Meeus low-precision sun and moon longitudes) ---------- */
@@ -833,7 +552,6 @@
           if (name === 'people') renderPeople();
           if (name === 'profile') renderProfile();
           document.getElementById('scr-' + name).scrollTop = 0;
-          Ripple.kick();
         }
 
         function renderReg() {
@@ -1181,50 +899,27 @@
 
         /* ---------- Splash ---------- */
         var splash = document.getElementById('splash'), sRings = document.getElementById('s-rings'), phone = document.getElementById('phone');
-        var splashOpen = true, falling = false;
+        var splashOpen = true;
         var sLine = slotLabel({ k: TODAY_SLOT.k, n: TODAY_SLOT.n }).replace('Кольцо', 'Кольцо') + ' · ' + fmtShort(TODAY);
         document.getElementById('s-line').textContent = sLine;
         sRings.setAttribute('aria-label', 'Войти в CENTRAL. Сегодня: ' + sLine);
 
-        Ripple.origin = function () {
-          if (falling) return null;
-          if (splashOpen) return document.getElementById('s-today-hit');
-          if (current === 'krug' && !sheet.classList.contains('is-open')) return document.getElementById('k-today-hit');
-          return null;
-        };
-        Ripple.clip = function () {
-          if (splashOpen) return null;
-          var r = phone.getBoundingClientRect();
-          return 'inset(' + Math.max(0, r.top) + 'px ' + Math.max(0, window.innerWidth - r.right) + 'px ' + Math.max(0, window.innerHeight - r.bottom) + 'px ' + Math.max(0, r.left) + 'px round 32px)';
-        };
-
         function enter() {
-          if (falling || !splashOpen) return;
-          falling = true;
-          Ripple.stop();
-          var p = nodeXY(TODAY_SLOT.k, TODAY_SLOT.n - 1);
-          sRings.style.transformOrigin = (p.x / 7.2) + '% ' + (p.y / 7.2) + '%';
-          splash.classList.add('is-falling');
-          setTimeout(function () {
-            splash.hidden = true;
-            splash.classList.remove('is-falling');
-            splashOpen = false; falling = false;
-            phone.hidden = false;
-            phone.classList.remove('is-entering'); void phone.offsetWidth; phone.classList.add('is-entering');
-            show(user ? 'today' : 'reg');
-          }, REDUCED ? 220 : 800);
+          if (!splashOpen) return;
+          splash.hidden = true;
+          splashOpen = false;
+          phone.hidden = false;
+          show(user ? 'today' : 'reg');
         }
         function openSplash() {
           closeSheet();
           splash.hidden = false; splashOpen = true;
           sRings.focus();
-          Ripple.kick();
         }
         sRings.addEventListener('click', enter);
         sRings.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enter(); } });
 
         buildSixRings('s');
-        initFullscreenRipples();
       })();
     </script>
   </body>
