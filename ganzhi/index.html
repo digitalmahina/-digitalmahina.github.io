@@ -165,6 +165,17 @@
       .x-pick input:checked + .x-av { box-shadow: inset 0 0 0 1.5px var(--es), 0 0 0 2px var(--fill-primary-on), 0 0 0 4px var(--fill-primary); }
       .x-pick input:focus-visible + .x-av { outline: 2px solid var(--fill-primary); outline-offset: 6px; }
       .x-field { display: grid; gap: 6px; font: var(--type-label); }
+      /* Personal shape mark */
+      .x-shape { display: inline-block; width: 11px; height: 11px; flex: none; vertical-align: -1px; margin-right: 5px; overflow: visible; }
+      .x-shapes { display: flex; flex-wrap: wrap; gap: 4px; }
+      .x-shapes label { position: relative; display: grid; justify-items: center; gap: 4px; min-width: 52px; min-height: var(--tap); padding: 8px 4px 6px; border-radius: var(--r-s); font: var(--type-caption); color: var(--text-secondary); cursor: pointer; }
+      .x-shapes input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+      .x-shapes .x-shape { width: 20px; height: 20px; margin: 0; color: var(--text-primary); }
+      .x-shapes label:has(input:checked) { background: var(--fill-tertiary); color: var(--text-primary); box-shadow: inset 0 0 0 1px var(--stroke-primary); }
+      .x-shapes label:has(input:focus-visible) { outline: 2px solid var(--fill-primary); outline-offset: 2px; }
+      .x-krug-date { justify-content: center; font: var(--type-caption); color: var(--text-secondary); text-align: center; }
+      .x-krug-motto { text-align: center; font: var(--type-small); color: var(--text-secondary); }
+      .x-legend .x-shape { margin-right: 0; color: var(--text-primary); }
 
       /* Bottom sheet */
       .x-scrim { position: absolute; inset: 0; z-index: 30; background: rgb(0 0 0 / 0.28); display: none; }
@@ -199,11 +210,12 @@
             <div class="x-top"><div class="x-brand"><span class="x-logo" data-logo style="--ls:24px" aria-hidden="true"></span><p class="x-wordmark">CENTRAL</p></div><span class="chip" id="k-today-chip"></span></div>
             <div>
               <h1 class="x-h1">Круг 60 дней</h1>
-              <p class="x-sub">Шестьдесят дней вокруг сегодняшнего и луна над ними. Точки от узла к центру — записи дня. Коснитесь узла, чтобы открыть день.</p>
+              <p class="x-sub">Шестьдесят дней вокруг сегодняшнего. Заметки идут от узла дня к центру: цвет — заметка, форма — автор. Коснитесь узла, чтобы открыть день.</p>
             </div>
             <div class="x-legend" aria-label="Стихии">
               <span><i class="x-edot elem-0"></i>Дерево</span><span><i class="x-edot elem-2"></i>Огонь</span><span><i class="x-edot elem-4"></i>Земля</span><span><i class="x-edot elem-6"></i>Металл</span><span><i class="x-edot elem-8"></i>Вода</span>
             </div>
+            <p class="x-krug-date" id="k-date"></p>
             <div class="x-krug" id="k-scroll">
               <div class="x-krug__inner" id="k-inner">
                 <div class="x-rings" id="k-rings" role="img" aria-label="Круг 60 дней с записями">
@@ -211,7 +223,8 @@
                 </div>
               </div>
             </div>
-            <p class="x-legend x-krug-legend"><span><i class="x-pdot" style="--pc:var(--text-secondary);margin:0"></i>точка = заметка · от узла к центру: сначала мои, затем друзья по порядку</span></p>
+            <p class="x-krug-motto">Каждая заметка — шаг к центру. Вместе мы дойдём.</p>
+            <p class="x-legend x-krug-legend"><span>цвет — заметка, форма — автор · от узла к центру: сначала мои, затем друзья по порядку</span></p>
             <div class="x-legend x-krug-legend" id="k-legend" aria-label="Обозначения"></div>
             <div class="x-row x-row--between">
               <span></span>
@@ -506,7 +519,9 @@
             : en < 90 ? 'растущий серп' : en < 180 ? 'растущая луна' : en < 270 ? 'убывающая луна' : 'убывающий серп';
           return (moonCache[key] = { ev: ev, frac: frac, elong: en, illum: (1 - Math.cos(en * RAD)) / 2, tithi: t, eka: eka, ekaSide: t <= 15 || pt < 15 ? 'шукла' : 'кришна', name: name });
         }
+        /* moon wording is off everywhere; kept as a hook for a later option */
         function moonTag(date) {
+          if (!SHOW_MOON) return '';
           var m = moonInfo(date);
           return '<span class="pill">' + m.name + ' · ' + Math.round(m.illum * 100) + '%</span>' + (m.eka ? '<span class="x-eka">Экадаши</span>' : '');
         }
@@ -533,15 +548,42 @@
           'Болит голова, но мысль ясная.', 'Новая тропинка через парк.', 'Записала сон, пока не забыла.'
         ];
         var PEOPLE = [
-          { id: 'lisa', nick: 'Лиса', elem: 1, bio: 'Пишет по утрам', color: 'light-dark(#2563eb, #7aa7ff)' },
-          { id: 'mark', nick: 'Марк', elem: 3, bio: 'Бег и погода', color: 'light-dark(#8a4b14, #d39a5f)' },
-          { id: 'taya', nick: 'Тая', elem: 4, bio: 'Сны и чай', color: 'light-dark(#0f8a7e, #4fd1c0)' },
-          { id: 'osya', nick: 'Ося', elem: 0, bio: 'Сад на балконе', color: 'light-dark(#c0267a, #f07ab5)' },
-          { id: 'vera', nick: 'Вера', elem: 2, bio: 'Город пешком', color: 'light-dark(#4d8a12, #9ed36a)' },
-          { id: 'gosha', nick: 'Гоша', elem: 4, bio: 'Музыка дня', color: 'light-dark(#b42318, #f38b80)' },
-          { id: 'nina', nick: 'Нина', elem: 1, bio: 'Одна фраза в день', color: 'light-dark(#52627a, #a5b4c8)' },
-          { id: 'roma', nick: 'Рома', elem: 0, bio: 'Работа и тишина', color: 'light-dark(#0e7490, #5ec8e5)' }
+          { id: 'lisa', nick: 'Лиса', elem: 1, shape: 'square', bio: 'Пишет по утрам', color: 'light-dark(#2563eb, #7aa7ff)' },
+          { id: 'mark', nick: 'Марк', elem: 3, shape: 'triangle', bio: 'Бег и погода', color: 'light-dark(#8a4b14, #d39a5f)' },
+          { id: 'taya', nick: 'Тая', elem: 4, shape: 'diamond', bio: 'Сны и чай', color: 'light-dark(#0f8a7e, #4fd1c0)' },
+          { id: 'osya', nick: 'Ося', elem: 0, shape: 'hexagon', bio: 'Сад на балконе', color: 'light-dark(#c0267a, #f07ab5)' },
+          { id: 'vera', nick: 'Вера', elem: 2, shape: 'cross', bio: 'Город пешком', color: 'light-dark(#4d8a12, #9ed36a)' },
+          { id: 'gosha', nick: 'Гоша', elem: 4, shape: 'circle', bio: 'Музыка дня', color: 'light-dark(#b42318, #f38b80)' },
+          { id: 'nina', nick: 'Нина', elem: 1, shape: 'triangle', bio: 'Одна фраза в день', color: 'light-dark(#52627a, #a5b4c8)' },
+          { id: 'roma', nick: 'Рома', elem: 0, shape: 'diamond', bio: 'Работа и тишина', color: 'light-dark(#0e7490, #5ec8e5)' }
         ];
+        /* Six personal marks: colour = the note, shape = who wrote it */
+        var SHAPES = [['circle', 'круг'], ['square', 'квадрат'], ['triangle', 'треугольник'], ['diamond', 'ромб'], ['hexagon', 'шестиугольник'], ['cross', 'крест']];
+        function shapeName(id) { for (var i = 0; i < SHAPES.length; i++) if (SHAPES[i][0] === id) return SHAPES[i][1]; return 'круг'; }
+        function shapeOf(p) { return (p && p.shape) || 'circle'; }
+        /* geometry of a shape centred at x,y; s ≈ half its size */
+        function shapeGeo(sh, x, y, s) {
+          function P(a) { return a.map(function (q) { return f1(x + q[0] * s) + ',' + f1(y + q[1] * s); }).join(' '); }
+          if (sh === 'square') return ['rect', { x: f1(x - 0.9 * s), y: f1(y - 0.9 * s), width: f1(1.8 * s), height: f1(1.8 * s) }];
+          if (sh === 'triangle') return ['polygon', { points: P([[0, -1.2], [1.12, 0.78], [-1.12, 0.78]]) }];
+          if (sh === 'diamond') return ['polygon', { points: P([[0, -1.25], [1.05, 0], [0, 1.25], [-1.05, 0]]) }];
+          if (sh === 'hexagon') {
+            var h = [];
+            for (var k = 0; k < 6; k++) { var a = (60 * k - 90) * Math.PI / 180; h.push([1.08 * Math.cos(a), 1.08 * Math.sin(a)]); }
+            return ['polygon', { points: P(h) }];
+          }
+          if (sh === 'cross') return ['polygon', { points: P([[-0.38, -1.15], [0.38, -1.15], [0.38, -0.38], [1.15, -0.38], [1.15, 0.38], [0.38, 0.38], [0.38, 1.15], [-0.38, 1.15], [-0.38, 0.38], [-1.15, 0.38], [-1.15, -0.38], [-0.38, -0.38]]) }];
+          return ['circle', { cx: f1(x), cy: f1(y), r: f1(s) }];
+        }
+        function shapeIcon(sh, fill) {
+          var g = shapeGeo(sh, 0, 0, 4.6), a = g[1];
+          return '<svg class="x-shape" viewBox="-6 -6 12 12" aria-hidden="true"><' + g[0] + ' ' + Object.keys(a).map(function (k) { return k + '="' + a[k] + '"'; }).join(' ') + ' style="fill:' + (fill || 'currentColor') + '"/></svg>';
+        }
+        function shapePicker(name, cur) {
+          return '<div class="x-shapes" role="radiogroup" aria-label="Мой знак">' + SHAPES.map(function (sh) {
+            return '<label><input type="radio" name="' + name + '" value="' + sh[0] + '"' + (sh[0] === cur ? ' checked' : '') + ' />' + shapeIcon(sh[0]) + sh[1] + '</label>';
+          }).join('') + '</div>';
+        }
         var ME_COLOR = 'var(--text-primary)';
         var NOTE_COLORS = [
           'light-dark(#2563eb, #7aa7ff)', 'light-dark(#b42318, #f38b80)', 'light-dark(#0f8a7e, #4fd1c0)', 'light-dark(#d97706, #fbbf24)',
@@ -616,7 +658,7 @@
         }
         function entryRows(list) {
           return '<div class="x-entries">' + list.map(function (e) {
-            return '<div class="x-entry">' + av(e.p, 32) + '<div><p class="x-entry__name">' + (e.c ? cdot(e.c) : pdot(e.p)) + esc(e.p.nick) + (e.me ? ' <small>вы</small>' : '') + '</p><p class="x-entry__text">' + esc(e.text) + '</p></div></div>';
+            return '<div class="x-entry">' + av(e.p, 32) + '<div><p class="x-entry__name">' + shapeIcon(shapeOf(e.p), e.c) + esc(e.p.nick) + (e.me ? ' <small>вы</small>' : '') + '</p><p class="x-entry__text">' + esc(e.text) + '</p></div></div>';
           }).join('') + '</div>';
         }
         function top() { return '<div class="x-top"><div class="x-brand">' + logo(24) + '<p class="x-wordmark">CENTRAL</p></div>' + (user ? av(user, 32) : '') + '</div>'; }
@@ -653,6 +695,7 @@
             '<form class="x-card" id="reg-form" novalidate>' +
             '<label class="x-field">Ник<input class="x-input" id="reg-nick" name="nick" maxlength="20" autocomplete="nickname" placeholder="Например, Аня" required /></label>' +
             '<div class="x-field"><span>Ваша стихия</span><div class="x-pick" role="radiogroup" aria-label="Стихия">' + pick + '</div></div>' +
+            '<div class="x-field"><span>Ваш знак <small class="fineprint">— им будут отмечены ваши заметки на Круге</small></span>' + shapePicker('shape', 'circle') + '</div>' +
             '<p class="fineprint">Регистрация живёт только в этой вкладке.</p>' +
             '<button class="x-primary" type="submit" id="reg-go" disabled>Войти в CENTRAL</button>' +
             '</form>';
@@ -667,7 +710,8 @@
             var v = nick.value.trim();
             if (!v) return;
             var elem = +el.querySelector('input[name="elem"]:checked').value;
-            user = { id: 'me', nick: v, elem: elem };
+            var shc = el.querySelector('input[name="shape"]:checked');
+            user = { id: 'me', nick: v, elem: elem, shape: shc ? shc.value : 'circle' };
             mine = seedMine(v); mineC = {};
             store.set('user', user); store.set('mine', mine); store.set('minec', mineC);
             show('today');
@@ -682,7 +726,7 @@
           var ago = addDays(TODAY, -60), agoKey = keyOf(ago), agoS = slotOf(ago);
           var notes = myNotes(key).slice();
           var showForm = !notes.length || adding || editIdx >= 0;
-          var fr = friendsOn(key).map(function (e) { return { p: person(e.uid), text: e.text }; });
+          var fr = friendsOn(key).map(function (e) { return { p: person(e.uid), text: e.text, c: NOTE_COLORS[e.c] }; });
           var agoFr = friendsOn(agoKey).length, agoMine = myNotes(agoKey);
           var curCI = editIdx >= 0 ? noteCI(key, editIdx) : 0;
           var swatches = '<div class="x-swatches" role="radiogroup" aria-label="Цвет заметки">' + NOTE_COLORS.map(function (c, ci) {
@@ -695,7 +739,7 @@
             '<div><p class="x-label">Сегодня</p><h1 class="x-h1">' + fmtLong(TODAY) + '</h1><div class="x-day" style="margin-top:6px"><span>' + slotLabel(s) + '</span>' + elemTag(s) + moonTag(TODAY) + '</div></div>' +
             '<div class="x-card"><p class="x-label">' + (notes.length ? 'Мои записи · ' + notes.length : 'Моя запись') + '</p><div class="x-notes">' +
             notes.map(function (t, i) {
-              return i === editIdx ? form : '<div class="x-note"><p>' + cdot(myColor(key, i)) + esc(t) + '</p><button class="btn" type="button" data-edit="' + i + '">Изменить</button></div>';
+              return i === editIdx ? form : '<div class="x-note"><p>' + shapeIcon(shapeOf(user), myColor(key, i)) + esc(t) + '</p><button class="btn" type="button" data-edit="' + i + '">Изменить</button></div>';
             }).join('') +
             (showForm && editIdx < 0 ? form : '') + '</div>' +
             (showForm ? '' : '<div class="links"><button class="btn" type="button" id="t-more">+ ещё мысль</button></div>') + '</div>' +
@@ -738,7 +782,7 @@
           var list = entriesOn(keyOf(d));
           var s = slotOf(d);
           return '<div class="x-lane"><p class="x-lane__head"><b>' + title + '</b><span>' + fmtDM(d) + ' · ' + (s.out ? 'между кольцами' : RING_ROMAN[s.k] + ' · ' + s.n) + '</span></p>' +
-            (list.length ? list.map(function (e) { return '<p class="x-mini">' + av(e.p, 24) + '<span><b>' + pdot(e.p) + esc(e.p.nick) + '</b>' + esc(e.text) + '</span></p>'; }).join('') : '<p class="x-empty" style="font-size:var(--size-caption)">Тишина</p>') +
+            (list.length ? list.map(function (e) { return '<p class="x-mini">' + av(e.p, 24) + '<span><b>' + shapeIcon(shapeOf(e.p), e.c) + esc(e.p.nick) + '</b>' + esc(e.text) + '</span></p>'; }).join('') : '<p class="x-empty" style="font-size:var(--size-caption)">Тишина</p>') +
             '</div>';
         }
         function renderFeed() {
@@ -763,7 +807,7 @@
             var v = q.value.trim().toLowerCase();
             document.getElementById('p-list').innerHTML = PEOPLE.filter(function (p) { return !v || p.nick.toLowerCase().indexOf(v) >= 0; }).map(function (p) {
               var n = 0; for (var k in FR) FR[k].forEach(function (e) { if (e.uid === p.id) n++; });
-              return '<div class="x-person">' + av(p, 40) + '<div><p class="x-person__name">' + pdot(p) + esc(p.nick) + '</p><p class="x-person__meta"><span class="elem-' + p.elem * 2 + '"><i class="x-edot"></i></span> ' + ELEM[p.elem] + ' · ' + esc(p.bio) + ' · ' + n + ' записей</p></div>' +
+              return '<div class="x-person">' + av(p, 40) + '<div><p class="x-person__name">' + shapeIcon(shapeOf(p)) + esc(p.nick) + '</p><p class="x-person__meta"><span class="elem-' + p.elem * 2 + '"><i class="x-edot"></i></span> ' + ELEM[p.elem] + ' · ' + shapeName(shapeOf(p)) + ' · ' + esc(p.bio) + ' · ' + n + ' записей</p></div>' +
                 '<button class="btn" type="button" data-f="' + p.id + '" aria-pressed="' + (follow[p.id] ? 'true' : 'false') + '">' + (follow[p.id] ? 'Вы подписаны' : 'Подписаться') + '</button></div>';
             }).join('') || '<p class="x-empty">Никого не нашли.</p>';
           }
@@ -785,7 +829,8 @@
           for (var d = myNotes(keyOf(TODAY)).length ? TODAY : addDays(TODAY, -1); myNotes(keyOf(d)).length; d = addDays(d, -1)) streak++;
           var nf = Object.keys(follow).length;
           el.innerHTML = top() +
-            '<div class="x-profile">' + av(user, 88) + '<h1 class="x-h1">' + esc(user.nick) + '</h1><span class="x-elem elem-' + user.elem * 2 + '">' + ELEM[user.elem] + '</span></div>' +
+            '<div class="x-profile">' + av(user, 88) + '<h1 class="x-h1">' + shapeIcon(shapeOf(user)) + esc(user.nick) + '</h1><span class="x-elem elem-' + user.elem * 2 + '">' + ELEM[user.elem] + '</span></div>' +
+            '<div class="x-field"><span>Мой знак</span>' + shapePicker('pr-shape', shapeOf(user)) + '</div>' +
             '<section class="stats"><div class="stat"><span class="stat__fig">' + total + '</span><span class="stat__label">Записей</span></div><div class="stat"><span class="stat__fig">' + streak + '</span><span class="stat__label">Дней подряд</span></div><div class="stat"><span class="stat__fig">' + nf + '</span><span class="stat__label">Подписок</span></div></section>' +
             '<div><p class="x-label" style="margin-bottom:10px">Последние записи</p><div id="pr-list" class="x-entries"></div></div>' +
             '<div class="links"><button class="btn" type="button" id="pr-splash">Показать заставку</button><button class="btn" type="button" id="pr-out">Выйти</button></div>';
@@ -809,13 +854,21 @@
             show('reg');
           });
           document.getElementById('pr-splash').addEventListener('click', openSplash);
+          [].forEach.call(el.querySelectorAll('input[name="pr-shape"]'), function (r) {
+            r.addEventListener('change', function () {
+              user.shape = r.value; store.set('user', user); renderProfile();
+              var nr = document.querySelector('#scr-profile input[name="pr-shape"][value="' + r.value + '"]'); if (nr) nr.focus();
+            });
+          });
         }
 
         /* ---------- Круг ---------- */
         var selected = null;
         /* One 60-day ring: node n is the day TODAY + (n − today's position).
            Geometry and wave math from ganzhi_lunar_wave_v2.html */
-        var KC = 340, KR = 252, RW = 252, AMP = 42, KNR = 10, KTR = 13, KDISC = 80, KDOT = 2.4, KSTEP = 7, KIN = 72;
+        /* Notes grow inward with a FIXED step: about 24 notes on one day (everyone together) reach the centre ring */
+        var KC = 340, KR = 252, RW = 252, AMP = 42, KNR = 10, KTR = 13, KDISC = 80, KDOT = 2.5, KCR = 10, KREACH = 24;
+        var KR0 = KR - KTR - 6, KSTEP = (KR0 - KCR - 4) / (KREACH - 1), KIN = 16;
         /* lunar wave, moon markers and Ekadashi: off for now, kept for a later option */
         var SHOW_MOON = false;
         var SYNODIC = 29.530589, NM0 = Date.UTC(2000, 0, 6, 18, 14);
@@ -873,15 +926,15 @@
 
           /* note dots: one neat radial line per day, starting just inside the node.
              Order along the line: my notes, then each followed friend in the order of Люди.
-             Fixed step; shrinks only when a day's line would reach the centre text. */
+             Fixed step; each mark is the author's shape filled with the note's colour. */
           var trackOf = { me: 0 }, nTracks = 1;
           PEOPLE.forEach(function (p) { if (follow[p.id]) trackOf[p.id] = nTracks++; });
           var dayDots = [];
           for (var di = 0; di < 60; di++) {
             var dk = keyOf(WIN[di]), dots = [];
-            myNotes(dk).forEach(function (t, j) { dots.push({ t: 0, j: j, c: myColor(dk, j) }); });
+            myNotes(dk).forEach(function (t, j) { dots.push({ t: 0, j: j, c: myColor(dk, j), sh: shapeOf(user) }); });
             if (WIN[di] <= TODAY) friendsOn(dk).forEach(function (e, j) {
-              if (trackOf[e.uid] != null) dots.push({ t: trackOf[e.uid], j: j, c: NOTE_COLORS[e.c] });
+              if (trackOf[e.uid] != null) dots.push({ t: trackOf[e.uid], j: j, c: NOTE_COLORS[e.c], sh: shapeOf(person(e.uid)) });
             });
             dots.sort(function (a, b) { return a.t - b.t || a.j - b.j; });
             dayDots.push(dots);
@@ -891,13 +944,18 @@
             var n = i + 1, d = WIN[i], key = keyOf(d), isT = n === TODAY_N, future = d > TODAY;
             var p = at(i, KR), stem = i % 10, nr = isT ? KTR : KNR;
 
-            /* each note = one dot in its own colour, in order along the day's radial line */
-            var cols = dayDots[i];
-            var r0 = KR - nr - 6, step = cols.length > 1 ? Math.min(KSTEP, (r0 - KIN) / (cols.length - 1)) : KSTEP;
-            cols.forEach(function (o, k) {
-              var q = at(i, r0 - k * step);
-              svg.appendChild(mk('circle', { cx: f1(q.x), cy: f1(q.y), r: KDOT, style: 'fill:' + o.c }));
+            /* each note = one mark (author's shape, note's colour), in order along the day's radial line */
+            var cols = dayDots[i], shown = cols.slice(0, KREACH);
+            shown.forEach(function (o, k) {
+              var q = at(i, KR0 - k * KSTEP), g0 = shapeGeo(o.sh, q.x, q.y, KDOT);
+              g0[1].style = 'fill:' + o.c;
+              svg.appendChild(mk(g0[0], g0[1]));
             });
+            /* the day reached the centre: a thin neutral line from the last mark to the centre point */
+            if (cols.length >= KREACH) {
+              var lq = at(i, KR0 - (KREACH - 1) * KSTEP);
+              svg.appendChild(mk('line', { x1: f1(lq.x), y1: f1(lq.y), x2: KC, y2: KC, style: 'stroke:var(--text-secondary);stroke-width:0.8;stroke-linecap:round' }));
+            }
 
             /* node */
             var g = mk('g', { class: 'elem-' + stem, style: future ? 'opacity:0.5' : '' });
@@ -938,21 +996,23 @@
             ekaDays.push(fmtDM(WIN[m]));
           }
 
-          /* centre: text only, no disc */
-          var tm = moonInfo(TODAY), y0 = KC - 4;
-          var dt = mk('text', { x: KC, y: y0, 'text-anchor': 'middle', style: 'font-size:22px;font-weight:500;fill:var(--text-primary)' });
-          dt.textContent = fmtShort(TODAY); svg.appendChild(dt);
-          var st = mk('text', { x: KC, y: y0 + 22, 'text-anchor': 'middle', style: 'font-size:11px;fill:var(--text-secondary)' });
-          st.textContent = 'сегодня · ' + TODAY_N + '/60'; svg.appendChild(st);
+          /* centre: "вместе мы можем достичь центра" — a small dark point and one faint ring */
+          var tm = SHOW_MOON ? moonInfo(TODAY) : null;
+          svg.appendChild(mk('circle', { cx: KC, cy: KC, r: KCR, style: 'fill:none;stroke:var(--text-secondary);stroke-opacity:0.4;stroke-width:0.75' }));
+          svg.appendChild(mk('circle', { cx: KC, cy: KC, r: 2.6, style: 'fill:var(--text-primary)' }));
+          document.getElementById('k-date').textContent = fmtShort(TODAY) + ' · ' + TODAY_N + '/60';
 
           document.getElementById('k-rings').setAttribute('aria-label',
             'Круг 60 дней с ' + fmtShort(WIN[0]) + ' по ' + fmtShort(WIN[59]) + '. Сегодня ' + TODAY_N + ' из 60' +
             (SHOW_MOON ? ', ' + tm.name + '. Полнолуние: ' + (fullDays.join(', ') || 'нет') + '. Экадаши: ' + (ekaDays.join(', ') || 'нет') : '') + '.');
 
-          var order = ['1 я'].concat(PEOPLE.filter(function (p) { return follow[p.id]; }).map(function (p) { return (trackOf[p.id] + 1) + ' ' + esc(p.nick); }));
+          var seen = [{ nick: 'я', shape: shapeOf(user) }].concat(PEOPLE.filter(function (p) { return follow[p.id]; }));
           document.getElementById('k-legend').innerHTML =
             (SHOW_MOON ? '<span><i class="x-lg-full"></i>полная луна</span><span><i class="x-lg-new"></i>новолуние</span><span><i class="x-lg-eka"></i>экадаши</span>' : '') +
-            '<span>порядок: ' + order.join(' · ') + '</span>';
+            SHAPES.map(function (sh) {
+              var who = seen.filter(function (p) { return shapeOf(p) === sh[0]; }).map(function (p) { return esc(p.nick); });
+              return '<span title="' + sh[1] + '">' + shapeIcon(sh[0]) + (who.join(', ') || '—') + '</span>';
+            }).join('');
         }
         document.getElementById('k-open-today').addEventListener('click', function () { openDay(TODAY, { k: TODAY_SLOT.k, n: TODAY_SLOT.n }); });
         document.getElementById('k-inner').addEventListener('click', function (e) {
@@ -978,7 +1038,7 @@
             '<div class="x-row x-row--between"><p class="x-label">' + slotLabel(s) + '</p><button class="btn" type="button" id="sh-close">Закрыть</button></div>' +
             '<div><h3>' + fmtShort(date) + '</h3><div class="x-day" style="margin-top:8px">' + elemTag(s) + moonTag(date) + (isT ? '<span class="chip chip--solid">Сегодня</span>' : '') + (future ? '<span class="chip">Ещё впереди</span>' : '') + '</div></div>' +
             '<div class="x-card"><p class="x-label">' + (mn.length > 1 ? 'Мои записи · ' + mn.length : 'Моя запись') + '</p>' +
-            (mn.length ? mn.map(function (t, i) { return '<p>' + cdot(myColor(key, i)) + esc(t) + '</p>'; }).join('') : '<p class="x-empty">' + (future ? 'День ещё не наступил.' : 'Записи нет.') + '</p>') +
+            (mn.length ? mn.map(function (t, i) { return '<p>' + shapeIcon(shapeOf(user), myColor(key, i)) + esc(t) + '</p>'; }).join('') : '<p class="x-empty">' + (future ? 'День ещё не наступил.' : 'Записи нет.') + '</p>') +
             (isT ? '<div class="links"><button class="btn" type="button" id="sh-write">' + (mn.length ? '+ ещё мысль' : 'Написать') + '</button></div>' : '') + '</div>' +
             (future ? '' : '<div><p class="x-label" style="margin-bottom:10px">Друзья · ' + list.length + '</p>' + (list.length ? entryRows(list) : '<p class="x-empty">Никто из друзей не писал.</p>') + '</div>') +
             '<div class="x-card"><div class="x-row x-row--between"><p class="x-label">60 дней назад</p><span class="pill">' + fmtShort(ago) + '</span></div>' +
