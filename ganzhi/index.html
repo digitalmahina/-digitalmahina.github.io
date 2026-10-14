@@ -132,8 +132,20 @@
       .x-krug__inner { width: calc(100% * var(--z, 1)); cursor: pointer; }
       .x-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font: var(--type-caption); color: var(--text-secondary); }
       .x-legend span { display: inline-flex; align-items: center; gap: 6px; }
-      .x-mark-mine { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--text-primary); }
-      .x-mark-fr { width: 5px; height: 5px; border-radius: 50%; background: var(--text-primary); }
+      :root { --x-moon: light-dark(#ee9f33, #f2b14f); --x-eka: #7c3aed; --x-newmoon: #9a9a96; }
+      .x-pdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--pc); flex: none; vertical-align: 1px; margin-right: 5px; }
+      .x-lg-dots { display: inline-flex; gap: 2px; }
+      .x-lg-dots .x-pdot { width: 6px; height: 6px; margin: 0; }
+      .x-lg-full { width: 9px; height: 9px; border-radius: 50%; background: var(--x-moon); }
+      .x-lg-new { width: 9px; height: 9px; border-radius: 50%; background: var(--fill-primary-on); box-shadow: inset 0 0 0 1.5px var(--x-newmoon); }
+      .x-lg-eka { width: 7px; height: 7px; margin: 0 1px; background: var(--x-eka); transform: rotate(45deg); }
+      .x-lg-line { width: 14px; height: 2px; border-radius: 1px; background: var(--x-moon); }
+      .x-eka { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 9px; border-radius: var(--r-pill); border: 1px solid var(--x-eka); color: var(--text-primary); font: var(--type-tag); }
+      .x-eka::before { content: ""; width: 7px; height: 7px; background: var(--x-eka); transform: rotate(45deg); }
+      .x-note { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+      .x-note + .x-note, .x-note + form, .x-notes + .links { border-top: 1px solid var(--stroke-secondary); padding-top: 10px; }
+      .x-notes { display: grid; gap: 10px; }
+      .x-notes > form { display: grid; gap: 10px; }
 
       /* Profile */
       .x-profile { display: grid; justify-items: center; gap: 8px; text-align: center; padding-top: 8px; }
@@ -178,26 +190,20 @@
           <section class="x-screen" id="scr-krug" aria-label="Круг">
             <div class="x-top"><p class="x-wordmark">CENTRAL</p><span class="chip" id="k-today-chip"></span></div>
             <div>
-              <h1 class="x-h1">Круг года</h1>
-              <p class="x-sub">Шесть колец по 60 дней. Коснитесь узла, чтобы открыть день.</p>
+              <h1 class="x-h1">Круг 60 дней</h1>
+              <p class="x-sub">Шестьдесят дней вокруг сегодняшнего и луна над ними. Точки от узла к центру — записи дня. Коснитесь узла, чтобы открыть день.</p>
             </div>
-            <div class="x-legend" aria-label="Обозначения">
+            <div class="x-legend" aria-label="Стихии">
               <span><i class="x-edot elem-0"></i>Дерево</span><span><i class="x-edot elem-2"></i>Огонь</span><span><i class="x-edot elem-4"></i>Земля</span><span><i class="x-edot elem-6"></i>Металл</span><span><i class="x-edot elem-8"></i>Вода</span>
-              <span><i class="x-mark-mine"></i>моя запись</span><span><i class="x-mark-fr"></i>пишут друзья</span>
             </div>
             <div class="x-krug" id="k-scroll">
               <div class="x-krug__inner" id="k-inner">
-                <div class="x-rings" id="k-rings" role="img" aria-label="Шесть колец года с моими записями и записями друзей">
-                  <svg id="k-ring-0" viewBox="0 0 720 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
-                  <svg id="k-ring-1" viewBox="0 0 720 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
-                  <svg id="k-ring-2" viewBox="0 0 720 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
-                  <svg id="k-ring-3" viewBox="0 0 720 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
-                  <svg id="k-ring-4" viewBox="0 0 720 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
-                  <svg id="k-ring-5" viewBox="0 0 720 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
-                  <svg id="k-ring-6" viewBox="0 0 720 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+                <div class="x-rings" id="k-rings" role="img" aria-label="Круг 60 дней с записями и фазами луны">
+                  <svg id="k-ring" viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
                 </div>
               </div>
             </div>
+            <div class="x-legend" id="k-legend" aria-label="Обозначения"></div>
             <div class="x-row x-row--between">
               <div class="links">
                 <button class="btn" type="button" id="k-zout" aria-label="Уменьшить">−</button>
@@ -667,6 +673,54 @@
           syncTicker();
         }
 
+        /* ---------- Moon (Meeus low-precision sun and moon longitudes) ---------- */
+        var RAD = Math.PI / 180;
+        function norm360(a) { a %= 360; return a < 0 ? a + 360 : a; }
+        function jdOf(d) { return d.getTime() / 86400000 + 2440587.5; }
+        function sunLon(jd) {
+          var T = (jd - 2451545) / 36525;
+          var L0 = 280.46646 + 36000.76983 * T, M = (357.52911 + 35999.05029 * T) * RAD;
+          var C = (1.914602 - 0.004817 * T) * Math.sin(M) + 0.019993 * Math.sin(2 * M) + 0.000289 * Math.sin(3 * M);
+          var om = (125.04 - 1934.136 * T) * RAD;
+          return norm360(L0 + C - 0.00569 - 0.00478 * Math.sin(om));
+        }
+        /* [D, M, M', F, coefficient] — main periodic terms of the moon's longitude */
+        var MOON_TERMS = [[0,0,1,0,6.288774],[2,0,-1,0,1.274027],[2,0,0,0,0.658314],[0,0,2,0,0.213618],[0,1,0,0,-0.185116],[0,0,0,2,-0.114332],[2,0,-2,0,0.058793],[2,-1,-1,0,0.057066],[2,0,1,0,0.053322],[2,-1,0,0,0.045758],[0,1,-1,0,-0.040923],[1,0,0,0,-0.03472],[0,1,1,0,-0.030383],[2,0,0,-2,0.015327],[0,0,1,2,-0.012528],[0,0,1,-2,0.01098],[4,0,-1,0,0.010675],[0,0,3,0,0.010034],[4,0,-2,0,0.008548],[2,1,-1,0,-0.007888],[2,1,0,0,-0.006766],[1,0,-1,0,-0.005163],[1,1,0,0,0.004987],[2,-1,1,0,0.004036],[2,0,2,0,0.003994],[4,0,0,0,0.003861],[2,0,-3,0,0.003665],[0,1,-2,0,-0.002689],[2,0,-1,2,-0.002602],[2,-1,-2,0,0.00239],[1,0,1,0,-0.002348],[2,-2,0,0,0.002236],[0,1,2,0,-0.00212],[0,2,0,0,-0.002069]];
+        function moonLon(jd) {
+          var T = (jd - 2451545) / 36525;
+          var Lp = 218.3164477 + 481267.88123421 * T;
+          var D = 297.8501921 + 445267.1114034 * T, M = 357.5291092 + 35999.0502909 * T;
+          var Mp = 134.9633964 + 477198.8675055 * T, F = 93.272095 + 483202.0175233 * T;
+          var E = 1 - 0.002516 * T, s = 0;
+          for (var i = 0; i < MOON_TERMS.length; i++) {
+            var t = MOON_TERMS[i], am = Math.abs(t[1]);
+            s += t[4] * (am === 1 ? E : am === 2 ? E * E : 1) * Math.sin((t[0] * D + t[1] * M + t[2] * Mp + t[3] * F) * RAD);
+          }
+          return norm360(Lp + s);
+        }
+        /** Moon − sun elongation in degrees: 0 new, 180 full */
+        function elongAt(d) { var jd = jdOf(d); return norm360(moonLon(jd) - sunLon(jd)); }
+        function atHour(d, h) { return new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, 0, 0); }
+        function tithiAt(d) { return Math.floor(elongAt(atHour(d, 6)) / 12) + 1; }
+        var moonCache = {};
+        function moonInfo(date) {
+          var key = keyOf(date);
+          if (moonCache[key]) return moonCache[key];
+          var e0 = elongAt(atHour(date, 0)), e1 = elongAt(atHour(addDays(date, 1), 0)), en = elongAt(atHour(date, 12));
+          var span = norm360(e1 - e0), ev = null, frac = 0.5;
+          [0, 180, 90, 270].some(function (x) { var dx = norm360(x - e0); if (dx < span) { ev = x; frac = dx / span; return true; } return false; });
+          var t = tithiAt(date), pt = tithiAt(addDays(date, -1));
+          /* 11th tithi at sunrise (first such day), or skipped between two sunrises */
+          var eka = ((t === 11 || t === 26) && pt !== t) || (pt === 10 && t === 12) || (pt === 25 && t === 27);
+          var name = ev === 0 ? 'новолуние' : ev === 180 ? 'полнолуние' : ev === 90 ? 'первая четверть' : ev === 270 ? 'последняя четверть'
+            : en < 90 ? 'растущий серп' : en < 180 ? 'растущая луна' : en < 270 ? 'убывающая луна' : 'убывающий серп';
+          return (moonCache[key] = { ev: ev, frac: frac, elong: en, illum: (1 - Math.cos(en * RAD)) / 2, tithi: t, eka: eka, ekaSide: t <= 15 || pt < 15 ? 'шукла' : 'кришна', name: name });
+        }
+        function moonTag(date) {
+          var m = moonInfo(date);
+          return '<span class="pill">' + m.name + ' · ' + Math.round(m.illum * 100) + '%</span>' + (m.eka ? '<span class="x-eka">Экадаши</span>' : '');
+        }
+
         /* ---------- Data ---------- */
         function rng(seed) {
           return function () {
@@ -689,23 +743,28 @@
           'Болит голова, но мысль ясная.', 'Новая тропинка через парк.', 'Записала сон, пока не забыла.'
         ];
         var PEOPLE = [
-          { id: 'lisa', nick: 'Лиса', elem: 1, bio: 'Пишет по утрам' },
-          { id: 'mark', nick: 'Марк', elem: 3, bio: 'Бег и погода' },
-          { id: 'taya', nick: 'Тая', elem: 4, bio: 'Сны и чай' },
-          { id: 'osya', nick: 'Ося', elem: 0, bio: 'Сад на балконе' },
-          { id: 'vera', nick: 'Вера', elem: 2, bio: 'Город пешком' },
-          { id: 'gosha', nick: 'Гоша', elem: 4, bio: 'Музыка дня' },
-          { id: 'nina', nick: 'Нина', elem: 1, bio: 'Одна фраза в день' },
-          { id: 'roma', nick: 'Рома', elem: 0, bio: 'Работа и тишина' }
+          { id: 'lisa', nick: 'Лиса', elem: 1, bio: 'Пишет по утрам', color: 'light-dark(#2563eb, #7aa7ff)' },
+          { id: 'mark', nick: 'Марк', elem: 3, bio: 'Бег и погода', color: 'light-dark(#8a4b14, #d39a5f)' },
+          { id: 'taya', nick: 'Тая', elem: 4, bio: 'Сны и чай', color: 'light-dark(#0f8a7e, #4fd1c0)' },
+          { id: 'osya', nick: 'Ося', elem: 0, bio: 'Сад на балконе', color: 'light-dark(#c0267a, #f07ab5)' },
+          { id: 'vera', nick: 'Вера', elem: 2, bio: 'Город пешком', color: 'light-dark(#4d8a12, #9ed36a)' },
+          { id: 'gosha', nick: 'Гоша', elem: 4, bio: 'Музыка дня', color: 'light-dark(#b42318, #f38b80)' },
+          { id: 'nina', nick: 'Нина', elem: 1, bio: 'Одна фраза в день', color: 'light-dark(#52627a, #a5b4c8)' },
+          { id: 'roma', nick: 'Рома', elem: 0, bio: 'Работа и тишина', color: 'light-dark(#0e7490, #5ec8e5)' }
         ];
+        var ME_COLOR = 'var(--text-primary)';
         var START = dateOfSlot(0, 1);
+        var SEED_START = addDays(TODAY, -130) < START ? addDays(TODAY, -130) : START;
         var FR = {};
         (function () {
           var r = rng(20261014);
-          for (var d = START; d <= TODAY; d = addDays(d, 1)) {
+          for (var d = SEED_START; d <= TODAY; d = addDays(d, 1)) {
             var key = keyOf(d), isT = key === keyOf(TODAY);
             PEOPLE.forEach(function (p) {
-              if (r() < (isT ? 0.6 : 0.33)) (FR[key] = FR[key] || []).push({ uid: p.id, text: PHRASES[Math.floor(r() * PHRASES.length)] });
+              if (r() < (isT ? 0.5 : 0.2)) {
+                (FR[key] = FR[key] || []).push({ uid: p.id, text: PHRASES[Math.floor(r() * PHRASES.length)] });
+                if (r() < 0.25) FR[key].push({ uid: p.id, text: PHRASES[Math.floor(r() * PHRASES.length)] });
+              }
             });
           }
         })();
@@ -717,20 +776,29 @@
         };
         var user = store.get('user', null);
         var mine = store.get('mine', {});
+        /* Several notes per day: mine[key] is an array (older single strings are wrapped) */
+        Object.keys(mine).forEach(function (k) { if (typeof mine[k] === 'string') mine[k] = [mine[k]]; });
         var follow = store.get('follow', { lisa: 1, mark: 1, taya: 1, osya: 1, vera: 1 });
 
         function seedMine(nick) {
           var r = rng(hash(nick)), m = {};
-          for (var d = START; d < TODAY; d = addDays(d, 1)) if (r() < 0.22) m[keyOf(d)] = PHRASES[Math.floor(r() * PHRASES.length)];
-          m[keyOf(addDays(TODAY, -60))] = 'Решил отмечать каждый день хотя бы одной строкой.';
+          for (var d = SEED_START; d < TODAY; d = addDays(d, 1)) {
+            if (r() < 0.4) {
+              m[keyOf(d)] = [PHRASES[Math.floor(r() * PHRASES.length)]];
+              if (r() < 0.3) m[keyOf(d)].push(PHRASES[Math.floor(r() * PHRASES.length)]);
+            }
+          }
+          m[keyOf(addDays(TODAY, -60))] = ['Решил отмечать каждый день хотя бы одной строкой.'];
           return m;
         }
+        function myNotes(key) { var v = mine[key]; return !v ? [] : typeof v === 'string' ? [v] : v; }
         function person(id) { if (id === 'me') return user; for (var i = 0; i < PEOPLE.length; i++) if (PEOPLE[i].id === id) return PEOPLE[i]; return null; }
+        function colorOf(p) { return !p || p.id === 'me' ? ME_COLOR : p.color; }
+        function pdot(p) { return '<i class="x-pdot" style="--pc:' + colorOf(p) + '" aria-hidden="true"></i>'; }
         function friendsOn(key) { return (FR[key] || []).filter(function (e) { return follow[e.uid]; }); }
         function entriesOn(key) {
           var list = friendsOn(key).map(function (e) { return { p: person(e.uid), text: e.text }; });
-          if (mine[key]) list.unshift({ p: user, text: mine[key], me: true });
-          return list;
+          return myNotes(key).map(function (t) { return { p: user, text: t, me: true }; }).concat(list);
         }
         function av(p, size) {
           return '<span class="x-av elem-' + p.elem * 2 + '" style="--s:' + (size || 32) + 'px" aria-hidden="true">' + esc(p.nick.charAt(0).toUpperCase()) + '</span>';
@@ -741,7 +809,7 @@
         }
         function entryRows(list) {
           return '<div class="x-entries">' + list.map(function (e) {
-            return '<div class="x-entry">' + av(e.p, 32) + '<div><p class="x-entry__name">' + esc(e.p.nick) + (e.me ? ' <small>вы</small>' : '') + '</p><p class="x-entry__text">' + esc(e.text) + '</p></div></div>';
+            return '<div class="x-entry">' + av(e.p, 32) + '<div><p class="x-entry__name">' + pdot(e.p) + esc(e.p.nick) + (e.me ? ' <small>вы</small>' : '') + '</p><p class="x-entry__text">' + esc(e.text) + '</p></div></div>';
           }).join('') + '</div>';
         }
         function top() { return '<div class="x-top"><p class="x-wordmark">CENTRAL</p>' + (user ? av(user, 32) : '') + '</div>'; }
@@ -800,38 +868,51 @@
           });
         }
 
-        var editing = false;
+        var editIdx = -1, adding = false;
         function renderToday() {
           var el = document.getElementById('scr-today');
           var key = keyOf(TODAY);
           var s = slotOf(TODAY);
           var ago = addDays(TODAY, -60), agoKey = keyOf(ago), agoS = slotOf(ago);
-          var my = editing ? null : mine[key];
+          var notes = myNotes(key).slice();
+          var showForm = !notes.length || adding || editIdx >= 0;
           var fr = friendsOn(key).map(function (e) { return { p: person(e.uid), text: e.text }; });
-          var agoFr = friendsOn(agoKey).length;
+          var agoFr = friendsOn(agoKey).length, agoMine = myNotes(agoKey);
+          var form = '<form id="t-form"><textarea class="x-textarea" id="t-text" aria-label="' + (notes.length ? 'Ещё мысль' : 'Моя запись') + '" placeholder="' + (notes.length && editIdx < 0 ? 'Ещё одна мысль…' : 'Что было сегодня?') + '" maxlength="600"></textarea>' +
+            '<div class="x-row x-row--between"><span class="fineprint">Через 60 дней вернётся на позицию ' + s.n + '</span><span class="x-row">' +
+            (notes.length ? '<button class="btn" type="button" id="t-cancel">Отмена</button>' : '') + '<button class="x-primary" type="submit">Сохранить</button></span></div></form>';
           el.innerHTML = top() +
-            '<div><p class="x-label">Сегодня</p><h1 class="x-h1">' + fmtLong(TODAY) + '</h1><div class="x-day" style="margin-top:6px"><span>' + slotLabel(s) + '</span>' + elemTag(s) + '</div></div>' +
-            (my
-              ? '<div class="x-card"><p class="x-label">Моя запись</p><p>' + esc(my) + '</p><div class="links"><button class="btn" type="button" id="t-edit">Изменить</button></div></div>'
-              : '<form class="x-card" id="t-form"><label class="x-label" for="t-text">Моя запись</label><textarea class="x-textarea" id="t-text" placeholder="Что было сегодня?" maxlength="600"></textarea><div class="x-row x-row--between"><span class="fineprint">Через 60 дней вернётся на позицию ' + s.n + '</span><button class="x-primary" type="submit">Сохранить</button></div></form>') +
+            '<div><p class="x-label">Сегодня</p><h1 class="x-h1">' + fmtLong(TODAY) + '</h1><div class="x-day" style="margin-top:6px"><span>' + slotLabel(s) + '</span>' + elemTag(s) + moonTag(TODAY) + '</div></div>' +
+            '<div class="x-card"><p class="x-label">' + (notes.length ? 'Мои записи · ' + notes.length : 'Моя запись') + '</p><div class="x-notes">' +
+            notes.map(function (t, i) {
+              return i === editIdx ? form : '<div class="x-note"><p>' + esc(t) + '</p><button class="btn" type="button" data-edit="' + i + '">Изменить</button></div>';
+            }).join('') +
+            (showForm && editIdx < 0 ? form : '') + '</div>' +
+            (showForm ? '' : '<div class="links"><button class="btn" type="button" id="t-more">+ ещё мысль</button></div>') + '</div>' +
             '<div class="x-card x-card--link" id="t-ago" role="button" tabindex="0" aria-label="Открыть день 60 дней назад">' +
             '<div class="x-row x-row--between"><p class="x-label">60 дней назад</p><span class="pill">' + agoFr + ' от друзей</span></div>' +
             '<div class="x-day">' + dayLine(ago) + '</div>' +
-            (mine[agoKey] ? '<p>' + esc(mine[agoKey]) + '</p>' : '<p class="x-empty">В этот день вы ничего не записали.</p>') +
+            (agoMine.length ? agoMine.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') : '<p class="x-empty">В этот день вы ничего не записали.</p>') +
             '</div>' +
             '<div><p class="x-label" style="margin-bottom:10px">Сегодня пишут · ' + fr.length + '</p>' + (fr.length ? entryRows(fr) : '<p class="x-empty">Пока никто из друзей не написал.</p>') + '</div>';
-          var form = document.getElementById('t-form');
-          if (form) form.addEventListener('submit', function (e) {
+          var f = document.getElementById('t-form');
+          if (f) f.addEventListener('submit', function (e) {
             e.preventDefault();
             var v = document.getElementById('t-text').value.trim();
             if (!v) return;
-            mine[key] = v; store.set('mine', mine); editing = false; renderToday();
+            if (editIdx >= 0) notes[editIdx] = v; else notes.push(v);
+            mine[key] = notes; store.set('mine', mine); editIdx = -1; adding = false; renderToday();
           });
-          if (editing) document.getElementById('t-text').value = mine[key] || '';
-          var edit = document.getElementById('t-edit');
-          if (edit) edit.addEventListener('click', function () {
-            editing = true; renderToday();
-            document.getElementById('t-text').focus();
+          if (editIdx >= 0) document.getElementById('t-text').value = notes[editIdx] || '';
+          var cancel = document.getElementById('t-cancel');
+          if (cancel) cancel.addEventListener('click', function () { editIdx = -1; adding = false; renderToday(); });
+          var more = document.getElementById('t-more');
+          if (more) more.addEventListener('click', function () { adding = true; renderToday(); document.getElementById('t-text').focus(); });
+          [].forEach.call(el.querySelectorAll('[data-edit]'), function (b) {
+            b.addEventListener('click', function () {
+              editIdx = +b.getAttribute('data-edit'); adding = false; renderToday();
+              document.getElementById('t-text').focus();
+            });
           });
           bindOpen(document.getElementById('t-ago'), ago);
         }
@@ -844,7 +925,7 @@
           var list = entriesOn(keyOf(d));
           var s = slotOf(d);
           return '<div class="x-lane"><p class="x-lane__head"><b>' + title + '</b><span>' + fmtDM(d) + ' · ' + (s.out ? 'между кольцами' : RING_ROMAN[s.k] + ' · ' + s.n) + '</span></p>' +
-            (list.length ? list.map(function (e) { return '<p class="x-mini">' + av(e.p, 24) + '<span><b>' + esc(e.p.nick) + '</b>' + esc(e.text) + '</span></p>'; }).join('') : '<p class="x-empty" style="font-size:var(--size-caption)">Тишина</p>') +
+            (list.length ? list.map(function (e) { return '<p class="x-mini">' + av(e.p, 24) + '<span><b>' + pdot(e.p) + esc(e.p.nick) + '</b>' + esc(e.text) + '</span></p>'; }).join('') : '<p class="x-empty" style="font-size:var(--size-caption)">Тишина</p>') +
             '</div>';
         }
         function renderFeed() {
@@ -869,7 +950,7 @@
             var v = q.value.trim().toLowerCase();
             document.getElementById('p-list').innerHTML = PEOPLE.filter(function (p) { return !v || p.nick.toLowerCase().indexOf(v) >= 0; }).map(function (p) {
               var n = 0; for (var k in FR) FR[k].forEach(function (e) { if (e.uid === p.id) n++; });
-              return '<div class="x-person">' + av(p, 40) + '<div><p class="x-person__name">' + esc(p.nick) + '</p><p class="x-person__meta"><span class="elem-' + p.elem * 2 + '"><i class="x-edot"></i></span> ' + ELEM[p.elem] + ' · ' + esc(p.bio) + ' · ' + n + ' записей</p></div>' +
+              return '<div class="x-person">' + av(p, 40) + '<div><p class="x-person__name">' + pdot(p) + esc(p.nick) + '</p><p class="x-person__meta"><span class="elem-' + p.elem * 2 + '"><i class="x-edot"></i></span> ' + ELEM[p.elem] + ' · ' + esc(p.bio) + ' · ' + n + ' записей</p></div>' +
                 '<button class="btn" type="button" data-f="' + p.id + '" aria-pressed="' + (follow[p.id] ? 'true' : 'false') + '">' + (follow[p.id] ? 'Вы подписаны' : 'Подписаться') + '</button></div>';
             }).join('') || '<p class="x-empty">Никого не нашли.</p>';
           }
@@ -885,22 +966,25 @@
 
         function renderProfile() {
           var el = document.getElementById('scr-profile');
-          var keys = Object.keys(mine).sort().reverse();
+          var keys = Object.keys(mine).filter(function (k) { return myNotes(k).length; }).sort().reverse();
+          var total = 0; keys.forEach(function (k) { total += myNotes(k).length; });
           var streak = 0;
-          for (var d = mine[keyOf(TODAY)] ? TODAY : addDays(TODAY, -1); mine[keyOf(d)]; d = addDays(d, -1)) streak++;
+          for (var d = myNotes(keyOf(TODAY)).length ? TODAY : addDays(TODAY, -1); myNotes(keyOf(d)).length; d = addDays(d, -1)) streak++;
           var nf = Object.keys(follow).length;
           el.innerHTML = top() +
             '<div class="x-profile">' + av(user, 88) + '<h1 class="x-h1">' + esc(user.nick) + '</h1><span class="x-elem elem-' + user.elem * 2 + '">' + ELEM[user.elem] + '</span></div>' +
-            '<section class="stats"><div class="stat"><span class="stat__fig">' + keys.length + '</span><span class="stat__label">Записей</span></div><div class="stat"><span class="stat__fig">' + streak + '</span><span class="stat__label">Дней подряд</span></div><div class="stat"><span class="stat__fig">' + nf + '</span><span class="stat__label">Подписок</span></div></section>' +
+            '<section class="stats"><div class="stat"><span class="stat__fig">' + total + '</span><span class="stat__label">Записей</span></div><div class="stat"><span class="stat__fig">' + streak + '</span><span class="stat__label">Дней подряд</span></div><div class="stat"><span class="stat__fig">' + nf + '</span><span class="stat__label">Подписок</span></div></section>' +
             '<div><p class="x-label" style="margin-bottom:10px">Последние записи</p><div id="pr-list" class="x-entries"></div></div>' +
             '<div class="links"><button class="btn" type="button" id="pr-splash">Показать заставку</button><button class="btn" type="button" id="pr-out">Выйти</button></div>';
           var list = document.getElementById('pr-list');
-          keys.slice(0, 8).forEach(function (k) {
-            var p = k.split('-'), dd = new Date(+p[0], +p[1] - 1, +p[2], 12);
+          var recent = [];
+          keys.forEach(function (k) { myNotes(k).slice().reverse().forEach(function (t) { recent.push({ k: k, t: t }); }); });
+          recent.slice(0, 8).forEach(function (it) {
+            var k = it.k, p = k.split('-'), dd = new Date(+p[0], +p[1] - 1, +p[2], 12);
             var row = document.createElement('div');
             row.className = 'x-entry x-card--link';
             row.setAttribute('role', 'button'); row.setAttribute('tabindex', '0');
-            row.innerHTML = '<span class="elem-' + (slotOf(dd).out ? 0 : stemOf(slotOf(dd).k, slotOf(dd).n)) + '"><i class="x-edot" style="margin-top:6px"></i></span><div><div class="x-day">' + dayLine(dd) + '</div><p class="x-entry__text">' + esc(mine[k]) + '</p></div>';
+            row.innerHTML = '<span class="elem-' + (slotOf(dd).out ? 0 : stemOf(slotOf(dd).k, slotOf(dd).n)) + '"><i class="x-edot" style="margin-top:6px"></i></span><div><div class="x-day">' + dayLine(dd) + '</div><p class="x-entry__text">' + esc(it.t) + '</p></div>';
             bindOpen(row, dd);
             list.appendChild(row);
           });
@@ -916,24 +1000,106 @@
 
         /* ---------- Круг ---------- */
         var zoom = 1, selected = null;
+        /* One 60-day ring: node n is the day TODAY + (n − today's position) */
+        var KC = 320, KRN = 288, KNR = 13.5, KTR = 18.5, KMIN = 150, KMAX = 283, KDOT0 = KRN - KNR - 9, KSTEP = 8.6, KDISC = 98;
+        var TODAY_N = TODAY_SLOT.n;
+        var WIN = [];
+        for (var wi = 0; wi < 60; wi++) WIN.push(addDays(TODAY, wi + 1 - TODAY_N));
+        var curveD = null;
+        function moonR(e) { return KMIN + (KMAX - KMIN) * (1 - Math.cos(e * RAD)) / 2; }
+        function polar(t, r) { var a = -Math.PI / 2 + (2 * Math.PI * t) / 60; return { x: KC + r * Math.cos(a), y: KC + r * Math.sin(a) }; }
+        function f1(v) { return Math.round(v * 10) / 10; }
+        function moonCurve() {
+          if (curveD) return curveD;
+          var t0 = atHour(WIN[0], 0).getTime(), pts = [];
+          for (var j = 0; j <= 360; j++) {
+            var t = j / 6, p = polar(t, moonR(elongAt(new Date(t0 + t * 86400000))));
+            pts.push(f1(p.x) + ' ' + f1(p.y));
+          }
+          return (curveD = 'M' + pts.join(' L') + ' Z');
+        }
+        function svgText(svg, x, y, txt, style) {
+          var t = mk('text', { x: x, y: y, 'text-anchor': 'middle', 'dominant-baseline': 'middle', style: style });
+          t.textContent = txt; svg.appendChild(t); return t;
+        }
         function renderKrug() {
           var s = TODAY_SLOT;
           document.getElementById('k-today-chip').textContent = 'Кольцо ' + RING_ROMAN[s.k] + ' · ' + s.n;
-          var ov = document.getElementById('k-ring-6');
-          ov.innerHTML = '';
-          for (var k = 0; k < 6; k++) {
-            for (var i = 0; i < 60; i++) {
-              var n = i + 1, p = nodeXY(k, i);
-              var key = keyOf(dateOfSlot(k, n));
-              var isT = k === s.k && n === s.n;
-              if (mine[key]) ov.appendChild(mk('circle', { cx: p.x, cy: p.y, r: (isT ? rTodayNode : rNode) + 2.2, style: 'fill:none;stroke:var(--text-primary);stroke-width:1.2' }));
-              if (friendsOn(key).length) {
-                var dx = p.x - p.ox, dy = p.y - p.oy, L = Math.sqrt(dx * dx + dy * dy) || 1, off = (isT ? rTodayNode : rNode) + 4.4;
-                ov.appendChild(mk('circle', { cx: p.x + (dx / L) * off, cy: p.y + (dy / L) * off, r: 1.7, style: 'fill:var(--text-primary);opacity:0.75' }));
-              }
-              if (selected && selected.k === k && selected.n === n) ov.appendChild(mk('circle', { cx: p.x, cy: p.y, r: rNode + 4, style: 'fill:none;stroke:var(--fill-system-orange);stroke-width:1.6' }));
+          var svg = document.getElementById('k-ring');
+          svg.innerHTML = '';
+
+          /* lunar curve */
+          svg.appendChild(mk('path', { d: moonCurve(), style: 'fill:none;stroke:var(--x-moon);stroke-width:2;stroke-linejoin:round' }));
+
+          /* centre disc */
+          var tm = moonInfo(TODAY);
+          svg.appendChild(mk('circle', { cx: KC, cy: KC, r: KDISC, style: 'fill:var(--fill-tertiary);stroke:var(--stroke-secondary);stroke-width:1' }));
+          var y0 = tm.eka ? KC - 36 : KC - 26;
+          svgText(svg, KC, y0, fmtShort(TODAY), 'font-size:26px;font-weight:600;fill:var(--text-primary)');
+          svgText(svg, KC, y0 + 34, 'сегодня · ' + TODAY_N + '/60', 'font-size:17px;fill:var(--text-secondary)');
+          svgText(svg, KC, y0 + 58, tm.name, 'font-size:17px;fill:var(--text-secondary)');
+          if (tm.eka) svgText(svg, KC, y0 + 84, '◆ Экадаши', 'font-size:17px;font-weight:600;fill:var(--x-eka)');
+
+          var ekaDays = [], fullDays = [];
+          for (var i = 0; i < 60; i++) {
+            var n = i + 1, d = WIN[i], key = keyOf(d), isT = n === TODAY_N, future = d > TODAY;
+            var p = polar(i + 0.5, KRN), stem = (n - 1) % 10;
+
+            /* notes as dots, stacked inward: mine first, then friends */
+            var cols = myNotes(key).map(function () { return ME_COLOR; })
+              .concat(future ? [] : friendsOn(key).map(function (e) { return person(e.uid).color; }));
+            cols.forEach(function (c, j) {
+              var q = polar(i + 0.5, KDOT0 - (isT ? KTR - KNR : 0) - j * KSTEP);
+              svg.appendChild(mk('circle', { cx: f1(q.x), cy: f1(q.y), r: 3.3, style: 'fill:' + c }));
+            });
+
+            /* node */
+            var g = mk('g', { class: 'elem-' + stem, style: future ? 'opacity:0.5' : '' });
+            var ttl = mk('title');
+            ttl.textContent = n + ' · ' + fmtShort(d) + ' · ' + ELEM[Math.floor(stem / 2)] + (cols.length ? ' · записей: ' + cols.length : '');
+            g.appendChild(ttl);
+            var c = mk('circle', {
+              cx: f1(p.x), cy: f1(p.y), r: isT ? KTR : KNR,
+              style: 'fill:var(--ef);stroke:' + (isT ? 'var(--text-primary)' : 'var(--es)') + ';stroke-width:' + (isT ? 2.6 : 0.8)
+            });
+            if (isT) c.setAttribute('id', 'k-today-hit');
+            g.appendChild(c);
+            svgText(g, f1(p.x), f1(p.y) + 0.5, String(n), 'font-size:' + (isT ? 15 : 12.5) + 'px;font-weight:600;fill:var(--et)');
+            svg.appendChild(g);
+
+            if (selected && selected.n === n) svg.appendChild(mk('circle', { cx: f1(p.x), cy: f1(p.y), r: (isT ? KTR : KNR) + 5, style: 'fill:none;stroke:var(--text-primary);stroke-width:1.4;stroke-dasharray:3 3' }));
+          }
+
+          /* moon markers on the curve */
+          for (var m = 0; m < 60; m++) {
+            var mi = moonInfo(WIN[m]);
+            if (mi.ev === 180) {
+              var fp = polar(m + mi.frac, moonR(180));
+              svg.appendChild(mk('circle', { cx: f1(fp.x), cy: f1(fp.y), r: 7, style: 'fill:var(--x-moon)' }));
+              fullDays.push(fmtDM(WIN[m]));
+            } else if (mi.ev === 0) {
+              var np = polar(m + mi.frac, moonR(0));
+              svg.appendChild(mk('circle', { cx: f1(np.x), cy: f1(np.y), r: 5, style: 'fill:#fff;stroke:var(--x-newmoon);stroke-width:1.5' }));
+            }
+            if (mi.eka) {
+              var ep = polar(m + 0.25, moonR(elongAt(atHour(WIN[m], 6)))), sz = 8;
+              svg.appendChild(mk('polygon', {
+                points: [f1(ep.x) + ',' + f1(ep.y - sz), f1(ep.x + sz) + ',' + f1(ep.y), f1(ep.x) + ',' + f1(ep.y + sz), f1(ep.x - sz) + ',' + f1(ep.y)].join(' '),
+                style: 'fill:var(--x-eka);stroke:var(--fill-primary-on);stroke-width:1'
+              }));
+              ekaDays.push(fmtDM(WIN[m]));
             }
           }
+
+          document.getElementById('k-rings').setAttribute('aria-label',
+            'Круг 60 дней с ' + fmtShort(WIN[0]) + ' по ' + fmtShort(WIN[59]) + '. Сегодня ' + TODAY_N + ' из 60, ' + tm.name +
+            '. Полнолуние: ' + (fullDays.join(', ') || 'нет') + '. Экадаши: ' + (ekaDays.join(', ') || 'нет') + '.');
+
+          var fdots = PEOPLE.filter(function (p) { return follow[p.id]; }).map(function (p) { return pdot(p); }).join('');
+          document.getElementById('k-legend').innerHTML =
+            '<span><i class="x-pdot" style="--pc:' + ME_COLOR + ';margin:0"></i>моя запись</span>' +
+            (fdots ? '<span><i class="x-lg-dots">' + fdots + '</i>друзья</span>' : '') +
+            '<span><i class="x-lg-full"></i>полнолуние</span><span><i class="x-lg-new"></i>новолуние</span><span><i class="x-lg-eka"></i>экадаши</span>';
         }
         function setZoom(z) {
           var sc = document.getElementById('k-scroll');
@@ -952,12 +1118,11 @@
         document.getElementById('k-inner').addEventListener('click', function (e) {
           var r = document.getElementById('k-rings').getBoundingClientRect();
           var vx = ((e.clientX - r.left) / r.width) * W, vy = ((e.clientY - r.top) / r.height) * H;
-          var best = null, bd = 1e9;
-          for (var k = 0; k < 6; k++) for (var i = 0; i < 60; i++) {
-            var p = nodeXY(k, i), d2 = (p.x - vx) * (p.x - vx) + (p.y - vy) * (p.y - vy);
-            if (d2 < bd) { bd = d2; best = { k: k, n: i + 1 }; }
-          }
-          if (best && bd < 16 * 16) openDay(dateOfSlot(best.k, best.n), best);
+          var dx = vx - KC, dy = vy - KC, dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < KDISC + 10 || dist > KRN + 30) return;
+          var turn = (Math.atan2(dy, dx) + Math.PI / 2) / (2 * Math.PI);
+          var i = ((Math.round(turn * 60 - 0.5) % 60) + 60) % 60;
+          openDay(WIN[i], { k: TODAY_SLOT.k, n: i + 1 });
         });
 
         /* ---------- Bottom sheet ---------- */
@@ -966,19 +1131,24 @@
           var s = slot ? { k: slot.k, n: slot.n, out: false } : slotOf(date);
           var key = keyOf(date), isT = key === keyOf(TODAY), future = date > TODAY;
           var list = entriesOn(key).filter(function (e) { return !e.me; });
+          var mn = myNotes(key);
+          var ago = addDays(date, -60), agoList = entriesOn(keyOf(ago));
           if (!s.out && current === 'krug') { selected = { k: s.k, n: s.n }; renderKrug(); }
           sheet.innerHTML = '<span class="x-sheet__grab" aria-hidden="true"></span>' +
             '<div class="x-row x-row--between"><p class="x-label">' + slotLabel(s) + '</p><button class="btn" type="button" id="sh-close">Закрыть</button></div>' +
-            '<div><h3>' + fmtShort(date) + '</h3><div class="x-day" style="margin-top:8px">' + elemTag(s) + (isT ? '<span class="chip chip--solid">Сегодня</span>' : '') + (future ? '<span class="chip">Ещё впереди</span>' : '') + '</div></div>' +
-            '<div class="x-card"><p class="x-label">Моя запись</p>' +
-            (mine[key] ? '<p>' + esc(mine[key]) + '</p>' : '<p class="x-empty">' + (future ? 'День ещё не наступил.' : 'Записи нет.') + '</p>') +
-            (isT ? '<div class="links"><button class="btn" type="button" id="sh-write">' + (mine[key] ? 'Открыть в Сегодня' : 'Написать') + '</button></div>' : '') + '</div>' +
-            (future ? '' : '<div><p class="x-label" style="margin-bottom:10px">Друзья · ' + list.length + '</p>' + (list.length ? entryRows(list) : '<p class="x-empty">Никто из друзей не писал.</p>') + '</div>');
+            '<div><h3>' + fmtShort(date) + '</h3><div class="x-day" style="margin-top:8px">' + elemTag(s) + moonTag(date) + (isT ? '<span class="chip chip--solid">Сегодня</span>' : '') + (future ? '<span class="chip">Ещё впереди</span>' : '') + '</div></div>' +
+            '<div class="x-card"><p class="x-label">' + (mn.length > 1 ? 'Мои записи · ' + mn.length : 'Моя запись') + '</p>' +
+            (mn.length ? mn.map(function (t) { return '<p>' + pdot(user) + esc(t) + '</p>'; }).join('') : '<p class="x-empty">' + (future ? 'День ещё не наступил.' : 'Записи нет.') + '</p>') +
+            (isT ? '<div class="links"><button class="btn" type="button" id="sh-write">' + (mn.length ? '+ ещё мысль' : 'Написать') + '</button></div>' : '') + '</div>' +
+            (future ? '' : '<div><p class="x-label" style="margin-bottom:10px">Друзья · ' + list.length + '</p>' + (list.length ? entryRows(list) : '<p class="x-empty">Никто из друзей не писал.</p>') + '</div>') +
+            '<div class="x-card"><div class="x-row x-row--between"><p class="x-label">60 дней назад</p><span class="pill">' + fmtShort(ago) + '</span></div>' +
+            '<div class="x-day">' + moonTag(ago) + '</div>' +
+            (agoList.length ? entryRows(agoList) : '<p class="x-empty">В этот день записей нет.</p>') + '</div>';
           lastFocus = document.activeElement;
           sheet.classList.add('is-open'); scrim.classList.add('is-open');
           document.getElementById('sh-close').addEventListener('click', closeSheet);
           var w = document.getElementById('sh-write');
-          if (w) w.addEventListener('click', function () { show('today'); var ta = document.getElementById('t-text'); if (ta) ta.focus(); });
+          if (w) w.addEventListener('click', function () { adding = myNotes(keyOf(TODAY)).length > 0; editIdx = -1; show('today'); var ta = document.getElementById('t-text'); if (ta) ta.focus(); });
           document.getElementById('sh-close').focus();
         }
         function closeSheet() {
@@ -1039,7 +1209,6 @@
         sRings.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enter(); } });
 
         buildSixRings('s');
-        buildSixRings('k');
         initFullscreenRipples();
       })();
     </script>
