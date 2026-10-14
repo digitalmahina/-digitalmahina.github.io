@@ -25,6 +25,13 @@
       :root {
         --x-ts: #888780;
         --x-bt: light-dark(rgba(0, 0, 0, 0.22), rgba(255, 255, 255, 0.22));
+        /* Type scale, ratio 1.25: 12 / 15 / 19 / 24, line heights on the 8px grid */
+        --x-t12: var(--weight-regular) 12px/16px var(--sans);
+        --x-t12m: var(--weight-medium) 12px/16px var(--sans);
+        --x-t15: var(--weight-regular) 15px/24px var(--sans);
+        --x-t15m: var(--weight-medium) 15px/24px var(--sans);
+        --x-t19: var(--weight-medium) 19px/24px var(--sans);
+        --x-t24: var(--weight-regular) 24px/32px var(--sans);
       }
 
       /* Six-ring stack */
@@ -35,13 +42,19 @@
       /* Splash */
       .x-splash {
         position: fixed; inset: 0; z-index: 9000;
-        display: grid; grid-template-rows: auto minmax(0, 1fr) auto; justify-items: center; align-items: center;
-        padding: max(14px, env(safe-area-inset-top)) 8px max(18px, env(safe-area-inset-bottom));
-        background: var(--fill-primary-on);
+        /* rings block S = min(screen width − 32, available height − 120) */
+        --S: min(calc(100vw - 32px), calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 120px));
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: env(safe-area-inset-top, 0px) 16px env(safe-area-inset-bottom, 0px);
+        background: var(--fill-primary-on); overflow: hidden;
       }
       .x-splash[hidden] { display: none; }
-      .x-wordmark { font: var(--type-tag); letter-spacing: 0.32em; padding-left: 0.32em; color: var(--text-primary); }
-      .x-splash__rings { width: min(calc(100vw - 16px), calc(100dvh - 160px)); cursor: pointer; border-radius: 50%; }
+      .x-wordmark { font: var(--x-t12m); letter-spacing: 0.32em; margin-right: -0.32em; color: var(--text-primary); }
+      /* logo = 0.07·S; wordmark cap height (0.7em in Geist) = the logo's inner diameter (0.837 of its size) */
+      .x-splash__brand { display: flex; align-items: center; gap: 8px; height: calc(var(--S) * 0.07); margin-bottom: 16px; }
+      .x-splash__brand .x-logo { --ls: calc(var(--S) * 0.07); }
+      .x-splash__brand .x-wordmark { font-size: calc(var(--S) * 0.07 * 0.837 / 0.7); line-height: 1; letter-spacing: 0.24em; margin-right: -0.24em; text-box: trim-both cap alphabetic; }
+      .x-splash__rings { width: var(--S); height: var(--S); flex: none; cursor: pointer; border-radius: 50%; }
 
       /* Daily ring logo */
       :root { --x-logo-t: light-dark(#444441, #d3d1c7); }
@@ -51,96 +64,114 @@
       .x-brand--stack { flex-direction: column; gap: 6px; }
 
       /* Note colour swatches */
-      .x-swatches { display: flex; flex-wrap: wrap; margin: -4px -6px; }
-      .x-swatches label { position: relative; width: 40px; height: 40px; display: grid; place-items: center; cursor: pointer; }
+      .x-swatches { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); }
+      .x-swatches label { position: relative; height: 40px; display: grid; place-items: center; cursor: pointer; }
       .x-swatches input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-      .x-swatches span { width: 18px; height: 18px; border-radius: 50%; background: var(--pc); }
-      .x-swatches input:checked + span { box-shadow: 0 0 0 2px var(--fill-primary-on), 0 0 0 3.5px var(--text-primary); }
-      .x-swatches input:focus-visible + span { outline: 2px solid var(--fill-primary); outline-offset: 5px; }
-      .x-note p .x-pdot { margin-right: 6px; }
-      .x-splash__rings:focus-visible { outline-offset: -6px; }
-      .x-splash__line { font: var(--type-caption); color: var(--text-secondary); text-align: center; }
+      .x-swatches span { width: 24px; height: 24px; border-radius: 50%; background: var(--pc); }
+      .x-swatches input:checked + span { box-shadow: 0 0 0 2px var(--fill-primary-on), 0 0 0 4px var(--text-primary); }
+      .x-swatches input:focus-visible + span { outline: 2px solid var(--fill-primary); outline-offset: 4px; }
+      .x-splash__rings:focus-visible { outline-offset: -8px; }
+      .x-splash__line { margin-top: 16px; font: var(--x-t12); color: var(--text-secondary); text-align: center; }
 
       /* No motion anywhere */
       html { scroll-behavior: auto !important; }
       *, *::before, *::after { animation: none !important; transition: none !important; }
 
       /* Phone frame */
+      /* Phone frame: true 390:844, centred in the viewport */
       .x-phone {
-        position: relative; width: min(400px, 100%); height: min(860px, calc(100dvh - 40px)); margin: 8px auto 0;
+        --ph: min(844px, calc(100dvh - 48px));
+        position: fixed; inset: 0; z-index: 10; margin: auto;
+        height: var(--ph); width: min(calc(var(--ph) * 390 / 844), calc(100vw - 32px));
         display: flex; flex-direction: column; overflow: hidden;
+        font: var(--x-t15); color: var(--text-primary);
         background: var(--fill-primary-on); border: 1px solid var(--stroke-primary); border-radius: var(--r-xl); box-shadow: var(--hark-shadow);
       }
       .x-phone[hidden] { display: none; }
       @media (max-width: 480px) {
-        .x-phone { width: calc(100% + 2 * var(--gutter)); margin: -12px calc(-1 * var(--gutter)) -40px; height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }
+        .x-phone { width: 100vw; height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }
       }
-      .x-screen { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 18px 28px; display: none; flex-direction: column; gap: 18px; overscroll-behavior: contain; }
+      .x-phone p, .x-phone h1, .x-phone h3 { margin: 0; overflow-wrap: anywhere; }
+      .x-screen { flex: 1; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; padding: 0 16px 24px; display: none; flex-direction: column; gap: 16px; overscroll-behavior: contain; }
       .x-screen.is-active { display: flex; }
-      .x-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-      .x-top .x-wordmark { font-size: var(--size-caption); }
-      .x-h1 { font: var(--type-title); }
-      .x-sub { font: var(--type-small); color: var(--text-secondary); }
-      .x-label { font: var(--type-tag); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
+      .x-top { position: sticky; top: 0; z-index: 2; flex: none; height: 48px; margin-inline: -16px; padding-inline: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--fill-primary-on); }
+      .x-top .x-logo { --ls: 24px; }
+      .x-h1 { font: var(--x-t24); }
+      .x-sub { font: var(--x-t15); color: var(--text-secondary); }
+      .x-cap { font: var(--x-t12); color: var(--text-secondary); }
+      .x-label { font: var(--x-t12m); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
+      .x-help { appearance: none; border: 0; background: none; width: var(--tap); height: var(--tap); margin-right: -10px; display: grid; place-items: center; cursor: pointer; color: var(--text-secondary); }
+      .x-help span { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--stroke-primary); display: grid; place-items: center; font: var(--x-t12m); }
+      .x-help:hover span { color: var(--text-primary); }
 
-      .x-tabs { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--stroke-secondary); background: var(--mat-regular); -webkit-backdrop-filter: var(--hark-blur); backdrop-filter: var(--hark-blur); padding-bottom: env(safe-area-inset-bottom); }
+      /* Tab bar: 56px + safe area, equal tabs, a 4px dot above the active icon */
+      .x-tabs { flex: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: calc(56px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); border-top: 1px solid var(--stroke-secondary); background: var(--fill-primary-on); }
       .x-tabs[hidden] { display: none; }
-      .x-tab { appearance: none; border: 0; background: none; color: var(--text-secondary); font: var(--type-tag); min-height: 56px; display: grid; place-items: center; gap: 2px; padding: 8px 2px; cursor: pointer; }
-      .x-tab::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: transparent; }
+      .x-tab { appearance: none; border: 0; background: none; color: var(--text-secondary); font: var(--x-t12); height: 56px; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; cursor: pointer; }
+      .x-tab::before { content: ""; width: 4px; height: 4px; margin-bottom: 4px; border-radius: 50%; background: transparent; }
+      .x-tab svg { width: 22px; height: 22px; display: block; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+      .x-tab span { margin-top: 4px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .x-tab[aria-current="page"] { color: var(--text-primary); }
-      .x-tab[aria-current="page"]::before { background: var(--fill-primary); }
+      .x-tab[aria-current="page"]::before { background: var(--text-primary); }
+      .x-tab:focus-visible { outline: 2px solid var(--fill-primary); outline-offset: -4px; border-radius: var(--r-s); }
 
       /* Cards and rows */
-      .x-card { background: var(--fill-tertiary); border-radius: var(--r-m); padding: 16px; display: grid; gap: 10px; }
+      .x-card { background: var(--fill-tertiary); border-radius: var(--r-s); padding: 16px; display: grid; gap: 8px; min-width: 0; }
       .x-card--link { cursor: pointer; }
-      .x-day { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: var(--type-caption); color: var(--text-secondary); }
-      .x-elem { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: var(--r-pill); background: var(--ef); color: var(--et); font: var(--type-tag); }
+      .x-day { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font: var(--x-t12); color: var(--text-secondary); }
+      .x-elem { display: inline-flex; align-items: center; gap: 8px; height: 24px; padding: 0 8px; border-radius: var(--r-pill); background: var(--ef); color: var(--et); font: var(--x-t12m); }
       .x-elem::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--es); }
       .x-edot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--es); flex: none; }
-      .x-av { --s: 32px; width: var(--s); height: var(--s); flex: none; border-radius: 50%; display: inline-grid; place-items: center; background: var(--ef); color: var(--et); box-shadow: inset 0 0 0 1.5px var(--es); font: var(--weight-bold) max(12px, calc(var(--s) * 0.42)) / 1 var(--sans); }
+      .x-av { --s: 32px; width: var(--s); height: var(--s); flex: none; border-radius: 50%; display: inline-grid; place-items: center; background: var(--ef); color: var(--et); box-shadow: inset 0 0 0 1.5px var(--es); font: var(--weight-bold) calc(var(--s) * 0.375) / 1 var(--sans); }
       .x-entries { display: grid; }
-      .x-entry { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; padding: 10px 0; border-top: 1px solid var(--stroke-secondary); }
+      .x-entry { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; padding: 16px 0; border-top: 1px solid var(--stroke-secondary); }
       .x-entry:first-child { border-top: 0; padding-top: 0; }
-      .x-entry__name { font: var(--type-label); }
-      .x-entry__name small { color: var(--text-secondary); font-weight: var(--weight-regular); }
-      .x-entry__text { font: var(--type-small); }
-      .x-empty { font: var(--type-small); color: var(--text-secondary); }
+      .x-entry:last-child { padding-bottom: 0; }
+      .x-entry__name { font: var(--x-t15m); }
+      .x-entry__name small { font: var(--x-t12); color: var(--text-secondary); }
+      .x-entry__text { font: var(--x-t15); }
+      .x-empty { font: var(--x-t15); color: var(--text-secondary); }
 
-      .x-textarea, .x-input { width: 100%; font: var(--type-body); color: var(--text-primary); background: var(--fill-primary-on); border: 1px solid var(--stroke-primary); border-radius: var(--r-s); padding: 12px; }
+      .x-textarea, .x-input { width: 100%; font: var(--x-t15); color: var(--text-primary); background: var(--fill-primary-on); border: 1px solid var(--stroke-primary); border-radius: var(--r-s); padding: 8px 16px; }
       .x-textarea { min-height: 96px; resize: vertical; }
-      .x-input { min-height: var(--tap); }
+      .x-input { height: var(--tap); }
       .x-textarea:focus, .x-input:focus { outline: 2px solid var(--fill-primary); outline-offset: 1px; }
-      .x-primary { appearance: none; border: 0; cursor: pointer; min-height: var(--tap); padding: 10px 18px; border-radius: var(--r-s); background: var(--fill-primary); color: var(--text-primary-on); font: var(--type-label); }
+      .x-primary { appearance: none; border: 0; cursor: pointer; min-height: var(--tap); padding: 0 16px; border-radius: var(--r-s); background: var(--fill-primary); color: var(--text-primary-on); font: var(--x-t15m); }
       .x-primary:disabled { opacity: 0.4; cursor: default; }
       .x-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
       .x-row--between { justify-content: space-between; }
       button.btn { cursor: pointer; }
 
       /* Parallel feed */
-      .x-feedday { display: grid; gap: 10px; padding-top: 14px; border-top: 1px solid var(--stroke-primary); }
+      .x-feeddays { display: grid; gap: 16px; }
+      .x-feedday { display: grid; gap: 8px; padding-top: 16px; border-top: 1px solid var(--stroke-primary); }
       .x-feedday:first-child { border-top: 0; padding-top: 0; }
-      .x-par { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-      .x-lane { background: var(--fill-tertiary); border-radius: var(--r-s); padding: 10px; display: grid; gap: 8px; align-content: start; min-width: 0; }
-      .x-lane__head { display: grid; gap: 2px; font: var(--type-caption); color: var(--text-secondary); }
+      .x-par { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .x-lane { background: var(--fill-tertiary); border-radius: var(--r-s); padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+      .x-lane__head { display: grid; font: var(--x-t12); color: var(--text-secondary); }
       .x-lane__head b { color: var(--text-primary); font-weight: var(--weight-medium); }
-      .x-mini { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px; align-items: start; font: var(--type-caption); }
-      .x-mini b { font-weight: var(--weight-medium); display: block; }
-      .x-mini span:last-child { overflow-wrap: anywhere; }
+      .x-mini { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px; align-items: center; font: var(--x-t12); }
+      .x-mini b { font-weight: var(--weight-medium); min-width: 0; overflow-wrap: anywhere; }
+      .x-mini__t { grid-column: 1 / -1; overflow-wrap: anywhere; }
+      .x-lane .x-empty { font: var(--x-t12); }
 
       /* People */
-      .x-person { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--stroke-secondary); }
-      .x-person:first-child { border-top: 0; }
-      .x-person__name { font: var(--type-label); }
-      .x-person__meta { font: var(--type-caption); color: var(--text-secondary); }
+      .x-person { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 16px 0; border-top: 1px solid var(--stroke-secondary); }
+      .x-person:first-child { border-top: 0; padding-top: 0; }
+      .x-person__name { font: var(--x-t15m); }
+      .x-person__meta { font: var(--x-t12); color: var(--text-secondary); }
 
-      /* Krug */
-      .x-krug { margin-inline: -18px; padding-inline: 4px; border-block: 1px solid var(--stroke-secondary); }
-      .x-krug__inner { width: 100%; cursor: pointer; }
-      .x-krug .x-rings svg text { font-family: var(--sans); }
-      .x-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font: var(--type-caption); color: var(--text-secondary); }
-      .x-legend span { display: inline-flex; align-items: center; gap: 6px; }
+      /* Krug: the ring is the hero. The screen is a size container, so the ring (100cqw square)
+         can sit with its centre at 45% of the visible height between header (48) and tab bar. */
+      .x-screen--krug { container-type: size; gap: 0; }
+      .x-krug-top { flex: none; min-height: max(32px, calc(0.45 * (100cqh - 24px) - 50cqw)); display: flex; align-items: center; justify-content: center; }
+      .x-krug { flex: none; width: 100%; aspect-ratio: 1; cursor: pointer; }
+      .x-krug .x-rings svg text { font-family: var(--sans); font-variant-numeric: tabular-nums; }
+      .x-krug-foot { flex: none; display: grid; gap: 16px; justify-items: center; padding-top: 16px; text-align: center; }
+      .x-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font: var(--x-t12); color: var(--text-secondary); }
+      .x-legend span { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
       :root { --x-moon: light-dark(#ee9f33, #f2b14f); --x-eka: #7c3aed; --x-newmoon: #9a9a96; }
-      .x-pdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--pc); flex: none; vertical-align: 1px; margin-right: 5px; }
+      .x-pdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--pc); flex: none; vertical-align: 1px; margin-right: 8px; }
       .x-lg-dots { display: inline-flex; gap: 2px; }
       .x-lg-dots .x-pdot { width: 6px; height: 6px; margin: 0; }
       .x-lg-full { width: 12px; height: 12px; border-radius: 50%; background: #ef9f27; opacity: 0.95; }
@@ -149,46 +180,57 @@
       .x-krug-legend { justify-content: center; }
       .x-lg-eka { width: 7px; height: 7px; margin: 0 1px; background: var(--x-eka); transform: rotate(45deg); }
       .x-lg-line { width: 14px; height: 2px; border-radius: 1px; background: var(--x-moon); }
-      .x-eka { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 9px; border-radius: var(--r-pill); border: 1px solid var(--x-eka); color: var(--text-primary); font: var(--type-tag); }
-      .x-eka::before { content: ""; width: 7px; height: 7px; background: var(--x-eka); transform: rotate(45deg); }
-      .x-note { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
-      .x-note + .x-note, .x-note + form, .x-notes + .links { border-top: 1px solid var(--stroke-secondary); padding-top: 10px; }
-      .x-notes { display: grid; gap: 10px; }
-      .x-notes > form { display: grid; gap: 10px; }
+      .x-eka { display: inline-flex; align-items: center; gap: 8px; height: 24px; padding: 0 8px; border-radius: var(--r-pill); border: 1px solid var(--x-eka); color: var(--text-primary); font: var(--x-t12m); }
+      .x-eka::before { content: ""; width: 8px; height: 8px; background: var(--x-eka); transform: rotate(45deg); }
+      .x-note { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+      .x-note + .x-note, .x-note + form, .x-notes + .links { border-top: 1px solid var(--stroke-secondary); padding-top: 8px; }
+      .x-notes { display: grid; gap: 8px; }
+      .x-notes > form { display: grid; gap: 8px; }
 
       /* Profile */
       .x-profile { display: grid; justify-items: center; gap: 8px; text-align: center; padding-top: 8px; }
-      .x-pick { display: flex; flex-wrap: wrap; gap: 10px; }
-      .x-pick label { display: grid; justify-items: center; gap: 4px; font: var(--type-caption); color: var(--text-secondary); cursor: pointer; }
+      .x-profile .x-h1 { display: inline-flex; align-items: center; }
+      .x-pick { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .x-pick label { position: relative; display: grid; justify-items: center; gap: 8px; padding: 8px 0; font: var(--x-t12); color: var(--text-secondary); cursor: pointer; min-width: 0; }
       .x-pick input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-      .x-pick .x-av { --s: 44px; }
+      .x-pick .x-av { --s: 32px; }
       .x-pick input:checked + .x-av { box-shadow: inset 0 0 0 1.5px var(--es), 0 0 0 2px var(--fill-primary-on), 0 0 0 4px var(--fill-primary); }
-      .x-pick input:focus-visible + .x-av { outline: 2px solid var(--fill-primary); outline-offset: 6px; }
-      .x-field { display: grid; gap: 6px; font: var(--type-label); }
+      .x-pick input:focus-visible + .x-av { outline: 2px solid var(--fill-primary); outline-offset: 8px; }
+      .x-field { display: grid; gap: 8px; font: var(--x-t15m); min-width: 0; }
       /* Personal shape mark */
-      .x-shape { display: inline-block; width: 11px; height: 11px; flex: none; vertical-align: -1px; margin-right: 5px; overflow: visible; }
-      .x-shapes { display: flex; flex-wrap: wrap; gap: 4px; }
-      .x-shapes label { position: relative; display: grid; justify-items: center; gap: 4px; min-width: 52px; min-height: var(--tap); padding: 8px 4px 6px; border-radius: var(--r-s); font: var(--type-caption); color: var(--text-secondary); cursor: pointer; }
+      .x-shape { display: inline-block; width: 12px; height: 12px; flex: none; vertical-align: -1px; margin-right: 8px; overflow: visible; }
+      .x-shapes { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+      .x-shapes label { position: relative; display: grid; place-items: center; height: 48px; border-radius: var(--r-s); color: var(--text-secondary); cursor: pointer; min-width: 0; }
       .x-shapes input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-      .x-shapes .x-shape { width: 20px; height: 20px; margin: 0; color: var(--text-primary); }
-      .x-shapes label:has(input:checked) { background: var(--fill-tertiary); color: var(--text-primary); box-shadow: inset 0 0 0 1px var(--stroke-primary); }
+      .x-shapes .x-shape { width: 24px; height: 24px; margin: 0; color: var(--text-primary); }
+      .x-shapes label:has(input:checked) { background: var(--fill-tertiary); box-shadow: inset 0 0 0 1px var(--stroke-primary); }
+      .x-card .x-shapes label:has(input:checked) { background: var(--fill-primary-on); }
       .x-shapes label:has(input:focus-visible) { outline: 2px solid var(--fill-primary); outline-offset: 2px; }
-      .x-krug-date { justify-content: center; font: var(--type-caption); color: var(--text-secondary); text-align: center; }
-      .x-krug-motto { text-align: center; font: var(--type-small); color: var(--text-secondary); }
+      .x-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+      .x-krug-date { font: var(--x-t12); color: var(--text-secondary); text-align: center; }
+      .x-krug-motto { font: var(--x-t15); color: var(--text-secondary); text-wrap: balance; }
+      .x-krug-legend { justify-content: center; }
       .x-legend .x-shape { margin-right: 0; color: var(--text-primary); }
 
-      /* Bottom sheet */
+      /* Profile figures: three equal columns */
+      .x-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+      .x-stats > div { display: grid; gap: 8px; padding: 16px; border-radius: var(--r-s); background: var(--fill-tertiary); min-width: 0; }
+      .x-stats b { font: var(--x-t24); font-variant-numeric: tabular-nums; }
+      .x-stats span { font: var(--x-t12); color: var(--text-secondary); }
+
+      /* Bottom sheet: opens instantly */
       .x-scrim { position: absolute; inset: 0; z-index: 30; background: rgb(0 0 0 / 0.28); display: none; }
       .x-scrim.is-open { display: block; }
-      .x-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 31; max-height: 78%; overflow-y: auto; background: var(--fill-primary-on); border-radius: var(--r-l) var(--r-l) 0 0; box-shadow: var(--hark-shadow); padding: 10px 18px calc(22px + env(safe-area-inset-bottom)); gap: 14px; display: none; }
+      .x-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 31; max-height: 80%; overflow-y: auto; overflow-x: hidden; background: var(--fill-primary-on); border-radius: var(--r-l) var(--r-l) 0 0; box-shadow: var(--hark-shadow); padding: 8px 16px calc(24px + env(safe-area-inset-bottom, 0px)); gap: 16px; display: none; }
       .x-sheet.is-open { display: grid; }
-      .x-sheet__grab { justify-self: center; width: 40px; height: 4px; border-radius: 2px; background: var(--stroke-primary); }
-      .x-sheet h3 { font: var(--type-heading); }
+      .x-sheet__grab { justify-self: center; width: 32px; height: 4px; border-radius: 2px; background: var(--stroke-primary); }
+      .x-sheet h3 { font: var(--x-t19); }
+      .x-help-list { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; font: var(--x-t15); }
     </style>
   </head>
   <body>
     <div class="x-splash" id="splash">
-      <div class="x-brand x-brand--stack"><span class="x-logo" data-logo style="--ls:52px" aria-hidden="true"></span><p class="x-wordmark">CENTRAL</p></div>
+      <div class="x-splash__brand"><span class="x-logo" data-logo aria-hidden="true"></span><p class="x-wordmark">CENTRAL</p></div>
       <div class="x-rings x-splash__rings" id="s-rings" role="button" tabindex="0" aria-label="Войти в CENTRAL">
         <svg id="s-ring-0" viewBox="0 0 720 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
         <svg id="s-ring-1" viewBox="0 0 720 720" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
@@ -206,28 +248,17 @@
           <section class="x-screen" id="scr-reg" aria-label="Регистрация"></section>
           <section class="x-screen" id="scr-today" aria-label="Сегодня"></section>
           <section class="x-screen" id="scr-feed" aria-label="Лента"></section>
-          <section class="x-screen" id="scr-krug" aria-label="Круг">
-            <div class="x-top"><div class="x-brand"><span class="x-logo" data-logo style="--ls:24px" aria-hidden="true"></span><p class="x-wordmark">CENTRAL</p></div><span class="chip" id="k-today-chip"></span></div>
-            <div>
-              <h1 class="x-h1">Круг 60 дней</h1>
-              <p class="x-sub">Шестьдесят дней вокруг сегодняшнего. Заметки идут от узла дня к центру: цвет — заметка, форма — автор. Коснитесь узла, чтобы открыть день.</p>
-            </div>
-            <div class="x-legend" aria-label="Стихии">
-              <span><i class="x-edot elem-0"></i>Дерево</span><span><i class="x-edot elem-2"></i>Огонь</span><span><i class="x-edot elem-4"></i>Земля</span><span><i class="x-edot elem-6"></i>Металл</span><span><i class="x-edot elem-8"></i>Вода</span>
-            </div>
-            <p class="x-krug-date" id="k-date"></p>
-            <div class="x-krug" id="k-scroll">
-              <div class="x-krug__inner" id="k-inner">
-                <div class="x-rings" id="k-rings" role="img" aria-label="Круг 60 дней с записями">
-                  <svg id="k-ring" viewBox="0 0 680 680" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
-                </div>
+          <section class="x-screen x-screen--krug" id="scr-krug" aria-label="Круг">
+            <div class="x-top"><div class="x-brand"><span class="x-logo" data-logo aria-hidden="true"></span><p class="x-wordmark">CENTRAL</p></div><div class="x-row"><span class="chip" id="k-today-chip"></span><button class="x-help" type="button" id="k-help" aria-label="Как читать Круг"><span aria-hidden="true">?</span></button></div></div>
+            <div class="x-krug-top"><p class="x-krug-date" id="k-date"></p></div>
+            <div class="x-krug" id="k-inner">
+              <div class="x-rings" id="k-rings" role="img" aria-label="Круг 60 дней с записями">
+                <svg id="k-ring" viewBox="0 0 680 680" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
               </div>
             </div>
-            <p class="x-krug-motto">Каждая заметка — шаг к центру. Вместе мы дойдём.</p>
-            <p class="x-legend x-krug-legend"><span>цвет — заметка, форма — автор · от узла к центру: сначала мои, затем друзья по порядку</span></p>
-            <div class="x-legend x-krug-legend" id="k-legend" aria-label="Обозначения"></div>
-            <div class="x-row x-row--between">
-              <span></span>
+            <div class="x-krug-foot">
+              <p class="x-krug-motto">Каждая заметка — шаг к центру. Вместе мы дойдём.</p>
+              <div class="x-legend x-krug-legend" id="k-legend" aria-label="Обозначения"></div>
               <button class="btn" type="button" id="k-open-today">Открыть сегодня</button>
             </div>
           </section>
@@ -235,11 +266,11 @@
           <section class="x-screen" id="scr-profile" aria-label="Профиль"></section>
 
           <nav class="x-tabs" id="tabs" aria-label="Разделы" hidden>
-            <button class="x-tab" type="button" data-tab="today">Сегодня</button>
-            <button class="x-tab" type="button" data-tab="feed">Лента</button>
-            <button class="x-tab" type="button" data-tab="krug">Круг</button>
-            <button class="x-tab" type="button" data-tab="people">Люди</button>
-            <button class="x-tab" type="button" data-tab="profile">Профиль</button>
+            <button class="x-tab" type="button" data-tab="today"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path d="M3.5 10h17M8 3v4M16 3v4" /></svg><span>Сегодня</span></button>
+            <button class="x-tab" type="button" data-tab="feed"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="7" height="16" rx="2" /><rect x="13.5" y="4" width="7" height="16" rx="2" /></svg><span>Лента</span></button>
+            <button class="x-tab" type="button" data-tab="krug"><svg viewBox="0 0 24 24" aria-hidden="true" style="fill:currentColor;stroke:none"><circle cx="20" cy="12" r="1.3" /><circle cx="18.93" cy="16" r="1.3" /><circle cx="16" cy="18.93" r="1.3" /><circle cx="12" cy="20" r="1.3" /><circle cx="8" cy="18.93" r="1.3" /><circle cx="5.07" cy="16" r="1.3" /><circle cx="4" cy="12" r="1.3" /><circle cx="5.07" cy="8" r="1.3" /><circle cx="8" cy="5.07" r="1.3" /><circle cx="12" cy="4" r="1.3" /><circle cx="16" cy="5.07" r="1.3" /><circle cx="18.93" cy="8" r="1.3" /><circle cx="12" cy="12" r="1.6" /></svg><span>Круг</span></button>
+            <button class="x-tab" type="button" data-tab="people"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3" /><path d="M3 19.5c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" /><circle cx="17" cy="9.5" r="2.5" /><path d="M16.5 14.2c2.6 0.2 4.5 2.2 4.5 5" /></svg><span>Люди</span></button>
+            <button class="x-tab" type="button" data-tab="profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="10" r="3" /><path d="M6.5 18.2c1.3-1.8 3.2-2.7 5.5-2.7s4.2 0.9 5.5 2.7" /></svg><span>Профиль</span></button>
           </nav>
 
           <div class="x-scrim" id="scrim"></div>
@@ -581,9 +612,16 @@
         }
         function shapePicker(name, cur) {
           return '<div class="x-shapes" role="radiogroup" aria-label="Мой знак">' + SHAPES.map(function (sh) {
-            return '<label><input type="radio" name="' + name + '" value="' + sh[0] + '"' + (sh[0] === cur ? ' checked' : '') + ' />' + shapeIcon(sh[0]) + sh[1] + '</label>';
-          }).join('') + '</div>';
+            return '<label title="' + sh[1] + '"><input type="radio" name="' + name + '" value="' + sh[0] + '" aria-label="' + sh[1] + '"' + (sh[0] === cur ? ' checked' : '') + ' />' + shapeIcon(sh[0]) + '</label>';
+          }).join('') + '</div><p class="x-cap" data-shape-name>Знак: ' + shapeName(cur) + '</p>';
         }
+        /* six equal cells show only the shape; the chosen name sits in the caption below */
+        document.addEventListener('change', function (e) {
+          var t = e.target;
+          if (!t.closest || !t.closest('.x-shapes')) return;
+          var cap = t.closest('.x-shapes').nextElementSibling;
+          if (cap && cap.hasAttribute('data-shape-name')) cap.textContent = 'Знак: ' + shapeName(t.value);
+        });
         var ME_COLOR = 'var(--text-primary)';
         var NOTE_COLORS = [
           'light-dark(#2563eb, #7aa7ff)', 'light-dark(#b42318, #f38b80)', 'light-dark(#0f8a7e, #4fd1c0)', 'light-dark(#d97706, #fbbf24)',
@@ -690,13 +728,13 @@
             return '<label><input type="radio" name="elem" value="' + i + '"' + (i === 0 ? ' checked' : '') + ' /><span class="x-av elem-' + i * 2 + '" id="reg-av-' + i + '">?</span>' + n + '</label>';
           }).join('');
           el.innerHTML =
-            '<div class="x-top"><div class="x-brand">' + logo(40) + '<p class="x-wordmark">CENTRAL</p></div></div>' +
+            '<div class="x-top"><div class="x-brand">' + logo(24) + '<p class="x-wordmark">CENTRAL</p></div></div>' +
             '<div><h1 class="x-h1">Регистрация</h1><p class="x-sub">Дневник по кругам года: одна запись в день, и через 60 дней она вернётся к вам на том же месте кольца.</p></div>' +
             '<form class="x-card" id="reg-form" novalidate>' +
             '<label class="x-field">Ник<input class="x-input" id="reg-nick" name="nick" maxlength="20" autocomplete="nickname" placeholder="Например, Аня" required /></label>' +
             '<div class="x-field"><span>Ваша стихия</span><div class="x-pick" role="radiogroup" aria-label="Стихия">' + pick + '</div></div>' +
-            '<div class="x-field"><span>Ваш знак <small class="fineprint">— им будут отмечены ваши заметки на Круге</small></span>' + shapePicker('shape', 'circle') + '</div>' +
-            '<p class="fineprint">Регистрация живёт только в этой вкладке.</p>' +
+            '<div class="x-field"><span>Ваш знак <small class="x-cap">— им будут отмечены ваши заметки на Круге</small></span>' + shapePicker('shape', 'circle') + '</div>' +
+            '<p class="x-cap">Регистрация живёт только в этой вкладке.</p>' +
             '<button class="x-primary" type="submit" id="reg-go" disabled>Войти в CENTRAL</button>' +
             '</form>';
           var nick = document.getElementById('reg-nick');
@@ -733,10 +771,10 @@
             return '<label title="' + NOTE_COLOR_NAMES[ci] + '"><input type="radio" name="t-color" value="' + ci + '" aria-label="' + NOTE_COLOR_NAMES[ci] + '"' + (ci === curCI ? ' checked' : '') + ' /><span style="--pc:' + c + '"></span></label>';
           }).join('') + '</div>';
           var form = '<form id="t-form"><textarea class="x-textarea" id="t-text" aria-label="' + (notes.length ? 'Ещё мысль' : 'Моя запись') + '" placeholder="' + (notes.length && editIdx < 0 ? 'Ещё одна мысль…' : 'Что было сегодня?') + '" maxlength="600"></textarea>' + swatches +
-            '<div class="x-row x-row--between"><span class="fineprint">Через 60 дней вернётся на позицию ' + s.n + '</span><span class="x-row">' +
+            '<div class="x-row x-row--between"><span class="x-cap">Через 60 дней вернётся на позицию ' + s.n + '</span><span class="x-row">' +
             (notes.length ? '<button class="btn" type="button" id="t-cancel">Отмена</button>' : '') + '<button class="x-primary" type="submit">Сохранить</button></span></div></form>';
           el.innerHTML = top() +
-            '<div><p class="x-label">Сегодня</p><h1 class="x-h1">' + fmtLong(TODAY) + '</h1><div class="x-day" style="margin-top:6px"><span>' + slotLabel(s) + '</span>' + elemTag(s) + moonTag(TODAY) + '</div></div>' +
+            '<div><p class="x-label">Сегодня</p><h1 class="x-h1">' + fmtLong(TODAY) + '</h1><div class="x-day" style="margin-top:8px"><span>' + slotLabel(s) + '</span>' + elemTag(s) + moonTag(TODAY) + '</div></div>' +
             '<div class="x-card"><p class="x-label">' + (notes.length ? 'Мои записи · ' + notes.length : 'Моя запись') + '</p><div class="x-notes">' +
             notes.map(function (t, i) {
               return i === editIdx ? form : '<div class="x-note"><p>' + shapeIcon(shapeOf(user), myColor(key, i)) + esc(t) + '</p><button class="btn" type="button" data-edit="' + i + '">Изменить</button></div>';
@@ -748,7 +786,7 @@
             '<div class="x-day">' + dayLine(ago) + '</div>' +
             (agoMine.length ? agoMine.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') : '<p class="x-empty">В этот день вы ничего не записали.</p>') +
             '</div>' +
-            '<div><p class="x-label" style="margin-bottom:10px">Сегодня пишут · ' + fr.length + '</p>' + (fr.length ? entryRows(fr) : '<p class="x-empty">Пока никто из друзей не написал.</p>') + '</div>';
+            '<div><p class="x-label" style="margin-bottom:8px">Сегодня пишут · ' + fr.length + '</p>' + (fr.length ? entryRows(fr) : '<p class="x-empty">Пока никто из друзей не написал.</p>') + '</div>';
           var f = document.getElementById('t-form');
           if (f) f.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -782,7 +820,7 @@
           var list = entriesOn(keyOf(d));
           var s = slotOf(d);
           return '<div class="x-lane"><p class="x-lane__head"><b>' + title + '</b><span>' + fmtDM(d) + ' · ' + (s.out ? 'между кольцами' : RING_ROMAN[s.k] + ' · ' + s.n) + '</span></p>' +
-            (list.length ? list.map(function (e) { return '<p class="x-mini">' + av(e.p, 24) + '<span><b>' + shapeIcon(shapeOf(e.p), e.c) + esc(e.p.nick) + '</b>' + esc(e.text) + '</span></p>'; }).join('') : '<p class="x-empty" style="font-size:var(--size-caption)">Тишина</p>') +
+            (list.length ? list.map(function (e) { return '<p class="x-mini">' + av(e.p, 32) + '<b>' + shapeIcon(shapeOf(e.p), e.c) + esc(e.p.nick) + '</b><span class="x-mini__t">' + esc(e.text) + '</span></p>'; }).join('') : '<p class="x-empty">Тишина</p>') +
             '</div>';
         }
         function renderFeed() {
@@ -794,7 +832,7 @@
             html += '<article class="x-feedday"><div class="x-day">' + dayLine(d) + (i === 0 ? '<span class="chip chip--solid">Сегодня</span>' : '') + '</div>' +
               '<div class="x-par">' + lane(i === 0 ? 'Сегодня' : 'Этот день', d) + lane('60 дней назад', addDays(d, -60)) + '</div></article>';
           }
-          el.innerHTML = top() + '<div><h1 class="x-h1">Лента</h1><p class="x-sub">Каждый день рядом с днём на той же позиции прошлого кольца.</p></div><div style="display:grid;gap:18px">' + html + '</div>';
+          el.innerHTML = top() + '<div><h1 class="x-h1">Лента</h1><p class="x-sub">Каждый день рядом с днём на той же позиции прошлого кольца.</p></div><div class="x-feeddays">' + html + '</div>';
         }
 
         function renderPeople() {
@@ -807,7 +845,7 @@
             var v = q.value.trim().toLowerCase();
             document.getElementById('p-list').innerHTML = PEOPLE.filter(function (p) { return !v || p.nick.toLowerCase().indexOf(v) >= 0; }).map(function (p) {
               var n = 0; for (var k in FR) FR[k].forEach(function (e) { if (e.uid === p.id) n++; });
-              return '<div class="x-person">' + av(p, 40) + '<div><p class="x-person__name">' + shapeIcon(shapeOf(p)) + esc(p.nick) + '</p><p class="x-person__meta"><span class="elem-' + p.elem * 2 + '"><i class="x-edot"></i></span> ' + ELEM[p.elem] + ' · ' + shapeName(shapeOf(p)) + ' · ' + esc(p.bio) + ' · ' + n + ' записей</p></div>' +
+              return '<div class="x-person">' + av(p, 32) + '<div><p class="x-person__name">' + shapeIcon(shapeOf(p)) + esc(p.nick) + '</p><p class="x-person__meta"><span class="elem-' + p.elem * 2 + '"><i class="x-edot"></i></span> ' + ELEM[p.elem] + ' · ' + shapeName(shapeOf(p)) + ' · ' + esc(p.bio) + ' · ' + n + ' записей</p></div>' +
                 '<button class="btn" type="button" data-f="' + p.id + '" aria-pressed="' + (follow[p.id] ? 'true' : 'false') + '">' + (follow[p.id] ? 'Вы подписаны' : 'Подписаться') + '</button></div>';
             }).join('') || '<p class="x-empty">Никого не нашли.</p>';
           }
@@ -829,10 +867,10 @@
           for (var d = myNotes(keyOf(TODAY)).length ? TODAY : addDays(TODAY, -1); myNotes(keyOf(d)).length; d = addDays(d, -1)) streak++;
           var nf = Object.keys(follow).length;
           el.innerHTML = top() +
-            '<div class="x-profile">' + av(user, 88) + '<h1 class="x-h1">' + shapeIcon(shapeOf(user)) + esc(user.nick) + '</h1><span class="x-elem elem-' + user.elem * 2 + '">' + ELEM[user.elem] + '</span></div>' +
+            '<div class="x-profile">' + av(user, 64) + '<h1 class="x-h1">' + shapeIcon(shapeOf(user)) + esc(user.nick) + '</h1><span class="x-elem elem-' + user.elem * 2 + '">' + ELEM[user.elem] + '</span></div>' +
             '<div class="x-field"><span>Мой знак</span>' + shapePicker('pr-shape', shapeOf(user)) + '</div>' +
-            '<section class="stats"><div class="stat"><span class="stat__fig">' + total + '</span><span class="stat__label">Записей</span></div><div class="stat"><span class="stat__fig">' + streak + '</span><span class="stat__label">Дней подряд</span></div><div class="stat"><span class="stat__fig">' + nf + '</span><span class="stat__label">Подписок</span></div></section>' +
-            '<div><p class="x-label" style="margin-bottom:10px">Последние записи</p><div id="pr-list" class="x-entries"></div></div>' +
+            '<div class="x-stats"><div><b>' + total + '</b><span>Записей</span></div><div><b>' + streak + '</b><span>Дней подряд</span></div><div><b>' + nf + '</b><span>Подписок</span></div></div>' +
+            '<div><p class="x-label" style="margin-bottom:8px">Последние записи</p><div id="pr-list" class="x-entries"></div></div>' +
             '<div class="links"><button class="btn" type="button" id="pr-splash">Показать заставку</button><button class="btn" type="button" id="pr-out">Выйти</button></div>';
           var list = document.getElementById('pr-list');
           var recent = [];
@@ -842,7 +880,7 @@
             var row = document.createElement('div');
             row.className = 'x-entry x-card--link';
             row.setAttribute('role', 'button'); row.setAttribute('tabindex', '0');
-            row.innerHTML = '<span class="elem-' + (slotOf(dd).out ? 0 : stemOf(slotOf(dd).k, slotOf(dd).n)) + '"><i class="x-edot" style="margin-top:6px"></i></span><div><div class="x-day">' + dayLine(dd) + '</div><p class="x-entry__text">' + esc(it.t) + '</p></div>';
+            row.innerHTML = '<span class="elem-' + (slotOf(dd).out ? 0 : stemOf(slotOf(dd).k, slotOf(dd).n)) + '"><i class="x-edot" style="margin-top:8px"></i></span><div><div class="x-day">' + dayLine(dd) + '</div><p class="x-entry__text">' + esc(it.t) + '</p></div>';
             bindOpen(row, dd);
             list.appendChild(row);
           });
@@ -867,8 +905,12 @@
         /* One 60-day ring: node n is the day TODAY + (n − today's position).
            Geometry and wave math from ganzhi_lunar_wave_v2.html */
         /* Notes grow inward with a FIXED step: about 24 notes on one day (everyone together) reach the centre ring */
-        var KC = 340, KR = 252, RW = 252, AMP = 42, KNR = 10, KTR = 13, KDISC = 80, KDOT = 2.5, KCR = 10, KREACH = 24;
-        var KR0 = KR - KTR - 6, KSTEP = (KR0 - KCR - 4) / (KREACH - 1), KIN = 16;
+        /* Proportions from the viewBox width W: node ring R = 0.43·W; node d = (2πR/60)/1.3, so the gap is 0.3·d all round;
+           number 0.42·d; mark 0.22·d; first mark at R − d/2 − 0.35·d; step = (first − centre ring)/24; centre point 0.012·W, ring 0.04·W */
+        var KW = 680, KC = KW / 2, KR = 0.43 * KW, KD = (2 * Math.PI * KR / 60) / 1.3, KNR = KD / 2, KFS = 0.42 * KD;
+        var KDOT = 0.22 * KD / 2, KCR = 0.04 * KW, KPT = 0.012 * KW, KREACH = 24;
+        var KR0 = KR - KD / 2 - 0.35 * KD, KSTEP = (KR0 - KCR) / KREACH;
+        var RW = 252, AMP = 42;
         /* lunar wave, moon markers and Ekadashi: off for now, kept for a later option */
         var SHOW_MOON = false;
         var SYNODIC = 29.530589, NM0 = Date.UTC(2000, 0, 6, 18, 14);
@@ -942,7 +984,7 @@
 
           for (var i = 0; i < 60; i++) {
             var n = i + 1, d = WIN[i], key = keyOf(d), isT = n === TODAY_N, future = d > TODAY;
-            var p = at(i, KR), stem = i % 10, nr = isT ? KTR : KNR;
+            var p = at(i, KR), stem = i % 10, nr = KNR;
 
             /* each note = one mark (author's shape, note's colour), in order along the day's radial line */
             var cols = dayDots[i], shown = cols.slice(0, KREACH);
@@ -962,16 +1004,18 @@
             var ttl = mk('title');
             ttl.textContent = n + ' · ' + fmtShort(d) + ' · ' + ELEM[Math.floor(stem / 2)] + (cols.length ? ' · записей: ' + cols.length : '');
             g.appendChild(ttl);
-            var x = Math.round(p.x), y = Math.round(p.y);
-            var c = mk('circle', { cx: x, cy: y, r: nr, style: 'fill:var(--ef);stroke:var(--es);stroke-width:' + (isT ? '2' : '0.5') });
+            var x = f1(p.x), y = f1(p.y);
+            /* today: same size, only a thicker (2px) and darker stroke */
+            var c = mk('circle', { cx: x, cy: y, r: f1(nr), 'vector-effect': 'non-scaling-stroke', style: 'fill:var(--ef);stroke:' + (isT ? 'var(--et)' : 'var(--es)') + ';stroke-width:' + (isT ? '2px' : '0.75px') });
             if (isT) c.setAttribute('id', 'k-today-hit');
             g.appendChild(c);
-            var nt = mk('text', { x: x, y: y + 4, 'text-anchor': 'middle', style: 'font-size:10px;font-weight:500;fill:var(--et)' });
+            /* optical centre: digits sit on the baseline, their cap height ≈ 0.7em, so drop by 0.35em */
+            var nt = mk('text', { x: x, y: f1(p.y + 0.35 * KFS), 'text-anchor': 'middle', style: 'font-size:' + f1(KFS) + 'px;font-weight:500;fill:var(--et)' });
             nt.textContent = String(n);
             g.appendChild(nt);
             svg.appendChild(g);
 
-            if (selected && selected.n === n) svg.appendChild(mk('circle', { cx: x, cy: y, r: nr + 4, style: 'fill:none;stroke:var(--text-primary);stroke-width:1.2;stroke-dasharray:3 3' }));
+            if (selected && selected.n === n) svg.appendChild(mk('circle', { cx: x, cy: y, r: f1(nr + 0.15 * KD), 'vector-effect': 'non-scaling-stroke', style: 'fill:none;stroke:var(--text-primary);stroke-width:1px;stroke-dasharray:3 3' }));
           }
 
           /* moon markers on the wave, as in the reference */
@@ -999,7 +1043,7 @@
           /* centre: "вместе мы можем достичь центра" — a small dark point and one faint ring */
           var tm = SHOW_MOON ? moonInfo(TODAY) : null;
           svg.appendChild(mk('circle', { cx: KC, cy: KC, r: KCR, style: 'fill:none;stroke:var(--text-secondary);stroke-opacity:0.4;stroke-width:0.75' }));
-          svg.appendChild(mk('circle', { cx: KC, cy: KC, r: 2.6, style: 'fill:var(--text-primary)' }));
+          svg.appendChild(mk('circle', { cx: KC, cy: KC, r: f1(KPT), style: 'fill:var(--text-primary)' }));
           document.getElementById('k-date').textContent = fmtShort(TODAY) + ' · ' + TODAY_N + '/60';
 
           document.getElementById('k-rings').setAttribute('aria-label',
@@ -1019,7 +1063,7 @@
           var r = document.getElementById('k-rings').getBoundingClientRect();
           var vx = ((e.clientX - r.left) / r.width) * 2 * KC, vy = ((e.clientY - r.top) / r.height) * 2 * KC;
           var dx = vx - KC, dy = vy - KC, dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < KIN - 6 || dist > RW + AMP + 14) return;
+          if (dist < KCR || dist > KR + KD) return;
           var turn = (Math.atan2(dy, dx) + Math.PI / 2) / (2 * Math.PI);
           var i = ((Math.round(turn * 60) % 60) + 60) % 60;
           openDay(WIN[i], { k: TODAY_SLOT.k, n: i + 1 });
@@ -1040,17 +1084,40 @@
             '<div class="x-card"><p class="x-label">' + (mn.length > 1 ? 'Мои записи · ' + mn.length : 'Моя запись') + '</p>' +
             (mn.length ? mn.map(function (t, i) { return '<p>' + shapeIcon(shapeOf(user), myColor(key, i)) + esc(t) + '</p>'; }).join('') : '<p class="x-empty">' + (future ? 'День ещё не наступил.' : 'Записи нет.') + '</p>') +
             (isT ? '<div class="links"><button class="btn" type="button" id="sh-write">' + (mn.length ? '+ ещё мысль' : 'Написать') + '</button></div>' : '') + '</div>' +
-            (future ? '' : '<div><p class="x-label" style="margin-bottom:10px">Друзья · ' + list.length + '</p>' + (list.length ? entryRows(list) : '<p class="x-empty">Никто из друзей не писал.</p>') + '</div>') +
+            (future ? '' : '<div><p class="x-label" style="margin-bottom:8px">Друзья · ' + list.length + '</p>' + (list.length ? entryRows(list) : '<p class="x-empty">Никто из друзей не писал.</p>') + '</div>') +
             '<div class="x-card"><div class="x-row x-row--between"><p class="x-label">60 дней назад</p><span class="pill">' + fmtShort(ago) + '</span></div>' +
             '<div class="x-day">' + moonTag(ago) + '</div>' +
             (agoList.length ? entryRows(agoList) : '<p class="x-empty">В этот день записей нет.</p>') + '</div>';
-          lastFocus = document.activeElement;
-          sheet.classList.add('is-open'); scrim.classList.add('is-open');
-          document.getElementById('sh-close').addEventListener('click', closeSheet);
+          openSheet('День');
           var w = document.getElementById('sh-write');
           if (w) w.addEventListener('click', function () { adding = myNotes(keyOf(TODAY)).length > 0; editIdx = -1; show('today'); var ta = document.getElementById('t-text'); if (ta) ta.focus(); });
+        }
+        /* shows the sheet instantly: no motion */
+        function openSheet(label) {
+          if (!sheet.classList.contains('is-open')) lastFocus = document.activeElement;
+          sheet.setAttribute('aria-label', label);
+          sheet.scrollTop = 0;
+          sheet.classList.add('is-open'); scrim.classList.add('is-open');
+          document.getElementById('sh-close').addEventListener('click', closeSheet);
           document.getElementById('sh-close').focus();
         }
+        /* "?" on Круг: how to read the ring */
+        function openHelp() {
+          sheet.innerHTML = '<span class="x-sheet__grab" aria-hidden="true"></span>' +
+            '<div class="x-row x-row--between"><p class="x-label">Как читать</p><button class="btn" type="button" id="sh-close">Закрыть</button></div>' +
+            '<h3>Круг 60 дней</h3>' +
+            '<ul class="x-help-list">' +
+            '<li>Шестьдесят дней вокруг сегодняшнего.</li>' +
+            '<li>Заметки идут от узла дня к центру: цвет — заметка, форма — автор.</li>' +
+            '<li>От узла к центру: сначала мои, затем друзья по порядку.</li>' +
+            '<li>Коснитесь узла, чтобы открыть день.</li>' +
+            '</ul>' +
+            '<div class="x-card"><p class="x-label">Стихии</p><div class="x-legend" aria-label="Стихии">' +
+            ELEM.map(function (n, i) { return '<span><i class="x-edot elem-' + i * 2 + '"></i>' + n + '</span>'; }).join('') +
+            '</div></div>';
+          openSheet('Как читать Круг');
+        }
+        document.getElementById('k-help').addEventListener('click', openHelp);
         function closeSheet() {
           if (!sheet.classList.contains('is-open')) return;
           sheet.classList.remove('is-open'); scrim.classList.remove('is-open');
@@ -1068,7 +1135,7 @@
         var splash = document.getElementById('splash'), sRings = document.getElementById('s-rings'), phone = document.getElementById('phone');
         var splashOpen = true;
         var sLine = slotLabel({ k: TODAY_SLOT.k, n: TODAY_SLOT.n }).replace('Кольцо', 'Кольцо') + ' · ' + fmtShort(TODAY);
-        document.getElementById('s-line').textContent = sLine;
+        document.getElementById('s-line').textContent = 'Открыть сегодня · ' + sLine;
         sRings.setAttribute('aria-label', 'Войти в CENTRAL. Сегодня: ' + sLine);
 
         function enter() {
