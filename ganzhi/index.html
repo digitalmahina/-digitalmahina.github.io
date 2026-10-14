@@ -42,10 +42,10 @@
       /* Splash */
       .x-splash {
         position: fixed; inset: 0; z-index: 9000;
-        /* rings block S = min(screen width − 32, available height − 120) */
-        --S: min(calc(100vw - 32px), calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 120px));
+        /* rings block S = min(screen width − 48, available height − 168) */
+        --S: min(calc(100vw - 48px), calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 168px));
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        padding: env(safe-area-inset-top, 0px) 16px env(safe-area-inset-bottom, 0px);
+        padding: env(safe-area-inset-top, 0px) 24px calc(24px + env(safe-area-inset-bottom, 0px));
         background: var(--fill-primary-on); overflow: hidden;
       }
       .x-splash[hidden] { display: none; }
@@ -71,7 +71,7 @@
       .x-swatches input:checked + span { box-shadow: 0 0 0 2px var(--fill-primary-on), 0 0 0 4px var(--text-primary); }
       .x-swatches input:focus-visible + span { outline: 2px solid var(--fill-primary); outline-offset: 4px; }
       .x-splash__rings:focus-visible { outline-offset: -8px; }
-      .x-splash__line { margin-top: 16px; font: var(--x-t12); color: var(--text-secondary); text-align: center; }
+      .x-splash__line { flex: none; margin: 24px 0 0; font: var(--x-t12); font-size: 12px; color: var(--text-secondary); opacity: 1; text-align: center; text-wrap: balance; }
 
       /* No motion anywhere */
       html { scroll-behavior: auto !important; }
@@ -209,7 +209,8 @@
       .x-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
       .x-krug-date { font: var(--x-t12); color: var(--text-secondary); text-align: center; }
       .x-krug-motto { font: var(--x-t15); color: var(--text-secondary); text-wrap: balance; }
-      .x-krug-legend { justify-content: center; }
+      .x-krug-legend { justify-content: center; align-items: center; max-width: 100%; }
+      .x-krug-legend > span { white-space: nowrap; flex: none; }
       .x-legend .x-shape { margin-right: 0; color: var(--text-primary); }
 
       /* Profile figures: three equal columns */
@@ -257,7 +258,7 @@
               </div>
             </div>
             <div class="x-krug-foot">
-              <p class="x-krug-motto">Каждая заметка — шаг к центру. Вместе мы дойдём.</p>
+              <p class="x-krug-motto">Каждая заметка&nbsp;— шаг&nbsp;к&nbsp;центру. Вместе&nbsp;мы дойдём.</p>
               <div class="x-legend x-krug-legend" id="k-legend" aria-label="Обозначения"></div>
               <button class="btn" type="button" id="k-open-today">Открыть сегодня</button>
             </div>
@@ -596,7 +597,8 @@
         function shapeGeo(sh, x, y, s) {
           function P(a) { return a.map(function (q) { return f1(x + q[0] * s) + ',' + f1(y + q[1] * s); }).join(' '); }
           if (sh === 'square') return ['rect', { x: f1(x - 0.9 * s), y: f1(y - 0.9 * s), width: f1(1.8 * s), height: f1(1.8 * s) }];
-          if (sh === 'triangle') return ['polygon', { points: P([[0, -1.2], [1.12, 0.78], [-1.12, 0.78]]) }];
+          /* centred on (x, y) so ring marks sit exactly on their day's radial line */
+          if (sh === 'triangle') return ['polygon', { points: P([[0, -0.99], [1.12, 0.99], [-1.12, 0.99]]) }];
           if (sh === 'diamond') return ['polygon', { points: P([[0, -1.25], [1.05, 0], [0, 1.25], [-1.05, 0]]) }];
           if (sh === 'hexagon') {
             var h = [];
@@ -905,11 +907,11 @@
         /* One 60-day ring: node n is the day TODAY + (n − today's position).
            Geometry and wave math from ganzhi_lunar_wave_v2.html */
         /* Notes grow inward with a FIXED step: about 24 notes on one day (everyone together) reach the centre ring */
-        /* Proportions from the viewBox width W: node ring R = 0.43·W; node d = (2πR/60)/1.3, so the gap is 0.3·d all round;
-           number 0.42·d; mark 0.22·d; first mark at R − d/2 − 0.35·d; step = (first − centre ring)/24; centre point 0.012·W, ring 0.04·W */
-        var KW = 680, KC = KW / 2, KR = 0.43 * KW, KD = (2 * Math.PI * KR / 60) / 1.3, KNR = KD / 2, KFS = 0.42 * KD;
-        var KDOT = 0.22 * KD / 2, KCR = 0.04 * KW, KPT = 0.012 * KW, KREACH = 24;
-        var KR0 = KR - KD / 2 - 0.35 * KD, KSTEP = (KR0 - KCR) / KREACH;
+        /* Proportions from the viewBox width W: node ring R = 0.43·W; node d = (2πR/60)/1.6, so the gap is 0.6·d all round;
+           number 0.42·d; mark 0.24·d; first mark at R − d/2 − 0.6·d; step = (first − centre ring)/24; centre point 0.012·W, ring 0.04·W */
+        var KW = 680, KC = KW / 2, KR = 0.43 * KW, KD = (2 * Math.PI * KR / 60) / 1.6, KNR = KD / 2, KFS = 0.42 * KD;
+        var KDOT = 0.24 * KD / 2, KCR = 0.04 * KW, KPT = 0.012 * KW, KREACH = 24;
+        var KR0 = KR - KD / 2 - 0.6 * KD, KSTEP = (KR0 - KCR) / KREACH;
         var RW = 252, AMP = 42;
         /* lunar wave, moon markers and Ekadashi: off for now, kept for a later option */
         var SHOW_MOON = false;
@@ -1054,8 +1056,9 @@
           document.getElementById('k-legend').innerHTML =
             (SHOW_MOON ? '<span><i class="x-lg-full"></i>полная луна</span><span><i class="x-lg-new"></i>новолуние</span><span><i class="x-lg-eka"></i>экадаши</span>' : '') +
             SHAPES.map(function (sh) {
-              var who = seen.filter(function (p) { return shapeOf(p) === sh[0]; }).map(function (p) { return esc(p.nick); });
-              return '<span title="' + sh[1] + '">' + shapeIcon(sh[0]) + (who.join(', ') || '—') + '</span>';
+              var full = seen.filter(function (p) { return shapeOf(p) === sh[0]; }).map(function (p) { return p.nick; }).join(', ') || '—';
+              var name = Array.from(full).length > 10 ? Array.from(full).slice(0, 9).join('') + '…' : full;
+              return '<span title="' + esc(sh[1] + (full !== '—' ? ': ' + full : '')) + '">' + shapeIcon(sh[0]) + esc(name) + '</span>';
             }).join('');
         }
         document.getElementById('k-open-today').addEventListener('click', function () { openDay(TODAY, { k: TODAY_SLOT.k, n: TODAY_SLOT.n }); });
