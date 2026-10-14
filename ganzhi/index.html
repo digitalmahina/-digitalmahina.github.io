@@ -1,0 +1,1015 @@
+<!DOCTYPE html><html lang="ru"><head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Ganzhi Дневник прототип</title>
+  <style>
+    :root {
+      --tp: #1a1a18;
+      --ts: #686761;
+      --bt: rgba(0, 0, 0, 0.12);
+      --bs: rgba(0, 0, 0, 0.3);
+      --bg: #fbfaf7;
+      --page: #f1efe9;
+      --soft: rgba(0, 0, 0, 0.035);
+      --rmd: 8px;
+      --rlg: 12px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      --cjk: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --tp: #f0ede8;
+        --ts: #8f8e87;
+        --bt: rgba(255, 255, 255, 0.12);
+        --bs: rgba(255, 255, 255, 0.32);
+        --bg: #1b1b19;
+        --page: #111110;
+        --soft: rgba(255, 255, 255, 0.045);
+      }
+    }
+    .elem-0, .elem-1 { --ef: #eaf3de; --es: #639922; --et: #27500a; }
+    .elem-2, .elem-3 { --ef: #faece7; --es: #993c1d; --et: #711313; }
+    .elem-4, .elem-5 { --ef: #faeeda; --es: #854f0b; --et: #633806; }
+    .elem-6, .elem-7 { --ef: #f1efe8; --es: #5f5e5a; --et: #444441; }
+    .elem-8, .elem-9 { --ef: #e6f1fb; --es: #185fa5; --et: #0c447c; }
+    @media (prefers-color-scheme: dark) {
+      .elem-0, .elem-1 { --ef: #173404; --es: #97c459; --et: #c0dd97; }
+      .elem-2, .elem-3 { --ef: #4a1b0c; --es: #f0997b; --et: #f5c4b3; }
+      .elem-4, .elem-5 { --ef: #412402; --es: #ef9f27; --et: #fac775; }
+      .elem-6, .elem-7 { --ef: #2c2c2a; --es: #b4b2a9; --et: #d3d1c7; }
+      .elem-8, .elem-9 { --ef: #042c53; --es: #85b7eb; --et: #b5d4f4; }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      font-family: var(--font);
+      color: var(--tp);
+      background: var(--bg);
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; color: inherit; }
+    .cjk { font-family: var(--cjk); }
+
+    /* ---------- device frame ---------- */
+    .device {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    @media (min-width: 520px) {
+      body {
+        background: var(--page);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .device {
+        width: 390px;
+        height: min(844px, calc(100vh - 40px));
+        border: 1px solid var(--bt);
+        border-radius: 28px;
+      }
+    }
+
+    /* ---------- screens ---------- */
+    .screen {
+      position: absolute;
+      inset: 0 0 64px 0;
+      display: none;
+      flex-direction: column;
+      background: var(--bg);
+    }
+    .screen.is-on { display: flex; animation: fade .22s ease-out; }
+    .screen--full { inset: 0; }
+    @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .screen.is-on { animation: none; } }
+    .hd {
+      flex: none;
+      padding: 18px 20px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .hd h1 { margin: 0; font-size: 1.05rem; font-weight: 500; }
+    .body {
+      flex: 1;
+      overflow: auto;
+      padding: 4px 20px 28px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .label {
+      margin: 0 0 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ts);
+    }
+    .muted { color: var(--ts); }
+    .small { font-size: 0.8125rem; }
+
+    /* ---------- avatars ---------- */
+    .av {
+      --sz: 36px;
+      width: var(--sz);
+      height: var(--sz);
+      flex: none;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--ef);
+      border: 1px solid var(--es);
+      color: var(--et);
+      font-family: var(--cjk);
+      font-size: calc(var(--sz) * 0.46);
+      line-height: 1;
+    }
+    .av--s { --sz: 24px; }
+    .av--l { --sz: 84px; border-width: 1.5px; }
+    .av-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      justify-items: center;
+    }
+    .av-grid button {
+      border: none;
+      background: none;
+      padding: 3px;
+      border-radius: 50%;
+      cursor: pointer;
+      outline-offset: 2px;
+    }
+    .av-grid button .av { --sz: 50px; transition: transform .15s; }
+    .av-grid button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--tp); }
+    .av-grid button:hover .av { transform: scale(1.05); }
+
+    /* ---------- controls ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: var(--rmd);
+      border: 1px solid var(--bs);
+      background: transparent;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn--fill { background: var(--tp); color: var(--bg); border-color: var(--tp); }
+    .btn--wide { width: 100%; }
+    .btn--sm { min-height: 34px; padding: 0 12px; font-size: 0.8rem; }
+    .btn:disabled { opacity: .35; cursor: default; }
+    .btn.is-on { background: var(--soft); border-color: var(--bt); color: var(--ts); }
+    .field {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 14px;
+      border: 1px solid var(--bt);
+      border-radius: var(--rmd);
+      background: transparent;
+      color: var(--tp);
+      font: inherit;
+      font-size: 1rem;
+    }
+    .field:focus, textarea:focus { outline: none; border-color: var(--bs); }
+    .iconbtn {
+      border: none;
+      background: none;
+      padding: 0;
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    /* ---------- registration ---------- */
+    .reg {
+      flex: 1;
+      overflow: auto;
+      padding: 56px 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .reg__mark { width: 92px; margin: 0 auto; display: block; }
+    .reg h1 { margin: 0; text-align: center; font-size: 1.35rem; font-weight: 500; }
+    .reg__lead { margin: 6px 0 0; text-align: center; color: var(--ts); font-size: 0.9rem; }
+    .reg__err { min-height: 18px; margin: 6px 0 0; font-size: 0.75rem; color: var(--ts); }
+
+    /* ---------- today ---------- */
+    .day {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .day__gz {
+      font-family: var(--cjk);
+      font-size: 2.6rem;
+      line-height: 1;
+      color: var(--et);
+      font-weight: 400;
+    }
+    .day__meta { font-size: 0.8125rem; color: var(--ts); line-height: 1.5; }
+    .day__meta b { color: var(--tp); font-weight: 500; }
+    .compose {
+      margin-top: 22px;
+      border: 1px solid var(--bt);
+      border-radius: var(--rlg);
+      padding: 14px;
+    }
+    .compose textarea {
+      width: 100%;
+      min-height: 132px;
+      resize: none;
+      border: none;
+      background: transparent;
+      color: var(--tp);
+      font: inherit;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      padding: 0;
+    }
+    .compose textarea::placeholder { color: var(--ts); }
+    .compose__bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+    .compose__bar span { font-size: 0.75rem; color: var(--ts); }
+    .saved { font-size: 1.05rem; line-height: 1.5; white-space: pre-wrap; margin: 0; }
+    .echo {
+      margin-top: 14px;
+      border-radius: var(--rlg);
+      background: var(--soft);
+      padding: 14px 16px;
+    }
+    .echo__row + .echo__row { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--bt); }
+    .echo__when { font-size: 0.75rem; color: var(--ts); margin: 0 0 4px; display: flex; gap: 8px; align-items: center; }
+    .echo__txt { margin: 0; font-size: 0.95rem; }
+    .stripe { width: 3px; height: 12px; border-radius: 2px; background: var(--es); display: inline-block; }
+
+    /* ---------- ring ---------- */
+    .ring { width: 100%; aspect-ratio: 1; display: block; margin: 0 auto; user-select: none; -webkit-tap-highlight-color: transparent; }
+    .ring text { font-family: var(--font); }
+    .ring .gz-c { font-family: var(--cjk); }
+    .ring .node { cursor: pointer; }
+    .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.75rem; color: var(--ts); margin: 8px 0 0; }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+    /* ---------- feed ---------- */
+    .seg {
+      display: inline-flex;
+      border: 1px solid var(--bt);
+      border-radius: var(--rmd);
+      padding: 2px;
+    }
+    .seg button {
+      border: none;
+      background: none;
+      min-height: 32px;
+      padding: 0 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: var(--ts);
+      cursor: pointer;
+    }
+    .seg button[aria-pressed="true"] { background: var(--soft); color: var(--tp); font-weight: 500; }
+    .feedwrap { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; }
+    .feed { display: grid; width: max-content; min-width: 100%; }
+    .feed > div { border-bottom: 1px solid var(--bt); }
+    .fh {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--bg);
+      padding: 8px 12px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .fh--corner { left: 0; z-index: 3; padding-left: 20px; }
+    .fl {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: var(--bg);
+      padding: 12px 8px 12px 20px;
+      font-size: 0.75rem;
+      color: var(--ts);
+      line-height: 1.35;
+    }
+    .fl b { display: block; font-family: var(--cjk); font-size: 0.95rem; font-weight: 400; color: var(--et); }
+    .fl::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 14px;
+      bottom: 14px;
+      width: 3px;
+      border-radius: 2px;
+      background: var(--es);
+    }
+    .fc { padding: 12px 12px; font-size: 0.85rem; line-height: 1.45; border-left: 1px solid var(--bt); }
+    .fc--empty { color: var(--ts); opacity: .6; }
+    .is-today-row { background: var(--soft); }
+    .fl.is-today-row { background: var(--bg); box-shadow: inset 0 0 0 999px var(--soft); }
+
+    /* ---------- people ---------- */
+    .people { list-style: none; margin: 0; padding: 0; }
+    .person { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--bt); align-items: flex-start; }
+    .person__main { flex: 1; min-width: 0; }
+    .person__nick { font-weight: 500; font-size: 0.95rem; }
+    .person__streak { font-size: 0.75rem; color: var(--ts); }
+    .person__last {
+      margin: 6px 0 0;
+      font-size: 0.82rem;
+      color: var(--ts);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .person .btn { flex: none; white-space: nowrap; }
+
+    /* ---------- profile ---------- */
+    .prof { text-align: center; padding-top: 12px; }
+    .prof__nick { margin: 12px 0 2px; font-size: 1.15rem; font-weight: 500; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 26px 0; }
+    .stat { border-radius: var(--rlg); background: var(--soft); padding: 14px 6px; }
+    .stat b { display: block; font-size: 1.5rem; font-weight: 500; line-height: 1.2; }
+    .stat span { font-size: 0.75rem; color: var(--ts); }
+
+    /* ---------- tab bar ---------- */
+    .tabs {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 64px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--bt);
+      background: var(--bg);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .tabs[hidden] { display: none; }
+    .tabs button {
+      border: none;
+      background: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 0.75rem;
+      color: var(--ts);
+      cursor: pointer;
+    }
+    .tabs button[aria-current="page"] { color: var(--tp); font-weight: 500; }
+    .tabs svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.4; }
+
+    /* ---------- sheet ---------- */
+    .scrim {
+      position: absolute; inset: 0;
+      background: rgba(0, 0, 0, 0.28);
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+      z-index: 20;
+    }
+    .scrim.is-on { opacity: 1; pointer-events: auto; }
+    .sheet {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      max-height: 78%;
+      overflow: auto;
+      background: var(--bg);
+      border-radius: 16px 16px 0 0;
+      border-top: 1px solid var(--bt);
+      padding: 8px 20px 28px;
+      transform: translateY(102%);
+      transition: transform .26s cubic-bezier(.2,.8,.2,1);
+      z-index: 21;
+    }
+    .sheet.is-on { transform: none; }
+    .sheet__grab { width: 36px; height: 4px; border-radius: 2px; background: var(--bt); margin: 4px auto 14px; }
+    .sheet__head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .sheet__gz { font-family: var(--cjk); font-size: 2rem; line-height: 1; color: var(--et); }
+    .loop { margin-top: 18px; }
+    .loop:first-of-type { margin-top: 0; }
+    .entry { display: flex; gap: 10px; padding: 8px 0; }
+    .entry__nick { font-size: 0.75rem; color: var(--ts); }
+    .entry__txt { margin: 1px 0 0; font-size: 0.9rem; }
+
+    .toast {
+      position: absolute;
+      left: 50%; bottom: 80px;
+      transform: translate(-50%, 10px);
+      background: var(--tp); color: var(--bg);
+      font-size: 0.8rem;
+      padding: 9px 14px;
+      border-radius: var(--rmd);
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s, transform .2s;
+      white-space: nowrap;
+      z-index: 30;
+    }
+    .toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+  </style>
+</head>
+<body>
+  <div class="device" id="app">
+
+    <!-- 1. Регистрация -->
+    <section class="screen screen--full is-on" id="s-reg" aria-label="Регистрация">
+      <div class="reg">
+        <div>
+          <svg class="reg__mark" viewBox="0 0 100 100" aria-hidden="true" id="reg-mark"></svg>
+          <h1>Ganzhi · Дневник</h1>
+          <p class="reg__lead">Одна мысль в день. Круг из 60 дней.</p>
+        </div>
+        <div>
+          <p class="label"><label for="nick">Ник</label></p>
+          <input class="field" id="nick" autocomplete="off" maxlength="24" placeholder="например, утренний_туман"/>
+          <p class="reg__err" id="nick-err"></p>
+        </div>
+        <div>
+          <p class="label">Аватар</p>
+          <div class="av-grid" id="reg-avatars" role="group" aria-label="Выбор аватара"></div>
+        </div>
+        <button class="btn btn--fill btn--wide" id="enter">Войти в круг</button>
+      </div>
+    </section>
+
+    <!-- 2. Сегодня -->
+    <section class="screen" id="s-today" aria-label="Сегодня">
+      <header class="hd">
+        <div class="day" id="today-head"></div>
+        <button class="iconbtn" id="open-profile" aria-label="Профиль"></button>
+      </header>
+      <div class="body">
+        <div class="compose" id="compose"></div>
+        <div id="echoes"></div>
+      </div>
+    </section>
+
+    <!-- 3. Круг -->
+    <section class="screen" id="s-ring" aria-label="Круг">
+      <header class="hd"><h1>Круг</h1><span class="small muted" id="ring-count"></span></header>
+      <div class="body">
+        <svg class="ring" id="ring" viewBox="0 0 680 680" role="img" aria-label="Круг из 60 дней"></svg>
+        <div class="legend" id="ring-legend"></div>
+        <p class="small muted" style="margin-top:14px">Нажми на узел, чтобы увидеть записи этого дня во всех кругах.</p>
+      </div>
+    </section>
+
+    <!-- 4. Лента -->
+    <section class="screen" id="s-feed" aria-label="Лента">
+      <header class="hd">
+        <h1>Лента</h1>
+        <div class="seg" role="group" aria-label="Режим ленты">
+          <button id="mode-me" aria-pressed="false">Только я</button>
+          <button id="mode-par" aria-pressed="true">Параллельно</button>
+        </div>
+      </header>
+      <div class="feedwrap"><div class="feed" id="feed"></div></div>
+    </section>
+
+    <!-- 5. Люди -->
+    <section class="screen" id="s-people" aria-label="Люди">
+      <header class="hd"><h1>Люди</h1><span class="small muted" id="people-count"></span></header>
+      <div class="body"><ul class="people" id="people"></ul></div>
+    </section>
+
+    <!-- 6. Профиль -->
+    <section class="screen" id="s-profile" aria-label="Профиль">
+      <header class="hd">
+        <button class="btn btn--sm" id="back">← Назад</button>
+        <h1>Профиль</h1>
+        <span style="width:70px"></span>
+      </header>
+      <div class="body" id="profile"></div>
+    </section>
+
+    <nav class="tabs" id="tabs" hidden="" aria-label="Разделы">
+      <button data-tab="today"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"></path></svg>Сегодня</button>
+      <button data-tab="ring"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" stroke-dasharray="2 2.4"></circle><circle cx="12" cy="3.5" r="1.8" fill="currentColor"></circle></svg>Круг</button>
+      <button data-tab="feed"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="7" height="16" rx="2"></rect><rect x="13.5" y="4" width="7" height="16" rx="2"></rect></svg>Лента</button>
+      <button data-tab="people"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"></circle><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6"></path><circle cx="16.5" cy="8" r="2.5"></circle><path d="M16 12.6c2.4 0 4 1.3 4.5 3.9"></path></svg>Люди</button>
+    </nav>
+
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Записи узла"><div class="sheet__grab"></div><div id="sheet-body"></div></div>
+    <div class="toast" id="toast" role="status"></div>
+  </div>
+
+  <script>
+    /* Фейковые данные в памяти: ничего не сохраняется между перезагрузками. */
+    var MY_POOL = [
+      'Проснулась раньше будильника и просто слушала, как гудит холодильник.',
+      'Кажется, я устала не от работы, а от того, что всё время на связи.',
+      'Купила мандарины. Запах сразу вернул в детство.',
+      'Сегодня впервые за месяц дошла пешком до реки.',
+      'Хочу меньше объяснять и больше делать.',
+      'Долгий звонок с мамой. Она смеялась — это главное.',
+      'Дождь весь день. Оказалось, мне это было нужно.',
+      'Записала три идеи и ни одну не начала. Пусть полежат.',
+      'Соседский кот снова сидел на моём подоконнике. Мы почти друзья.',
+      'Не стала спорить. Не потому что согласна, а потому что неважно.',
+      'Пересадила фикус. Руки в земле — лучшая медитация.',
+      'Перечитываю старые письма. Я была смелее, чем помню.',
+      'Сварила суп на три дня. Чувствую себя взрослой.',
+      'В метро женщина читала ту же книгу, что и я. Улыбнулись друг другу.',
+      'Мысль дня: тишина — тоже ответ.',
+      'Сегодня ничего не произошло, и это было прекрасно.',
+      'Устала. Ложусь в десять, без телефона.',
+      'Начала учить иероглифы. 甲 — первый ствол, как росток из земли.',
+      'Отказалась от встречи и не чувствую вины. Прогресс.',
+      'Небо вечером было цвета абрикоса.',
+      'Поняла, что скучаю не по городу, а по себе в том городе.',
+      'Убрала стол. Голова тоже стала чище.',
+      'Встретила бывшую коллегу. Обе сделали вид, что спешим.',
+      'Испекла хлеб. Кривой, но свой.',
+      'Сегодня день без кофе. Мир серее, но честнее.',
+      'Хочется написать кому-то длинное письмо. Не знаю кому.',
+      'На работе похвалили за то, что я считала мелочью.',
+      'Бег, 5 км. Медленно, но без остановок.',
+      'Думаю о том, что через 60 дней прочитаю это снова.',
+      'Тревожно без причины. Записываю, чтобы отпустить.',
+      'Нашла в кармане билет на концерт прошлой осени.',
+      'Друг прислал фото моря. Я почти почувствовала соль.',
+      'Слишком много экранов. Завтра — бумажная книга.',
+      'Всё получилось не так, как планировала, но лучше.',
+      'Первый снег / первый тёплый день — неважно, первый.',
+      'Сказала «нет» вежливо и твёрдо. Запомнить это ощущение.',
+      'Смотрела, как дети строят крепость из веток. Серьёзные, как архитекторы.',
+      'Хочу научиться ничего не хотеть хотя бы полчаса в день.',
+      'Вечер с гитарой. Пальцы помнят больше, чем я.',
+      'Чай с бергамотом и окно нараспашку.',
+      'Сегодня я была добрее к себе, чем вчера.',
+      'Пробка на мосту, а я впервые не злилась — слушала подкаст про звёзды.'
+    ];
+    var MY_60 = 'Решила, что этот круг будет про терпение. Посмотрим, что скажу через 60 дней.';
+    var MY_120 = 'Начинаю дневник. Не знаю, зачем, но хочется оставлять следы.';
+
+    var POOL = [
+      'Утро началось с тумана. Город как будто ещё не решил, каким быть.',
+      'Написал старому другу. Ответил через минуту, как будто ждал.',
+      'Работал до ночи, но впервые за неделю с удовольствием.',
+      'Пила чай на балконе, пока не замёрзли пальцы.',
+      'Ничего не успел. Зато долго смотрел на воробьёв.',
+      'Сегодня всё раздражало. Завтра будет иначе.',
+      'Поезд опоздал на час, и я дочитал книгу. Спасибо, поезд.',
+      'Посадила базилик. Посмотрим, кто из нас упрямее.',
+      'Мне кажется, я начинаю понимать отца.',
+      'Танцевала одна на кухне под старое радио.',
+      'Сломался зонт. Пришла домой мокрая и почему-то счастливая.',
+      'Иногда лучший план — не иметь плана.',
+      'Записала сон: я плыла в лодке по библиотеке.',
+      'Весь день молчал. Это было громко.',
+      'Купил новые кроссовки и тут же пошёл в них под дождь.',
+      'Поймал себя на том, что улыбаюсь в лифте.',
+      'Длинная прогулка без маршрута. Нашёл двор с качелями.',
+      'Мама прислала рецепт пирога голосовым на 7 минут.',
+      'Не люблю понедельники, но этот был ничего.',
+      'Хочу в горы. Просто записываю это желание.',
+      'Сегодня понял, что медленно — тоже движение.',
+      'Сосед сверху играет на виолончели. Я больше не жалуюсь.',
+      'Выбросила старые конспекты. Легче, чем думала.',
+      'Ветер с залива пах водорослями и свободой.',
+      'Встреча, которой боялся, прошла спокойно.',
+      'Переставил мебель. Комната стала чужой и интересной.',
+      'Слушала дождь вместо музыки.',
+      'Первый раз приготовил рамен сам. Бульон варил шесть часов.',
+      'Снова не спал до трёх. Нужно что-то менять.',
+      'Помог незнакомцу донести коляску по лестнице. Мелочь, а приятно.',
+      'Все вокруг спешат, а я сегодня — нет.',
+      'Смотрю на круг и думаю: вернусь в этот день другим человеком.',
+      'Нашла на рынке старую открытку с чужим «люблю».',
+      'Сделала фото луны на телефон. Получилось пятно. Красивое пятно.',
+      'Устал объяснять, что я в порядке. Я правда в порядке.',
+      'Прочитал, что 子 — это полночь. Интересно, что я пишу в полночь.',
+      'День без новостей. Мир, кажется, справился без меня.',
+      'Варю кофе в турке, как дед. Так же убегает.',
+      'Записалась на керамику. Глина не прощает спешки.',
+      'Сегодня тепло. В куртке нараспашку, как подросток.',
+      'Опять думаю о переезде. Опять никуда не еду.',
+      'Тихий вечер. Плед, лампа, пёс сопит рядом.',
+      'Разговор в такси оказался лучшим за неделю.',
+      'Хочется быть проще. Без фильтров.',
+      'Получил письмо из прошлого — сам себе год назад.',
+      'Сегодня я никому ничего не должна.',
+      'Сварила варенье из последних яблок.',
+      'Смотрел на облака дольше, чем в экран. Маленькая победа.',
+      'Взяла выходной просто так. Без повода.',
+      'Сегодня всё валилось из рук. Даже чашка.',
+      'Нарисовал карту района по памяти. Половину перепутал.',
+      'Лёд на лужах хрустит, как сахар.',
+      'Заметила, что стала чаще говорить «спасибо».',
+      'Мир шумный. Я сегодня — нет.',
+      'Пересмотрел любимый фильм и плакал в тех же местах.',
+      'Колено болит к дождю. Старею по прогнозу.',
+      'Ужин с друзьями до полуночи. Голос сел от смеха.',
+      'Учусь отпускать то, что не моё.',
+      'Сегодня я была на крыше. Город сверху тише.',
+      'Читаю по главе в день, как сериал.'
+    ];
+
+    var STEMS = '甲乙丙丁戊己庚辛壬癸';
+    var BRANCHES = '子丑寅卯辰巳午未申酉戌亥';
+    var STEM_PY = ['jiǎ', 'yǐ', 'bǐng', 'dīng', 'wù', 'jǐ', 'gēng', 'xīn', 'rén', 'guǐ'];
+    var BRANCH_PY = ['zǐ', 'chǒu', 'yín', 'mǎo', 'chén', 'sì', 'wǔ', 'wèi', 'shēn', 'yǒu', 'xū', 'hài'];
+    var ELEMENTS = ['Дерево', 'Огонь', 'Земля', 'Металл', 'Вода'];
+
+    var USERS = [
+      { id: 'me', nick: '', av: 0 },
+      { id: 'veter', nick: 'ветер_с_севера', av: 8, dens: 0.8, streak: 23 },
+      { id: 'mahina', nick: 'mahina', av: 2, dens: 0.72, streak: 6 },
+      { id: 'lin', nick: 'lin_yu', av: 5, dens: 0.7, streak: 11 },
+      { id: 'pilot', nick: 'тихий_пилот', av: 6, dens: 0.5, streak: 2 },
+      { id: 'sosna', nick: 'сосна_у_дома', av: 1, dens: 0.62, streak: 14 },
+      { id: 'kira', nick: 'kira.m', av: 3, dens: 0.45, streak: 1 },
+      { id: 'chai', nick: 'ночной_чай', av: 9, dens: 0.66, streak: 37 },
+      { id: 'ostrov', nick: 'остров_7', av: 4, dens: 0.4, streak: 3 }
+    ];
+    var ADDED = ['veter', 'mahina', 'lin'];
+  </script>
+  <script>
+    (function () {
+      var NS = 'http://www.w3.org/2000/svg';
+      var DAY = 86400000;
+      var now = new Date();
+      var TODAY = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
+      /* Опорная дата: 7 января 2000 — день 甲子 (индекс 0 из 60). */
+      var EPOCH = new Date(2000, 0, 7, 12);
+      var MON_S = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+      var MON_G = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+      var WD = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+      var MAXOFF = 125;
+      var FEED_DAYS = 72;
+
+      function $(id) { return document.getElementById(id); }
+      function dateAt(off) { return new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate() - off, 12); }
+      function gzIdx(d) { var n = Math.round((d - EPOCH) / DAY); return ((n % 60) + 60) % 60; }
+      function gzName(i) { return STEMS[i % 10] + BRANCHES[i % 12]; }
+      function gzPy(i) { return STEM_PY[i % 10] + ' ' + BRANCH_PY[i % 12]; }
+      function elName(i) { var s = i % 10; return (s % 2 ? 'Инь ' : 'Ян ') + ELEMENTS[Math.floor(s / 2)]; }
+      function fmtS(d) { return d.getDate() + ' ' + MON_S[d.getMonth()]; }
+      function fmtL(d) { return d.getDate() + ' ' + MON_G[d.getMonth()]; }
+      function pl(n, a, b, c) { var m = Math.abs(n) % 100, m1 = m % 10; if (m > 10 && m < 20) return c; if (m1 > 1 && m1 < 5) return b; if (m1 === 1) return a; return c; }
+      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+      function user(id) { for (var i = 0; i < USERS.length; i++) if (USERS[i].id === id) return USERS[i]; }
+      function av(i, cls) { return '<span class="av elem-' + i + (cls ? ' ' + cls : '') + '" aria-hidden="true">' + STEMS[i] + '</span>'; }
+      function ago(off) { if (off === 0) return 'сегодня'; if (off === 1) return 'вчера'; return off + ' ' + pl(off, 'день', 'дня', 'дней') + ' назад'; }
+      function mk(tag, attrs) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
+      function tx(text, x, y, style, cls) { var t = mk('text', { x: x, y: y, 'text-anchor': 'middle', style: style }); if (cls) t.setAttribute('class', cls); t.textContent = text; return t; }
+
+      /* ---------- seed ---------- */
+      function rng(seed) {
+        return function () {
+          seed = (seed + 0x6d2b79f5) | 0;
+          var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+      function shuffled(arr, r) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+        return a;
+      }
+      var E = {};
+      (function seed() {
+        var r = rng(7), p = shuffled(MY_POOL, r), k = 0, me = {};
+        for (var off = 1; off <= 72; off++) if (off <= 9 || (off > 10 && r() < 0.78)) me[off] = p[k++ % p.length];
+        for (off = 100; off < 120; off++) if (r() < 0.55) me[off] = p[k++ % p.length];
+        me[60] = MY_60;
+        me[120] = MY_120;
+        E.me = me;
+        USERS.forEach(function (u, ui) {
+          if (u.id === 'me') return;
+          var rr = rng(101 + ui * 13), pp = shuffled(POOL, rr), kk = 0, m = {};
+          for (var o = 0; o <= MAXOFF; o++) {
+            var on;
+            if (o === 0) on = rr() < 0.45;
+            else if (o <= u.streak) on = true;
+            else if (o === u.streak + 1) on = false;
+            else on = rr() < u.dens;
+            if (on) m[o] = pp[kk++ % pp.length];
+          }
+          E[u.id] = m;
+        });
+      })();
+
+      function streak(id) {
+        var m = E[id], o = m[0] ? 0 : 1, n = 0;
+        while (m[o]) { n++; o++; }
+        return n;
+      }
+      function lastOff(id) { for (var o = 0; o <= MAXOFF; o++) if (E[id][o]) return o; return -1; }
+      function firstOff(id) { var keys = Object.keys(E[id]).map(Number); return Math.max.apply(null, keys); }
+
+      /* ---------- state ---------- */
+      var TODAY_I = gzIdx(TODAY);
+      var editing = false;
+      var feedMode = 'par';
+      var current = 'reg';
+      var regAv = 0;
+
+      /* ---------- navigation ---------- */
+      var RENDER = {
+        today: renderToday, ring: renderRing, feed: renderFeed, people: renderPeople, profile: renderProfile
+      };
+      function show(name) {
+        current = name;
+        document.querySelectorAll('.screen').forEach(function (s) { s.classList.toggle('is-on', s.id === 's-' + name); });
+        $('tabs').hidden = name === 'reg';
+        document.querySelectorAll('.tabs button').forEach(function (b) {
+          if (b.dataset.tab === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+        });
+        closeSheet();
+        if (RENDER[name]) RENDER[name]();
+      }
+      document.querySelectorAll('.tabs button').forEach(function (b) {
+        b.addEventListener('click', function () { show(b.dataset.tab); });
+      });
+
+      var toastT;
+      function toast(msg) {
+        var t = $('toast');
+        t.textContent = msg;
+        t.classList.add('is-on');
+        clearTimeout(toastT);
+        toastT = setTimeout(function () { t.classList.remove('is-on'); }, 2200);
+      }
+
+      /* ---------- avatar grid ---------- */
+      function avatarGrid(el, selected, onPick) {
+        el.innerHTML = '';
+        for (var i = 0; i < 10; i++) {
+          (function (i) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.setAttribute('aria-pressed', i === selected ? 'true' : 'false');
+            b.setAttribute('aria-label', STEM_PY[i] + ', ' + elName(i));
+            b.innerHTML = av(i);
+            b.addEventListener('click', function () {
+              el.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+              b.setAttribute('aria-pressed', 'true');
+              onPick(i);
+            });
+            el.appendChild(b);
+          })(i);
+        }
+      }
+
+      /* ---------- 1. registration ---------- */
+      (function regMark() {
+        var s = $('reg-mark');
+        for (var i = 0; i < 60; i++) {
+          var a = ((i * 6 - 90) * Math.PI) / 180;
+          var c = mk('circle', { cx: 50 + 40 * Math.cos(a), cy: 50 + 40 * Math.sin(a), r: i === TODAY_I ? 3.4 : 2.1, class: 'elem-' + (i % 10) });
+          c.setAttribute('style', 'fill:var(--ef);stroke:var(--es);stroke-width:' + (i === TODAY_I ? 1.2 : 0.5));
+          s.appendChild(c);
+        }
+        var t = tx(gzName(TODAY_I), 50, 57, 'font-size:19px;fill:var(--et)', 'elem-' + (TODAY_I % 10));
+        t.setAttribute('font-family', 'PingFang SC, Hiragino Sans GB, Noto Sans CJK SC, sans-serif');
+        s.appendChild(t);
+      })();
+      avatarGrid($('reg-avatars'), regAv, function (i) { regAv = i; });
+      $('nick').addEventListener('input', function () { $('nick-err').textContent = ''; });
+      $('enter').addEventListener('click', function () {
+        var n = $('nick').value.trim();
+        if (!n) { $('nick-err').textContent = 'Придумай ник — так тебя увидят другие.'; $('nick').focus(); return; }
+        if (USERS.some(function (u) { return u.id !== 'me' && u.nick.toLowerCase() === n.toLowerCase(); })) {
+          $('nick-err').textContent = 'Этот ник уже занят.'; return;
+        }
+        USERS[0].nick = n;
+        USERS[0].av = regAv;
+        show('today');
+      });
+      $('nick').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('enter').click(); });
+
+      /* ---------- 2. today ---------- */
+      function renderToday() {
+        var i = TODAY_I;
+        $('today-head').innerHTML =
+          '<span class="day__gz elem-' + (i % 10) + '">' + gzName(i) + '</span>' +
+          '<div class="day__meta"><b>Сегодня, ' + fmtL(TODAY) + '</b><br>' + WD[TODAY.getDay()] + '<br>' +
+          gzPy(i) + ' · ' + (i + 1) + '/60 · ' + elName(i) + '</div>';
+        $('open-profile').innerHTML = av(USERS[0].av);
+
+        var c = $('compose'), mine = E.me[0];
+        if (mine && !editing) {
+          c.innerHTML =
+            '<p class="label">Мысль дня</p><p class="saved">' + esc(mine) + '</p>' +
+            '<div class="compose__bar"><span>Узел ' + (i + 1) + '/60 светится</span>' +
+            '<button class="btn btn--sm" id="edit">Изменить</button></div>';
+          $('edit').onclick = function () { editing = true; renderToday(); $('ta').focus(); };
+        } else {
+          c.innerHTML =
+            '<label class="label" for="ta" style="display:block">Одна мысль</label>' +
+            '<textarea id="ta" maxlength="280" placeholder="Что у тебя сегодня на уме?">' + esc(mine || '') + '</textarea>' +
+            '<div class="compose__bar"><span id="cnt"></span><button class="btn btn--fill btn--sm" id="save">Сохранить</button></div>';
+          var ta = $('ta'), save = $('save'), cnt = $('cnt');
+          var upd = function () { var l = ta.value.trim().length; save.disabled = !l; cnt.textContent = ta.value.length + ' / 280'; };
+          ta.oninput = upd; upd();
+          save.onclick = function () {
+            var v = ta.value.trim();
+            if (!v) return;
+            var first = !E.me[0];
+            E.me[0] = v;
+            editing = false;
+            renderToday();
+            toast(first ? 'Записано · узел ' + (i + 1) + '/60 светится' : 'Запись обновлена');
+          };
+        }
+
+        var rows = [60, 120].map(function (off) {
+          var d = dateAt(off), t = E.me[off];
+          return '<div class="echo__row"><p class="echo__when"><span class="stripe elem-' + (gzIdx(d) % 10) + '"></span>' +
+            off + ' дней назад · ' + fmtS(d) + ' ' + d.getFullYear() + '</p>' +
+            (t ? '<p class="echo__txt">' + esc(t) + '</p>' : '<p class="echo__txt muted">Записи нет — день остался пустым.</p>') + '</div>';
+        }).join('');
+        $('echoes').innerHTML =
+          '<div class="echo"><p class="label">60 дней назад, тот же узел · ' + gzName(i) + '</p>' + rows + '</div>';
+      }
+      $('open-profile').addEventListener('click', function () { show('profile'); });
+
+      /* ---------- 3. ring ---------- */
+      function renderRing() {
+        var svg = $('ring');
+        svg.innerHTML = '';
+        var cx = 340, cy = 340, R = 265;
+        svg.appendChild(mk('circle', { cx: cx, cy: cy, r: R, fill: 'none', stroke: 'var(--bt)', 'stroke-width': 0.5, 'stroke-dasharray': '2 5' }));
+        svg.appendChild(mk('circle', { cx: cx, cy: cy, r: 84, style: 'fill:none;stroke:var(--bt);stroke-width:0.5' }));
+        var cg = mk('g', { class: 'elem-' + (TODAY_I % 10) });
+        cg.appendChild(tx(gzName(TODAY_I), cx, cy + 4, 'font-size:34px;fill:var(--et)', 'gz-c'));
+        cg.appendChild(tx('сегодня · ' + (TODAY_I + 1) + '/60', cx, cy + 28, 'font-size:12px;fill:var(--ts)'));
+        cg.appendChild(tx(fmtS(TODAY), cx, cy + 44, 'font-size:12px;fill:var(--ts)'));
+        svg.appendChild(cg);
+
+        var count = 0;
+        for (var i = 0; i < 60; i++) {
+          var a = ((i * 6 - 90) * Math.PI) / 180;
+          var x = Math.round(cx + R * Math.cos(a)), y = Math.round(cy + R * Math.sin(a));
+          var off = (TODAY_I - i + 60) % 60;
+          var has = !!E.me[off], isT = i === TODAY_I;
+          if (has) count++;
+          var g = mk('g', { class: 'node elem-' + (i % 10), 'data-i': i, role: 'button', tabindex: '0',
+            'aria-label': 'Узел ' + (i + 1) + ', ' + gzName(i) + ', ' + fmtL(dateAt(off)) + (has ? ', есть запись' : '') });
+          g.appendChild(mk('circle', { cx: x, cy: y, r: 15, fill: 'transparent' }));
+          g.appendChild(mk('circle', { cx: x, cy: y, r: isT ? 13 : 10,
+            style: (has ? 'fill:var(--ef);' : 'fill:var(--bg);') + 'stroke:var(--es);stroke-width:' + (isT ? 2 : has ? 0.5 : 0.8) + ';opacity:' + (has || isT ? 1 : 0.7) }));
+          var nt = tx(String(i + 1), x, y, 'font-size:11px;font-weight:500;pointer-events:none;fill:' + (has || isT ? 'var(--et)' : 'var(--ts)'));
+          nt.setAttribute('dominant-baseline', 'middle');
+          g.appendChild(nt);
+          ADDED.forEach(function (id, j) {
+            if (!E[id][off]) return;
+            var rr = R - 24 - j * 9;
+            var dot = mk('circle', { cx: cx + rr * Math.cos(a), cy: cy + rr * Math.sin(a), r: 3.4, class: 'elem-' + user(id).av });
+            dot.setAttribute('style', 'fill:var(--es);pointer-events:none');
+            g.appendChild(dot);
+          });
+          svg.appendChild(g);
+        }
+        $('ring-count').textContent = 'в этом круге ' + count + ' из 60';
+        var lg = '<span class="elem-' + (TODAY_I % 10) + '"><i style="background:var(--ef);border:1px solid var(--es)"></i>есть запись</span>' +
+          '<span><i style="border:1px solid var(--bs)"></i>пусто</span>';
+        ADDED.forEach(function (id) { var u = user(id); lg += '<span class="elem-' + u.av + '"><i style="background:var(--es);width:7px;height:7px"></i>' + esc(u.nick) + '</span>'; });
+        $('ring-legend').innerHTML = lg;
+      }
+      $('ring').addEventListener('click', function (e) {
+        var g = e.target.closest('.node');
+        if (g) openNode(+g.dataset.i);
+      });
+      $('ring').addEventListener('keydown', function (e) {
+        var g = e.target.closest && e.target.closest('.node');
+        if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openNode(+g.dataset.i); }
+      });
+
+      function entryHtml(id, off) {
+        var u = user(id);
+        return '<div class="entry">' + av(u.av, 'av--s') + '<div><div class="entry__nick">' + (id === 'me' ? 'я · ' + esc(u.nick) : esc(u.nick)) + '</div>' +
+          '<p class="entry__txt">' + esc(E[id][off]) + '</p></div></div>';
+      }
+      function openNode(i) {
+        var d0 = (TODAY_I - i + 60) % 60;
+        var names = ['Этот круг', 'Прошлый круг · −60 дней', 'Позапрошлый круг · −120 дней'];
+        var h = '<div class="sheet__head"><span class="sheet__gz elem-' + (i % 10) + '">' + gzName(i) + '</span>' +
+          '<div class="day__meta"><b>Узел ' + (i + 1) + '/60</b><br>' + gzPy(i) + ' · ' + elName(i) + '</div></div>';
+        for (var L = 0; L < 3; L++) {
+          var off = d0 + 60 * L;
+          if (off > MAXOFF) break;
+          var d = dateAt(off);
+          var ids = ['me'].concat(ADDED).filter(function (id) { return E[id][off]; });
+          h += '<div class="loop"><p class="label">' + (off === 0 ? 'Сегодня' : names[L]) + ' · ' + fmtS(d) + ' ' + d.getFullYear() + '</p>';
+          h += ids.length ? ids.map(function (id) { return entryHtml(id, off); }).join('') : '<p class="small muted" style="margin:0">Никто не писал.</p>';
+          if (off === 0 && !E.me[0]) h += '<p style="margin:8px 0 0"><button class="btn btn--sm" id="go-write">Написать сегодня</button></p>';
+          h += '</div>';
+        }
+        $('sheet-body').innerHTML = h;
+        var gw = $('go-write');
+        if (gw) gw.onclick = function () { show('today'); setTimeout(function () { var t = $('ta'); if (t) t.focus(); }, 50); };
+        $('scrim').classList.add('is-on');
+        $('sheet').classList.add('is-on');
+        $('sheet').scrollTop = 0;
+      }
+      function closeSheet() { $('scrim').classList.remove('is-on'); $('sheet').classList.remove('is-on'); }
+      $('scrim').addEventListener('click', closeSheet);
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+
+      /* ---------- 4. feed ---------- */
+      function renderFeed() {
+        $('mode-me').setAttribute('aria-pressed', feedMode === 'me');
+        $('mode-par').setAttribute('aria-pressed', feedMode === 'par');
+        var cols = feedMode === 'par' ? ['me'].concat(ADDED) : ['me'];
+        var f = $('feed');
+        var one = cols.length === 1;
+        f.style.gridTemplateColumns = '78px ' + (one ? 'minmax(0, 1fr)' : 'repeat(' + cols.length + ', 172px)');
+        f.style.width = one ? '100%' : 'max-content';
+        var h = '<div class="fh fh--corner muted">День</div>';
+        cols.forEach(function (id) {
+          var u = user(id);
+          h += '<div class="fh">' + av(u.av, 'av--s') + '<span>' + (id === 'me' ? 'Я' : esc(u.nick)) + '</span></div>';
+        });
+        for (var off = 0; off < FEED_DAYS; off++) {
+          var d = dateAt(off), gi = gzIdx(d), tr = off === 0 ? ' is-today-row' : '';
+          h += '<div class="fl elem-' + (gi % 10) + tr + '">' + (off === 0 ? 'сегодня' : fmtS(d)) + '<b>' + gzName(gi) + '</b></div>';
+          cols.forEach(function (id) {
+            var t = E[id][off];
+            h += t ? '<div class="fc' + tr + '">' + esc(t) + '</div>' : '<div class="fc fc--empty' + tr + '">—</div>';
+          });
+        }
+        f.innerHTML = h;
+        if (feedMode === 'par' && !ADDED.length) toast('Добавь ленты в разделе «Люди»');
+      }
+      $('mode-me').addEventListener('click', function () { feedMode = 'me'; renderFeed(); });
+      $('mode-par').addEventListener('click', function () { feedMode = 'par'; renderFeed(); });
+
+      /* ---------- 5. people ---------- */
+      function renderPeople() {
+        var others = USERS.slice(1);
+        $('people-count').textContent = 'в ленте ' + ADDED.length + ' из ' + others.length;
+        $('people').innerHTML = others.map(function (u) {
+          var s = streak(u.id), lo = lastOff(u.id), on = ADDED.indexOf(u.id) > -1;
+          return '<li class="person">' + av(u.av) + '<div class="person__main"><div class="person__nick">' + esc(u.nick) + '</div>' +
+            '<div class="person__streak">' + (s ? 'пишет ' + s + ' ' + pl(s, 'день', 'дня', 'дней') + ' подряд' : 'сделал(а) паузу') + '</div>' +
+            (lo > -1 ? '<p class="person__last">' + ago(lo) + ': «' + esc(E[u.id][lo]) + '»</p>' : '') + '</div>' +
+            '<button class="btn btn--sm' + (on ? ' is-on' : '') + '" data-u="' + u.id + '" aria-pressed="' + on + '">' + (on ? '✓ В ленте' : '+ Добавить ленту') + '</button></li>';
+        }).join('');
+      }
+      $('people').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-u]');
+        if (!b) return;
+        var id = b.dataset.u, k = ADDED.indexOf(id);
+        if (k > -1) { ADDED.splice(k, 1); toast(user(id).nick + ' убран(а) из ленты'); }
+        else { ADDED.push(id); toast(user(id).nick + ' теперь в ленте и на круге'); }
+        renderPeople();
+      });
+
+      /* ---------- 6. profile ---------- */
+      function renderProfile() {
+        var me = USERS[0];
+        var count = Object.keys(E.me).length, s = streak('me'), fo = firstOff('me');
+        var circles = Math.floor((fo + 1) / 60);
+        $('profile').innerHTML =
+          '<div class="prof">' + av(me.av, 'av--l') +
+          '<p class="prof__nick">' + esc(me.nick) + '</p>' +
+          '<p class="small muted" style="margin:0">в круге с ' + fmtL(dateAt(fo)) + ' ' + dateAt(fo).getFullYear() + ' · ' + elName(me.av) + '</p>' +
+          '<div class="stats">' +
+          '<div class="stat"><b>' + count + '</b><span>' + pl(count, 'запись', 'записи', 'записей') + '</span></div>' +
+          '<div class="stat"><b>' + s + '</b><span>' + pl(s, 'день', 'дня', 'дней') + ' подряд</span></div>' +
+          '<div class="stat"><b>' + circles + '</b><span>' + pl(circles, 'полный круг', 'полных круга', 'полных кругов') + '</span></div>' +
+          '</div>' +
+          '<button class="btn btn--wide" id="chg-av">Сменить аватар</button>' +
+          '<div class="av-grid" id="prof-avatars" hidden style="margin-top:18px"></div>' +
+          '<button class="btn btn--wide" id="logout" style="margin-top:12px;border-color:var(--bt);color:var(--ts)">Выйти из круга</button>' +
+          '</div>';
+        $('chg-av').onclick = function () {
+          var g = $('prof-avatars');
+          g.hidden = !g.hidden;
+          if (!g.hidden) avatarGrid(g, me.av, function (i) { me.av = i; regAv = i; renderProfile(); toast('Аватар обновлён'); });
+        };
+        $('logout').onclick = function () { $('nick').value = me.nick; show('reg'); };
+      }
+      $('back').addEventListener('click', function () { show('today'); });
+    })();
+  </script>
+
+
+</body></html>
