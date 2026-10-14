@@ -206,12 +206,12 @@
             </div>
             <div class="x-krug" id="k-scroll">
               <div class="x-krug__inner" id="k-inner">
-                <div class="x-rings" id="k-rings" role="img" aria-label="Круг 60 дней с записями и фазами луны">
+                <div class="x-rings" id="k-rings" role="img" aria-label="Круг 60 дней с записями">
                   <svg id="k-ring" viewBox="0 0 680 680" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
                 </div>
               </div>
             </div>
-            <p class="x-legend x-krug-legend"><span><i class="x-pdot" style="--pc:var(--text-secondary);margin:0"></i>точка = заметка · ряд 1 — я, далее — друзья по порядку</span></p>
+            <p class="x-legend x-krug-legend"><span><i class="x-pdot" style="--pc:var(--text-secondary);margin:0"></i>точка = заметка · от узла к центру: сначала мои, затем друзья по порядку</span></p>
             <div class="x-legend x-krug-legend" id="k-legend" aria-label="Обозначения"></div>
             <div class="x-row x-row--between">
               <span></span>
@@ -815,7 +815,9 @@
         var selected = null;
         /* One 60-day ring: node n is the day TODAY + (n − today's position).
            Geometry and wave math from ganzhi_lunar_wave_v2.html */
-        var KC = 340, KR = 252, RW = 252, AMP = 42, KNR = 10, KTR = 13, KDISC = 80, KDOT = 2.4, KSTEP = 6;
+        var KC = 340, KR = 252, RW = 252, AMP = 42, KNR = 10, KTR = 13, KDISC = 80, KDOT = 2.4, KSTEP = 7, KIN = 72;
+        /* lunar wave, moon markers and Ekadashi: off for now, kept for a later option */
+        var SHOW_MOON = false;
         var SYNODIC = 29.530589, NM0 = Date.UTC(2000, 0, 6, 18, 14);
         var TODAY_N = TODAY_SLOT.n;
         var WIN = [];
@@ -865,39 +867,35 @@
           svg.innerHTML = '';
 
           /* lunar wave: closed Catmull-Rom through 60 points at RW + dp(ph(i)) */
-          svg.appendChild(mk('path', { d: WAVE_D, fill: 'none', stroke: '#EF9F27', 'stroke-width': '1.3', 'stroke-opacity': '0.85' }));
+          if (SHOW_MOON) svg.appendChild(mk('path', { d: WAVE_D, fill: 'none', stroke: '#EF9F27', 'stroke-width': '1.3', 'stroke-opacity': '0.85' }));
 
           var ekaDays = [], fullDays = [];
 
-          /* activity tracks: track 0 = me, then each followed friend in the order of Люди.
-             Every track holds `cap` evenly spaced rows, so dots line up in concentric circles. */
+          /* note dots: one neat radial line per day, starting just inside the node.
+             Order along the line: my notes, then each followed friend in the order of Люди.
+             Fixed step; shrinks only when a day's line would reach the centre text. */
           var trackOf = { me: 0 }, nTracks = 1;
           PEOPLE.forEach(function (p) { if (follow[p.id]) trackOf[p.id] = nTracks++; });
-          var dayDots = [], cap = 1;
+          var dayDots = [];
           for (var di = 0; di < 60; di++) {
-            var dk = keyOf(WIN[di]), cnt = {}, dots = [];
+            var dk = keyOf(WIN[di]), dots = [];
             myNotes(dk).forEach(function (t, j) { dots.push({ t: 0, j: j, c: myColor(dk, j) }); });
-            cap = Math.max(cap, dots.length);
-            if (WIN[di] <= TODAY) friendsOn(dk).forEach(function (e) {
-              var j = cnt[e.uid] = (cnt[e.uid] || 0) + 1;
-              dots.push({ t: trackOf[e.uid], j: j - 1, c: NOTE_COLORS[e.c] });
-              cap = Math.max(cap, j);
+            if (WIN[di] <= TODAY) friendsOn(dk).forEach(function (e, j) {
+              if (trackOf[e.uid] != null) dots.push({ t: trackOf[e.uid], j: j, c: NOTE_COLORS[e.c] });
             });
+            dots.sort(function (a, b) { return a.t - b.t || a.j - b.j; });
             dayDots.push(dots);
           }
-          var TGAP = cap > 1 ? 0.7 : 0, R0 = KR - KTR - 5;
-          var units = nTracks * cap - 1 + TGAP * (nTracks - 1);
-          var step = units > 0 ? Math.min(KSTEP, (R0 - KDISC - 10) / units) : KSTEP;
-          function trackR(t, j) { return R0 - (t * cap + j + t * TGAP) * step; }
 
           for (var i = 0; i < 60; i++) {
             var n = i + 1, d = WIN[i], key = keyOf(d), isT = n === TODAY_N, future = d > TODAY;
             var p = at(i, KR), stem = i % 10, nr = isT ? KTR : KNR;
 
-            /* each note = one dot in its own colour, on its person's track; more notes stack inward */
+            /* each note = one dot in its own colour, in order along the day's radial line */
             var cols = dayDots[i];
-            cols.forEach(function (o) {
-              var q = at(i, trackR(o.t, o.j));
+            var r0 = KR - nr - 6, step = cols.length > 1 ? Math.min(KSTEP, (r0 - KIN) / (cols.length - 1)) : KSTEP;
+            cols.forEach(function (o, k) {
+              var q = at(i, r0 - k * step);
               svg.appendChild(mk('circle', { cx: f1(q.x), cy: f1(q.y), r: KDOT, style: 'fill:' + o.c }));
             });
 
@@ -919,18 +917,18 @@
           }
 
           /* moon markers on the wave, as in the reference */
-          FULL_I.forEach(function (i) {
+          if (SHOW_MOON) FULL_I.forEach(function (i) {
             var w = waveAt(i);
             svg.appendChild(mk('circle', { cx: f1(w.x), cy: f1(w.y), r: 6, fill: '#EF9F27', 'fill-opacity': '0.95' }));
             fullDays.push(fmtDM(WIN[i]));
           });
-          NEW_I.forEach(function (i) {
+          if (SHOW_MOON) NEW_I.forEach(function (i) {
             var w = waveAt(i);
             svg.appendChild(mk('circle', { cx: f1(w.x), cy: f1(w.y), r: 5, style: 'fill:var(--fill-primary-on);stroke:var(--text-secondary);stroke-width:0.8;stroke-opacity:0.6' }));
             svg.appendChild(mk('circle', { cx: f1(w.x), cy: f1(w.y), r: 1.8, style: 'fill:var(--text-secondary);fill-opacity:0.45' }));
           });
           /* Ekadashi diamonds on the wave */
-          for (var m = 0; m < 60; m++) {
+          for (var m = 0; SHOW_MOON && m < 60; m++) {
             if (!moonInfo(WIN[m]).eka) continue;
             var ep = waveAt(m), sz = 5;
             svg.appendChild(mk('polygon', {
@@ -940,34 +938,28 @@
             ekaDays.push(fmtDM(WIN[m]));
           }
 
-          /* centre disc */
-          var tm = moonInfo(TODAY);
-          svg.appendChild(mk('circle', { cx: KC, cy: KC, r: KDISC, style: 'fill:var(--fill-tertiary);stroke:var(--stroke-secondary);stroke-width:0.5' }));
-          var y0 = tm.eka ? KC - 4 : KC + 4;
+          /* centre: text only, no disc */
+          var tm = moonInfo(TODAY), y0 = KC - 4;
           var dt = mk('text', { x: KC, y: y0, 'text-anchor': 'middle', style: 'font-size:22px;font-weight:500;fill:var(--text-primary)' });
           dt.textContent = fmtShort(TODAY); svg.appendChild(dt);
-          [['сегодня · ' + TODAY_N + '/60', 22, 'fill:var(--text-secondary)'], [tm.name, 37, 'fill:var(--text-secondary);opacity:0.7']]
-            .concat(tm.eka ? [['◆ экадаши', 52, 'fill:var(--x-eka);font-weight:500']] : [])
-            .forEach(function (l) {
-              var t = mk('text', { x: KC, y: y0 + l[1], 'text-anchor': 'middle', style: 'font-size:11px;' + l[2] });
-              t.textContent = l[0]; svg.appendChild(t);
-            });
+          var st = mk('text', { x: KC, y: y0 + 22, 'text-anchor': 'middle', style: 'font-size:11px;fill:var(--text-secondary)' });
+          st.textContent = 'сегодня · ' + TODAY_N + '/60'; svg.appendChild(st);
 
           document.getElementById('k-rings').setAttribute('aria-label',
-            'Круг 60 дней с ' + fmtShort(WIN[0]) + ' по ' + fmtShort(WIN[59]) + '. Сегодня ' + TODAY_N + ' из 60, ' + tm.name +
-            '. Полнолуние: ' + (fullDays.join(', ') || 'нет') + '. Экадаши: ' + (ekaDays.join(', ') || 'нет') + '.');
+            'Круг 60 дней с ' + fmtShort(WIN[0]) + ' по ' + fmtShort(WIN[59]) + '. Сегодня ' + TODAY_N + ' из 60' +
+            (SHOW_MOON ? ', ' + tm.name + '. Полнолуние: ' + (fullDays.join(', ') || 'нет') + '. Экадаши: ' + (ekaDays.join(', ') || 'нет') : '') + '.');
 
           var order = ['1 я'].concat(PEOPLE.filter(function (p) { return follow[p.id]; }).map(function (p) { return (trackOf[p.id] + 1) + ' ' + esc(p.nick); }));
           document.getElementById('k-legend').innerHTML =
-            '<span><i class="x-lg-full"></i>полная луна</span><span><i class="x-lg-new"></i>новолуние</span><span><i class="x-lg-eka"></i>экадаши</span>' +
-            '<span>ряды: ' + order.join(' · ') + '</span>';
+            (SHOW_MOON ? '<span><i class="x-lg-full"></i>полная луна</span><span><i class="x-lg-new"></i>новолуние</span><span><i class="x-lg-eka"></i>экадаши</span>' : '') +
+            '<span>порядок: ' + order.join(' · ') + '</span>';
         }
         document.getElementById('k-open-today').addEventListener('click', function () { openDay(TODAY, { k: TODAY_SLOT.k, n: TODAY_SLOT.n }); });
         document.getElementById('k-inner').addEventListener('click', function (e) {
           var r = document.getElementById('k-rings').getBoundingClientRect();
           var vx = ((e.clientX - r.left) / r.width) * 2 * KC, vy = ((e.clientY - r.top) / r.height) * 2 * KC;
           var dx = vx - KC, dy = vy - KC, dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < KDISC + 10 || dist > RW + AMP + 14) return;
+          if (dist < KIN - 6 || dist > RW + AMP + 14) return;
           var turn = (Math.atan2(dy, dx) + Math.PI / 2) / (2 * Math.PI);
           var i = ((Math.round(turn * 60) % 60) + 60) % 60;
           openDay(WIN[i], { k: TODAY_SLOT.k, n: i + 1 });
