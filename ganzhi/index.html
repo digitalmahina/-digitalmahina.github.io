@@ -100,9 +100,8 @@
       .x-sub { font: var(--x-t15); color: var(--text-secondary); }
       .x-cap { font: var(--x-t12); color: var(--text-secondary); }
       .x-label { font: var(--x-t12m); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
-      .x-help { appearance: none; border: 0; background: none; width: var(--tap); height: var(--tap); margin-right: -10px; display: grid; place-items: center; cursor: pointer; color: var(--text-secondary); }
-      .x-help span { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--stroke-primary); display: grid; place-items: center; font: var(--x-t12m); }
-      .x-help:hover span { color: var(--text-primary); }
+      .x-err { font: var(--x-t12); color: var(--fill-system-red); }
+      .x-addrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
 
       /* Tab bar: 56px + safe area, equal tabs, a 4px dot above the active icon */
       .x-tabs { flex: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: calc(56px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); border-top: 1px solid var(--stroke-secondary); background: var(--fill-primary-on); }
@@ -170,18 +169,7 @@
       .x-krug-foot { flex: none; display: grid; gap: 16px; justify-items: center; padding-top: 16px; text-align: center; }
       .x-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font: var(--x-t12); color: var(--text-secondary); }
       .x-legend span { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
-      :root { --x-moon: light-dark(#ee9f33, #f2b14f); --x-eka: #7c3aed; --x-newmoon: #9a9a96; }
-      .x-pdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--pc); flex: none; vertical-align: 1px; margin-right: 8px; }
-      .x-lg-dots { display: inline-flex; gap: 2px; }
-      .x-lg-dots .x-pdot { width: 6px; height: 6px; margin: 0; }
-      .x-lg-full { width: 12px; height: 12px; border-radius: 50%; background: #ef9f27; opacity: 0.95; }
-      .x-lg-new { position: relative; width: 10px; height: 10px; border-radius: 50%; background: var(--fill-primary-on); box-shadow: inset 0 0 0 0.8px color-mix(in srgb, var(--text-secondary) 60%, transparent); }
-      .x-lg-new::after { content: ""; position: absolute; left: 50%; top: 50%; width: 3.6px; height: 3.6px; margin: -1.8px 0 0 -1.8px; border-radius: 50%; background: var(--text-secondary); opacity: 0.45; }
       .x-krug-legend { justify-content: center; }
-      .x-lg-eka { width: 7px; height: 7px; margin: 0 1px; background: var(--x-eka); transform: rotate(45deg); }
-      .x-lg-line { width: 14px; height: 2px; border-radius: 1px; background: var(--x-moon); }
-      .x-eka { display: inline-flex; align-items: center; gap: 8px; height: 24px; padding: 0 8px; border-radius: var(--r-pill); border: 1px solid var(--x-eka); color: var(--text-primary); font: var(--x-t12m); }
-      .x-eka::before { content: ""; width: 8px; height: 8px; background: var(--x-eka); transform: rotate(45deg); }
       .x-note { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
       .x-note + .x-note, .x-note + form, .x-notes + .links { border-top: 1px solid var(--stroke-secondary); padding-top: 8px; }
       .x-notes { display: grid; gap: 8px; }
@@ -226,7 +214,6 @@
       .x-sheet.is-open { display: grid; }
       .x-sheet__grab { justify-self: center; width: 32px; height: 4px; border-radius: 2px; background: var(--stroke-primary); }
       .x-sheet h3 { font: var(--x-t19); }
-      .x-help-list { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; font: var(--x-t15); }
     </style>
   </head>
   <body>
@@ -250,7 +237,7 @@
           <section class="x-screen" id="scr-today" aria-label="Сегодня"></section>
           <section class="x-screen" id="scr-feed" aria-label="Лента"></section>
           <section class="x-screen x-screen--krug" id="scr-krug" aria-label="Круг">
-            <div class="x-top"><div class="x-brand"><span class="x-logo" data-logo aria-hidden="true"></span><p class="x-wordmark">CENTRAL</p></div><div class="x-row"><span class="chip" id="k-today-chip"></span><button class="x-help" type="button" id="k-help" aria-label="Как читать Круг"><span aria-hidden="true">?</span></button></div></div>
+            <div class="x-top"><div class="x-brand"><span class="x-logo" data-logo aria-hidden="true"></span><p class="x-wordmark">CENTRAL</p></div><div class="x-row"><span class="chip" id="k-today-chip"></span></div></div>
             <div class="x-krug-top"><p class="x-krug-date" id="k-date"></p></div>
             <div class="x-krug" id="k-inner">
               <div class="x-rings" id="k-rings" role="img" aria-label="Круг 60 дней с записями">
@@ -508,87 +495,6 @@
           svg5.appendChild(hubTx);
         }
 
-        /* ---------- Moon (Meeus low-precision sun and moon longitudes) ---------- */
-        var RAD = Math.PI / 180;
-        function norm360(a) { a %= 360; return a < 0 ? a + 360 : a; }
-        function jdOf(d) { return d.getTime() / 86400000 + 2440587.5; }
-        function sunLon(jd) {
-          var T = (jd - 2451545) / 36525;
-          var L0 = 280.46646 + 36000.76983 * T, M = (357.52911 + 35999.05029 * T) * RAD;
-          var C = (1.914602 - 0.004817 * T) * Math.sin(M) + 0.019993 * Math.sin(2 * M) + 0.000289 * Math.sin(3 * M);
-          var om = (125.04 - 1934.136 * T) * RAD;
-          return norm360(L0 + C - 0.00569 - 0.00478 * Math.sin(om));
-        }
-        /* [D, M, M', F, coefficient] — main periodic terms of the moon's longitude */
-        var MOON_TERMS = [[0,0,1,0,6.288774],[2,0,-1,0,1.274027],[2,0,0,0,0.658314],[0,0,2,0,0.213618],[0,1,0,0,-0.185116],[0,0,0,2,-0.114332],[2,0,-2,0,0.058793],[2,-1,-1,0,0.057066],[2,0,1,0,0.053322],[2,-1,0,0,0.045758],[0,1,-1,0,-0.040923],[1,0,0,0,-0.03472],[0,1,1,0,-0.030383],[2,0,0,-2,0.015327],[0,0,1,2,-0.012528],[0,0,1,-2,0.01098],[4,0,-1,0,0.010675],[0,0,3,0,0.010034],[4,0,-2,0,0.008548],[2,1,-1,0,-0.007888],[2,1,0,0,-0.006766],[1,0,-1,0,-0.005163],[1,1,0,0,0.004987],[2,-1,1,0,0.004036],[2,0,2,0,0.003994],[4,0,0,0,0.003861],[2,0,-3,0,0.003665],[0,1,-2,0,-0.002689],[2,0,-1,2,-0.002602],[2,-1,-2,0,0.00239],[1,0,1,0,-0.002348],[2,-2,0,0,0.002236],[0,1,2,0,-0.00212],[0,2,0,0,-0.002069]];
-        function moonLon(jd) {
-          var T = (jd - 2451545) / 36525;
-          var Lp = 218.3164477 + 481267.88123421 * T;
-          var D = 297.8501921 + 445267.1114034 * T, M = 357.5291092 + 35999.0502909 * T;
-          var Mp = 134.9633964 + 477198.8675055 * T, F = 93.272095 + 483202.0175233 * T;
-          var E = 1 - 0.002516 * T, s = 0;
-          for (var i = 0; i < MOON_TERMS.length; i++) {
-            var t = MOON_TERMS[i], am = Math.abs(t[1]);
-            s += t[4] * (am === 1 ? E : am === 2 ? E * E : 1) * Math.sin((t[0] * D + t[1] * M + t[2] * Mp + t[3] * F) * RAD);
-          }
-          return norm360(Lp + s);
-        }
-        /** Moon − sun elongation in degrees: 0 new, 180 full */
-        function elongAt(d) { var jd = jdOf(d); return norm360(moonLon(jd) - sunLon(jd)); }
-        function atHour(d, h) { return new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, 0, 0); }
-        function tithiAt(d) { return Math.floor(elongAt(atHour(d, 6)) / 12) + 1; }
-        var moonCache = {};
-        function moonInfo(date) {
-          var key = keyOf(date);
-          if (moonCache[key]) return moonCache[key];
-          var e0 = elongAt(atHour(date, 0)), e1 = elongAt(atHour(addDays(date, 1), 0)), en = elongAt(atHour(date, 12));
-          var span = norm360(e1 - e0), ev = null, frac = 0.5;
-          [0, 180, 90, 270].some(function (x) { var dx = norm360(x - e0); if (dx < span) { ev = x; frac = dx / span; return true; } return false; });
-          var t = tithiAt(date), pt = tithiAt(addDays(date, -1));
-          /* 11th tithi at sunrise (first such day), or skipped between two sunrises */
-          var eka = ((t === 11 || t === 26) && pt !== t) || (pt === 10 && t === 12) || (pt === 25 && t === 27);
-          var name = ev === 0 ? 'новолуние' : ev === 180 ? 'полнолуние' : ev === 90 ? 'первая четверть' : ev === 270 ? 'последняя четверть'
-            : en < 90 ? 'растущий серп' : en < 180 ? 'растущая луна' : en < 270 ? 'убывающая луна' : 'убывающий серп';
-          return (moonCache[key] = { ev: ev, frac: frac, elong: en, illum: (1 - Math.cos(en * RAD)) / 2, tithi: t, eka: eka, ekaSide: t <= 15 || pt < 15 ? 'шукла' : 'кришна', name: name });
-        }
-        /* moon wording is off everywhere; kept as a hook for a later option */
-        function moonTag(date) {
-          if (!SHOW_MOON) return '';
-          var m = moonInfo(date);
-          return '<span class="pill">' + m.name + ' · ' + Math.round(m.illum * 100) + '%</span>' + (m.eka ? '<span class="x-eka">Экадаши</span>' : '');
-        }
-
-        /* ---------- Data ---------- */
-        function rng(seed) {
-          return function () {
-            seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
-            var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-          };
-        }
-        function hash(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
-
-        var PHRASES = [
-          'Проснулась до будильника, долго смотрела в окно.', 'Дождь весь день, зато дочитал книгу.', 'Сказал «нет» встрече и не пожалел.',
-          'Пекли хлеб, вышел кривой и вкусный.', 'Длинная прогулка вдоль реки.', 'Ничего не успела, но было спокойно.',
-          'Первый холодный вечер, достал шарф.', 'Позвонил маме просто так.', 'Сорок минут без телефона, получилось.',
-          'Тяжёлый день, лёг рано.', 'Нашла старую фотографию и полдня улыбалась.', 'Купил цветы себе.',
-          'Пробежал пять километров без остановки.', 'Разобрал ящик стола, нашёл ключ от ничего.', 'Слушал один альбом по кругу.',
-          'Встретила друга, которого не видела год.', 'Сделал то, что откладывал месяц.', 'Сварила суп на три дня.',
-          'Солнце в обед, сидел на лавке.', 'Спорили о фильме до полуночи.', 'Тихо, тепло, чай с мятой.',
-          'Болит голова, но мысль ясная.', 'Новая тропинка через парк.', 'Записала сон, пока не забыла.'
-        ];
-        var PEOPLE = [
-          { id: 'lisa', nick: 'Лиса', elem: 1, shape: 'square', bio: 'Пишет по утрам', color: 'light-dark(#2563eb, #7aa7ff)' },
-          { id: 'mark', nick: 'Марк', elem: 3, shape: 'triangle', bio: 'Бег и погода', color: 'light-dark(#8a4b14, #d39a5f)' },
-          { id: 'taya', nick: 'Тая', elem: 4, shape: 'diamond', bio: 'Сны и чай', color: 'light-dark(#0f8a7e, #4fd1c0)' },
-          { id: 'osya', nick: 'Ося', elem: 0, shape: 'hexagon', bio: 'Сад на балконе', color: 'light-dark(#c0267a, #f07ab5)' },
-          { id: 'vera', nick: 'Вера', elem: 2, shape: 'cross', bio: 'Город пешком', color: 'light-dark(#4d8a12, #9ed36a)' },
-          { id: 'gosha', nick: 'Гоша', elem: 4, shape: 'circle', bio: 'Музыка дня', color: 'light-dark(#b42318, #f38b80)' },
-          { id: 'nina', nick: 'Нина', elem: 1, shape: 'triangle', bio: 'Одна фраза в день', color: 'light-dark(#52627a, #a5b4c8)' },
-          { id: 'roma', nick: 'Рома', elem: 0, shape: 'diamond', bio: 'Работа и тишина', color: 'light-dark(#0e7490, #5ec8e5)' }
-        ];
         /* Six personal marks: colour = the note, shape = who wrote it */
         var SHAPES = [['circle', 'круг'], ['square', 'квадрат'], ['triangle', 'треугольник'], ['diamond', 'ромб'], ['hexagon', 'шестиугольник'], ['cross', 'крест']];
         function shapeName(id) { for (var i = 0; i < SHAPES.length; i++) if (SHAPES[i][0] === id) return SHAPES[i][1]; return 'круг'; }
@@ -624,70 +530,145 @@
           var cap = t.closest('.x-shapes').nextElementSibling;
           if (cap && cap.hasAttribute('data-shape-name')) cap.textContent = 'Знак: ' + shapeName(t.value);
         });
-        var ME_COLOR = 'var(--text-primary)';
         var NOTE_COLORS = [
           'light-dark(#2563eb, #7aa7ff)', 'light-dark(#b42318, #f38b80)', 'light-dark(#0f8a7e, #4fd1c0)', 'light-dark(#d97706, #fbbf24)',
           'light-dark(#c0267a, #f07ab5)', 'light-dark(#4d8a12, #9ed36a)', 'light-dark(#6d28d9, #b69cff)', 'light-dark(#8a4b14, #d39a5f)'
         ];
         var NOTE_COLOR_NAMES = ['синий', 'красный', 'бирюзовый', 'янтарный', 'розовый', 'зелёный', 'фиолетовый', 'коричневый'];
-        var START = dateOfSlot(0, 1);
-        var SEED_START = addDays(TODAY, -130) < START ? addDays(TODAY, -130) : START;
-        var FR = {};
-        (function () {
-          var r = rng(20261014);
-          for (var d = SEED_START; d <= TODAY; d = addDays(d, 1)) {
-            var key = keyOf(d), isT = key === keyOf(TODAY);
-            PEOPLE.forEach(function (p) {
-              if (r() < (isT ? 0.5 : 0.2)) {
-                (FR[key] = FR[key] || []).push({ uid: p.id, text: PHRASES[Math.floor(r() * PHRASES.length)] });
-                if (r() < 0.25) FR[key].push({ uid: p.id, text: PHRASES[Math.floor(r() * PHRASES.length)] });
-              }
-            });
+        /* ---------- Data: the only code that touches storage ----------
+           Local for now (localStorage, per device). To move to Supabase, rewrite these
+           methods only: each returns a Promise, and the UI never reads storage itself.
+           Shapes: profile { id, nick, elem, shape } · note { id, user_id, day 'YYYY-MM-DD', text, color, created_at } */
+        var store = (function () {
+          var P = 'central-', mem = {}, listeners = [];
+          function rd(k, def) {
+            try { var v = localStorage.getItem(P + k); return v ? JSON.parse(v) : def; }
+            catch (e) { return mem[k] !== undefined ? mem[k] : def; }
           }
-          /* every note gets its own colour, varied but stable */
-          Object.keys(FR).forEach(function (k) { FR[k].forEach(function (e, j) { e.c = hash(k + e.uid + j) % NOTE_COLORS.length; }); });
+          function wr(k, v) {
+            if (v == null) delete mem[k]; else mem[k] = v;
+            try { if (v == null) localStorage.removeItem(P + k); else localStorage.setItem(P + k, JSON.stringify(v)); } catch (e) {}
+          }
+          function sess() { return rd('session', null); }
+          function me() { var s = sess(); if (!s) throw new Error('Нет входа'); return s.user_id; }
+          function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+          function emit() { var s = sess(); listeners.slice().forEach(function (cb) { cb(s); }); }
+          function run(fn) { return new Promise(function (ok) { ok(fn()); }); }
+          function allProfiles() {
+            var out = [];
+            try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k.indexOf(P + 'profile:') === 0) out.push(JSON.parse(localStorage.getItem(k))); } }
+            catch (e) { Object.keys(mem).forEach(function (k) { if (k.indexOf('profile:') === 0) out.push(mem[k]); }); }
+            return out;
+          }
+          function notesOf(uid) { return rd('notes:' + uid, []); }
+          return {
+            /* true while there is no backend: the email link is not really sent */
+            local: true,
+
+            /* Auth. Supabase: auth.signInWithOtp({ email }) and auth.onAuthStateChange */
+            signInWithEmail: function (email) { return run(function () { wr('pending', { email: email }); return { email: email }; }); },
+            pendingEmail: function () { var p = rd('pending', null); return p ? p.email : ''; },
+            /* local stand-in for opening the emailed link */
+            confirmLocal: function () {
+              return run(function () {
+                var p = rd('pending', null); if (!p) return null;
+                var email = p.email.trim().toLowerCase();
+                wr('pending', null);
+                wr('session', { user_id: 'u-' + email, email: email });
+                emit(); return sess();
+              });
+            },
+            cancelSignIn: function () { return run(function () { wr('pending', null); }); },
+            /* calls cb(session or null) now and on every change; returns an unsubscribe */
+            onAuth: function (cb) {
+              listeners.push(cb); cb(sess());
+              return function () { listeners = listeners.filter(function (f) { return f !== cb; }); };
+            },
+            signOut: function () { return run(function () { wr('session', null); emit(); }); },
+
+            /* Profile */
+            getProfile: function () { return run(function () { var s = sess(); return s ? rd('profile:' + s.user_id, null) : null; }); },
+            saveProfile: function (p) {
+              return run(function () {
+                var id = me(), v = { id: id, nick: p.nick, elem: p.elem, shape: p.shape };
+                wr('profile:' + id, v); return v;
+              });
+            },
+            findUserByNick: function (nick) {
+              return run(function () {
+                var q = String(nick).trim().toLowerCase();
+                return allProfiles().filter(function (p) { return p && p.nick.toLowerCase() === q; })[0] || null;
+              });
+            },
+
+            /* My notes */
+            listNotes: function () { return run(function () { return notesOf(me()); }); },
+            addNote: function (n) {
+              return run(function () {
+                var id = me(), all = notesOf(id);
+                var v = { id: newId(), user_id: id, day: n.day, text: n.text, color: n.color || 0, created_at: new Date().toISOString() };
+                all.push(v); wr('notes:' + id, all); return v;
+              });
+            },
+            updateNote: function (noteId, patch) {
+              return run(function () {
+                var id = me(), all = notesOf(id), v = null;
+                all.forEach(function (n) { if (n.id === noteId) { if (patch.text != null) n.text = patch.text; if (patch.color != null) n.color = patch.color; v = n; } });
+                wr('notes:' + id, all); return v;
+              });
+            },
+            deleteNote: function (noteId) {
+              return run(function () { var id = me(); wr('notes:' + id, notesOf(id).filter(function (n) { return n.id !== noteId; })); });
+            },
+
+            /* Friends: profiles I follow, and their notes */
+            listFriends: function () { return run(function () { return rd('friends:' + me(), []); }); },
+            addFriend: function (p) {
+              return run(function () {
+                var id = me(), all = rd('friends:' + id, []);
+                if (p.id !== id && !all.some(function (f) { return f.id === p.id; })) all.push({ id: p.id, nick: p.nick, elem: p.elem, shape: p.shape });
+                wr('friends:' + id, all); return all;
+              });
+            },
+            removeFriend: function (friendId) {
+              return run(function () { var id = me(); wr('friends:' + id, rd('friends:' + id, []).filter(function (f) { return f.id !== friendId; })); });
+            },
+            listFriendNotes: function () {
+              return run(function () {
+                var out = [];
+                rd('friends:' + me(), []).forEach(function (f) { out = out.concat(notesOf(f.id)); });
+                return out;
+              });
+            }
+          };
         })();
 
-        var store = {
-          get: function (k, def) { try { var v = sessionStorage.getItem('central-' + k); return v ? JSON.parse(v) : def; } catch (e) { return store.mem[k] !== undefined ? store.mem[k] : def; } },
-          set: function (k, v) { store.mem[k] = v; try { sessionStorage.setItem('central-' + k, JSON.stringify(v)); } catch (e) {} },
-          mem: {}
-        };
-        var user = store.get('user', null);
-        var mine = store.get('mine', {});
-        /* Several notes per day: mine[key] is an array (older single strings are wrapped) */
-        Object.keys(mine).forEach(function (k) { if (typeof mine[k] === 'string') mine[k] = [mine[k]]; });
-        var follow = store.get('follow', { lisa: 1, mark: 1, taya: 1, osya: 1, vera: 1 });
-        /* colour index of each of my notes: mineC[key][i]; seeded notes fall back to a stable varied colour */
-        var mineC = store.get('minec', {});
-        function noteCI(key, i) { var a = mineC[key]; return a && a[i] != null ? a[i] : hash(key + ':' + i) % NOTE_COLORS.length; }
-        function myColor(key, i) { return NOTE_COLORS[noteCI(key, i)]; }
-        function setCI(key, i, ci) {
-          var a = mineC[key] || [];
-          for (var j = 0; j < i; j++) if (a[j] == null) a[j] = noteCI(key, j);
-          a[i] = ci; mineC[key] = a; store.set('minec', mineC);
+        /* ---------- In-memory copy for the screens ---------- */
+        var session = null, user = null, notes = [], friends = [], friendNotes = [];
+        var byDay = {}, frByDay = {};
+        function byTime(a, b) { return a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0; }
+        function reindex() {
+          byDay = {}; frByDay = {};
+          notes.slice().sort(byTime).forEach(function (n) { (byDay[n.day] = byDay[n.day] || []).push(n); });
+          friendNotes.slice().sort(byTime).forEach(function (n) { (frByDay[n.day] = frByDay[n.day] || []).push(n); });
         }
-        function cdot(c) { return '<i class="x-pdot" style="--pc:' + c + '" aria-hidden="true"></i>'; }
+        function loadAll() {
+          return Promise.all([store.getProfile(), store.listNotes(), store.listFriends(), store.listFriendNotes()]).then(function (r) {
+            user = r[0]; notes = r[1]; friends = r[2]; friendNotes = r[3]; reindex();
+          });
+        }
+        function reloadNotes() { return store.listNotes().then(function (r) { notes = r; reindex(); }); }
+        function reloadFriends() {
+          return Promise.all([store.listFriends(), store.listFriendNotes()]).then(function (r) { friends = r[0]; friendNotes = r[1]; reindex(); });
+        }
+        function clearState() { user = null; notes = []; friends = []; friendNotes = []; reindex(); }
 
-        function seedMine(nick) {
-          var r = rng(hash(nick)), m = {};
-          for (var d = SEED_START; d < TODAY; d = addDays(d, 1)) {
-            if (r() < 0.4) {
-              m[keyOf(d)] = [PHRASES[Math.floor(r() * PHRASES.length)]];
-              if (r() < 0.3) m[keyOf(d)].push(PHRASES[Math.floor(r() * PHRASES.length)]);
-            }
-          }
-          m[keyOf(addDays(TODAY, -60))] = ['Решил отмечать каждый день хотя бы одной строкой.'];
-          return m;
-        }
-        function myNotes(key) { var v = mine[key]; return !v ? [] : typeof v === 'string' ? [v] : v; }
-        function person(id) { if (id === 'me') return user; for (var i = 0; i < PEOPLE.length; i++) if (PEOPLE[i].id === id) return PEOPLE[i]; return null; }
-        function colorOf(p) { return !p || p.id === 'me' ? ME_COLOR : p.color; }
-        function pdot(p) { return '<i class="x-pdot" style="--pc:' + colorOf(p) + '" aria-hidden="true"></i>'; }
-        function friendsOn(key) { return (FR[key] || []).filter(function (e) { return follow[e.uid]; }); }
+        function myNotes(key) { return byDay[key] || []; }
+        function friendById(id) { for (var i = 0; i < friends.length; i++) if (friends[i].id === id) return friends[i]; return null; }
+        function friendsOn(key) { return (frByDay[key] || []).filter(function (e) { return friendById(e.user_id); }); }
+        function friendEntries(key) { return friendsOn(key).map(function (e) { return { p: friendById(e.user_id), text: e.text, c: NOTE_COLORS[e.color || 0] }; }); }
         function entriesOn(key) {
-          var list = friendsOn(key).map(function (e) { return { p: person(e.uid), text: e.text, c: NOTE_COLORS[e.c] }; });
-          return myNotes(key).map(function (t, i) { return { p: user, text: t, me: true, c: myColor(key, i) }; }).concat(list);
+          return myNotes(key).map(function (n) { return { p: user, text: n.text, me: true, c: NOTE_COLORS[n.color || 0] }; }).concat(friendEntries(key));
         }
         function av(p, size) {
           return '<span class="x-av elem-' + p.elem * 2 + '" style="--s:' + (size || 32) + 'px" aria-hidden="true">' + esc(p.nick.charAt(0).toUpperCase()) + '</span>';
@@ -724,26 +705,63 @@
           document.getElementById('scr-' + name).scrollTop = 0;
         }
 
+        /* Entry in three steps: (a) email, (b) check your mail, (c) profile */
+        var regStep = 'email';
+        function regTop() { return '<div class="x-top"><div class="x-brand">' + logo(24) + '<p class="x-wordmark">CENTRAL</p></div></div>'; }
         function renderReg() {
+          if (regStep === 'check') return renderCheck();
+          if (regStep === 'setup') return renderSetup();
+          var el = document.getElementById('scr-reg');
+          el.innerHTML = regTop() +
+            '<div><h1 class="x-h1">Вход</h1><p class="x-sub">Дневник по кругам года: одна запись в день, и через 60 дней она вернётся к вам на том же месте кольца.</p></div>' +
+            '<form class="x-card" id="reg-form" novalidate>' +
+            '<label class="x-field">Почта<input class="x-input" id="reg-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required /></label>' +
+            '<p class="x-err" id="reg-err" hidden>Проверьте адрес почты.</p>' +
+            '<button class="x-primary" type="submit" id="reg-go" disabled>Получить ссылку для входа</button>' +
+            '</form>';
+          var email = document.getElementById('reg-email'), go = document.getElementById('reg-go');
+          email.value = store.pendingEmail();
+          go.disabled = !email.value.trim();
+          email.addEventListener('input', function () { go.disabled = !email.value.trim(); document.getElementById('reg-err').hidden = true; });
+          document.getElementById('reg-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var v = email.value.trim();
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { document.getElementById('reg-err').hidden = false; return; }
+            go.disabled = true;
+            store.signInWithEmail(v).then(function () { regStep = 'check'; renderReg(); }, function () { go.disabled = false; document.getElementById('reg-err').hidden = false; });
+          });
+        }
+        function renderCheck() {
+          var el = document.getElementById('scr-reg');
+          el.innerHTML = regTop() +
+            '<div><h1 class="x-h1">Проверьте почту</h1><p class="x-sub">Мы отправили ссылку для входа на ' + esc(store.pendingEmail()) + '. Откройте её на этом устройстве.</p></div>' +
+            '<div class="x-card">' +
+            (store.local ? '<p class="x-cap">Пока письма не отправляются: вход проходит прямо здесь.</p><button class="x-primary" type="button" id="reg-confirm">Продолжить</button>' : '') +
+            '<div class="links"><button class="btn" type="button" id="reg-back">Другой адрес</button></div>' +
+            '</div>';
+          var c = document.getElementById('reg-confirm');
+          if (c) c.addEventListener('click', function () { c.disabled = true; store.confirmLocal(); });
+          document.getElementById('reg-back').addEventListener('click', function () { store.cancelSignIn().then(function () { regStep = 'email'; renderReg(); }); });
+        }
+        function renderSetup() {
           var el = document.getElementById('scr-reg');
           var pick = ELEM.map(function (n, i) {
             return '<label><input type="radio" name="elem" value="' + i + '"' + (i === 0 ? ' checked' : '') + ' /><span class="x-av elem-' + i * 2 + '" id="reg-av-' + i + '">?</span>' + n + '</label>';
           }).join('');
-          el.innerHTML =
-            '<div class="x-top"><div class="x-brand">' + logo(24) + '<p class="x-wordmark">CENTRAL</p></div></div>' +
-            '<div><h1 class="x-h1">Регистрация</h1><p class="x-sub">Дневник по кругам года: одна запись в день, и через 60 дней она вернётся к вам на том же месте кольца.</p></div>' +
+          el.innerHTML = regTop() +
+            '<div><h1 class="x-h1">Профиль</h1><p class="x-sub">Ник, аватар и знак. По нику вас найдут друзья.</p></div>' +
             '<form class="x-card" id="reg-form" novalidate>' +
             '<label class="x-field">Ник<input class="x-input" id="reg-nick" name="nick" maxlength="20" autocomplete="nickname" placeholder="Например, Аня" required /></label>' +
-            '<div class="x-field"><span>Ваша стихия</span><div class="x-pick" role="radiogroup" aria-label="Стихия">' + pick + '</div></div>' +
+            '<p class="x-err" id="reg-err" hidden>Этот ник уже занят.</p>' +
+            '<div class="x-field"><span>Аватар</span><div class="x-pick" role="radiogroup" aria-label="Аватар">' + pick + '</div></div>' +
             '<div class="x-field"><span>Ваш знак <small class="x-cap">— им будут отмечены ваши заметки на Круге</small></span>' + shapePicker('shape', 'circle') + '</div>' +
-            '<p class="x-cap">Регистрация живёт только в этой вкладке.</p>' +
             '<button class="x-primary" type="submit" id="reg-go" disabled>Войти в CENTRAL</button>' +
             '</form>';
-          var nick = document.getElementById('reg-nick');
+          var nick = document.getElementById('reg-nick'), go = document.getElementById('reg-go'), err = document.getElementById('reg-err');
           nick.addEventListener('input', function () {
             var l = nick.value.trim().charAt(0).toUpperCase() || '?';
             for (var i = 0; i < 5; i++) document.getElementById('reg-av-' + i).textContent = l;
-            document.getElementById('reg-go').disabled = !nick.value.trim();
+            go.disabled = !nick.value.trim(); err.hidden = true;
           });
           document.getElementById('reg-form').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -751,63 +769,68 @@
             if (!v) return;
             var elem = +el.querySelector('input[name="elem"]:checked').value;
             var shc = el.querySelector('input[name="shape"]:checked');
-            user = { id: 'me', nick: v, elem: elem, shape: shc ? shc.value : 'circle' };
-            mine = seedMine(v); mineC = {};
-            store.set('user', user); store.set('mine', mine); store.set('minec', mineC);
-            show('today');
+            go.disabled = true;
+            store.findUserByNick(v).then(function (found) {
+              if (found && (!session || found.id !== session.user_id)) { err.hidden = false; go.disabled = false; return; }
+              return store.saveProfile({ nick: v, elem: elem, shape: shc ? shc.value : 'circle' }).then(function (p) { user = p; regStep = 'email'; show('today'); });
+            });
           });
         }
 
-        var editIdx = -1, adding = false;
+        var editId = null, adding = false;
         function renderToday() {
           var el = document.getElementById('scr-today');
           var key = keyOf(TODAY);
           var s = slotOf(TODAY);
-          var ago = addDays(TODAY, -60), agoKey = keyOf(ago), agoS = slotOf(ago);
-          var notes = myNotes(key).slice();
-          var showForm = !notes.length || adding || editIdx >= 0;
-          var fr = friendsOn(key).map(function (e) { return { p: person(e.uid), text: e.text, c: NOTE_COLORS[e.c] }; });
+          var ago = addDays(TODAY, -60), agoKey = keyOf(ago);
+          var list = myNotes(key);
+          var editing = editId != null;
+          var showForm = !list.length || adding || editing;
+          var fr = friendEntries(key);
           var agoFr = friendsOn(agoKey).length, agoMine = myNotes(agoKey);
-          var curCI = editIdx >= 0 ? noteCI(key, editIdx) : 0;
+          var curCI = 0;
+          list.forEach(function (n) { if (n.id === editId) curCI = n.color || 0; });
           var swatches = '<div class="x-swatches" role="radiogroup" aria-label="Цвет заметки">' + NOTE_COLORS.map(function (c, ci) {
             return '<label title="' + NOTE_COLOR_NAMES[ci] + '"><input type="radio" name="t-color" value="' + ci + '" aria-label="' + NOTE_COLOR_NAMES[ci] + '"' + (ci === curCI ? ' checked' : '') + ' /><span style="--pc:' + c + '"></span></label>';
           }).join('') + '</div>';
-          var form = '<form id="t-form"><textarea class="x-textarea" id="t-text" aria-label="' + (notes.length ? 'Ещё мысль' : 'Моя запись') + '" placeholder="' + (notes.length && editIdx < 0 ? 'Ещё одна мысль…' : 'Что было сегодня?') + '" maxlength="600"></textarea>' + swatches +
+          var form = '<form id="t-form"><textarea class="x-textarea" id="t-text" aria-label="' + (list.length ? 'Ещё мысль' : 'Моя запись') + '" placeholder="' + (list.length && !editing ? 'Ещё одна мысль…' : 'Что было сегодня?') + '" maxlength="600"></textarea>' + swatches +
             '<div class="x-row x-row--between"><span class="x-cap">Через 60 дней вернётся на позицию ' + s.n + '</span><span class="x-row">' +
-            (notes.length ? '<button class="btn" type="button" id="t-cancel">Отмена</button>' : '') + '<button class="x-primary" type="submit">Сохранить</button></span></div></form>';
+            (editing ? '<button class="btn" type="button" id="t-del">Удалить</button>' : '') +
+            (list.length ? '<button class="btn" type="button" id="t-cancel">Отмена</button>' : '') + '<button class="x-primary" type="submit">Сохранить</button></span></div></form>';
           el.innerHTML = top() +
-            '<div><p class="x-label">Сегодня</p><h1 class="x-h1">' + fmtLong(TODAY) + '</h1><div class="x-day" style="margin-top:8px"><span>' + slotLabel(s) + '</span>' + elemTag(s) + moonTag(TODAY) + '</div></div>' +
-            '<div class="x-card"><p class="x-label">' + (notes.length ? 'Мои записи · ' + notes.length : 'Моя запись') + '</p><div class="x-notes">' +
-            notes.map(function (t, i) {
-              return i === editIdx ? form : '<div class="x-note"><p>' + shapeIcon(shapeOf(user), myColor(key, i)) + esc(t) + '</p><button class="btn" type="button" data-edit="' + i + '">Изменить</button></div>';
+            '<div><p class="x-label">Сегодня</p><h1 class="x-h1">' + fmtLong(TODAY) + '</h1><div class="x-day" style="margin-top:8px"><span>' + slotLabel(s) + '</span>' + elemTag(s) + '</div></div>' +
+            '<div class="x-card"><p class="x-label">' + (list.length ? 'Мои записи · ' + list.length : 'Моя запись') + '</p><div class="x-notes">' +
+            (notes.length ? '' : '<p class="x-empty">Первая заметка — первый шаг к центру.</p>') +
+            list.map(function (n) {
+              return n.id === editId ? form : '<div class="x-note"><p>' + shapeIcon(shapeOf(user), NOTE_COLORS[n.color || 0]) + esc(n.text) + '</p><button class="btn" type="button" data-edit="' + n.id + '">Изменить</button></div>';
             }).join('') +
-            (showForm && editIdx < 0 ? form : '') + '</div>' +
+            (showForm && !editing ? form : '') + '</div>' +
             (showForm ? '' : '<div class="links"><button class="btn" type="button" id="t-more">+ ещё мысль</button></div>') + '</div>' +
             '<div class="x-card x-card--link" id="t-ago" role="button" tabindex="0" aria-label="Открыть день 60 дней назад">' +
             '<div class="x-row x-row--between"><p class="x-label">60 дней назад</p><span class="pill">' + agoFr + ' от друзей</span></div>' +
             '<div class="x-day">' + dayLine(ago) + '</div>' +
-            (agoMine.length ? agoMine.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') : '<p class="x-empty">В этот день вы ничего не записали.</p>') +
+            (agoMine.length ? agoMine.map(function (n) { return '<p>' + esc(n.text) + '</p>'; }).join('') : '<p class="x-empty">В этот день вы ничего не записали.</p>') +
             '</div>' +
             '<div><p class="x-label" style="margin-bottom:8px">Сегодня пишут · ' + fr.length + '</p>' + (fr.length ? entryRows(fr) : '<p class="x-empty">Пока никто из друзей не написал.</p>') + '</div>';
+          function done() { editId = null; adding = false; return reloadNotes().then(renderToday); }
           var f = document.getElementById('t-form');
           if (f) f.addEventListener('submit', function (e) {
             e.preventDefault();
             var v = document.getElementById('t-text').value.trim();
             if (!v) return;
             var chk = el.querySelector('input[name="t-color"]:checked'), ci = chk ? +chk.value : 0;
-            var pos = editIdx >= 0 ? editIdx : notes.length;
-            if (editIdx >= 0) notes[editIdx] = v; else notes.push(v);
-            setCI(key, pos, ci);
-            mine[key] = notes; store.set('mine', mine); editIdx = -1; adding = false; renderToday();
+            (editing ? store.updateNote(editId, { text: v, color: ci }) : store.addNote({ day: key, text: v, color: ci })).then(done);
           });
-          if (editIdx >= 0) document.getElementById('t-text').value = notes[editIdx] || '';
+          if (editing) list.forEach(function (n) { if (n.id === editId) document.getElementById('t-text').value = n.text; });
+          var del = document.getElementById('t-del');
+          if (del) del.addEventListener('click', function () { store.deleteNote(editId).then(done); });
           var cancel = document.getElementById('t-cancel');
-          if (cancel) cancel.addEventListener('click', function () { editIdx = -1; adding = false; renderToday(); });
+          if (cancel) cancel.addEventListener('click', function () { editId = null; adding = false; renderToday(); });
           var more = document.getElementById('t-more');
           if (more) more.addEventListener('click', function () { adding = true; renderToday(); document.getElementById('t-text').focus(); });
           [].forEach.call(el.querySelectorAll('[data-edit]'), function (b) {
             b.addEventListener('click', function () {
-              editIdx = +b.getAttribute('data-edit'); adding = false; renderToday();
+              editId = b.getAttribute('data-edit'); adding = false; renderToday();
               document.getElementById('t-text').focus();
             });
           });
@@ -827,6 +850,10 @@
         }
         function renderFeed() {
           var el = document.getElementById('scr-feed');
+          if (!friendNotes.length) {
+            el.innerHTML = top() + '<div><h1 class="x-h1">Лента</h1><p class="x-sub">Каждый день рядом с днём на той же позиции прошлого кольца.</p></div><p class="x-empty">Здесь появятся заметки друзей.</p>';
+            return;
+          }
           var html = '';
           for (var i = 0; i < 14; i++) {
             var d = addDays(TODAY, -i);
@@ -839,44 +866,54 @@
 
         function renderPeople() {
           var el = document.getElementById('scr-people');
-          el.innerHTML = top() + '<div><h1 class="x-h1">Люди</h1><p class="x-sub">Подписки решают, чьи записи видны в Ленте и на Круге.</p></div>' +
-            '<input class="x-input" id="p-q" type="search" placeholder="Поиск по нику" aria-label="Поиск по нику" />' +
+          el.innerHTML = top() + '<div><h1 class="x-h1">Люди</h1><p class="x-sub">Друзья решают, чьи записи видны в Ленте и на Круге.</p></div>' +
+            '<form class="x-addrow" id="p-add" novalidate><input class="x-input" id="p-q" type="text" autocomplete="off" placeholder="Ник друга" aria-label="Ник друга" maxlength="20" /><button class="x-primary" type="submit">Добавить</button></form>' +
+            '<p class="x-err" id="p-msg" hidden></p>' +
             '<div id="p-list"></div>';
-          var q = document.getElementById('p-q');
+          var q = document.getElementById('p-q'), msg = document.getElementById('p-msg');
+          function say(t) { msg.textContent = t; msg.hidden = !t; }
           function draw() {
-            var v = q.value.trim().toLowerCase();
-            document.getElementById('p-list').innerHTML = PEOPLE.filter(function (p) { return !v || p.nick.toLowerCase().indexOf(v) >= 0; }).map(function (p) {
-              var n = 0; for (var k in FR) FR[k].forEach(function (e) { if (e.uid === p.id) n++; });
-              return '<div class="x-person">' + av(p, 32) + '<div><p class="x-person__name">' + shapeIcon(shapeOf(p)) + esc(p.nick) + '</p><p class="x-person__meta"><span class="elem-' + p.elem * 2 + '"><i class="x-edot"></i></span> ' + ELEM[p.elem] + ' · ' + shapeName(shapeOf(p)) + ' · ' + esc(p.bio) + ' · ' + n + ' записей</p></div>' +
-                '<button class="btn" type="button" data-f="' + p.id + '" aria-pressed="' + (follow[p.id] ? 'true' : 'false') + '">' + (follow[p.id] ? 'Вы подписаны' : 'Подписаться') + '</button></div>';
-            }).join('') || '<p class="x-empty">Никого не нашли.</p>';
+            document.getElementById('p-list').innerHTML = friends.map(function (p) {
+              var n = friendNotes.filter(function (e) { return e.user_id === p.id; }).length;
+              return '<div class="x-person">' + av(p, 32) + '<div><p class="x-person__name">' + shapeIcon(shapeOf(p)) + esc(p.nick) + '</p><p class="x-person__meta"><span class="elem-' + p.elem * 2 + '"><i class="x-edot"></i></span> ' + ELEM[p.elem] + ' · ' + shapeName(shapeOf(p)) + ' · ' + n + ' записей</p></div>' +
+                '<button class="btn" type="button" data-rm="' + esc(p.id) + '">Убрать</button></div>';
+            }).join('') || '<p class="x-empty">Пока никого. Добавьте друга по нику.</p>';
           }
-          q.addEventListener('input', draw);
+          q.addEventListener('input', function () { say(''); });
+          document.getElementById('p-add').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var v = q.value.trim();
+            if (!v) return;
+            if (user && v.toLowerCase() === user.nick.toLowerCase()) return say('Это ваш ник.');
+            store.findUserByNick(v).then(function (p) {
+              if (!p) return say('Никого с ником «' + v + '».');
+              if (friendById(p.id)) return say('Уже в друзьях.');
+              return store.addFriend(p).then(reloadFriends).then(function () { q.value = ''; say(''); draw(); });
+            });
+          });
           document.getElementById('p-list').addEventListener('click', function (e) {
-            var b = e.target.closest('[data-f]'); if (!b) return;
-            var id = b.getAttribute('data-f');
-            if (follow[id]) delete follow[id]; else follow[id] = 1;
-            store.set('follow', follow); draw();
+            var b = e.target.closest('[data-rm]'); if (!b) return;
+            store.removeFriend(b.getAttribute('data-rm')).then(reloadFriends).then(draw);
           });
           draw();
         }
 
         function renderProfile() {
           var el = document.getElementById('scr-profile');
-          var keys = Object.keys(mine).filter(function (k) { return myNotes(k).length; }).sort().reverse();
-          var total = 0; keys.forEach(function (k) { total += myNotes(k).length; });
+          var keys = Object.keys(byDay).sort().reverse();
+          var total = notes.length;
           var streak = 0;
           for (var d = myNotes(keyOf(TODAY)).length ? TODAY : addDays(TODAY, -1); myNotes(keyOf(d)).length; d = addDays(d, -1)) streak++;
-          var nf = Object.keys(follow).length;
+          var nf = friends.length;
           el.innerHTML = top() +
             '<div class="x-profile">' + av(user, 64) + '<h1 class="x-h1">' + shapeIcon(shapeOf(user)) + esc(user.nick) + '</h1><span class="x-elem elem-' + user.elem * 2 + '">' + ELEM[user.elem] + '</span></div>' +
             '<div class="x-field"><span>Мой знак</span>' + shapePicker('pr-shape', shapeOf(user)) + '</div>' +
-            '<div class="x-stats"><div><b>' + total + '</b><span>Записей</span></div><div><b>' + streak + '</b><span>Дней подряд</span></div><div><b>' + nf + '</b><span>Подписок</span></div></div>' +
+            '<div class="x-stats"><div><b>' + total + '</b><span>Записей</span></div><div><b>' + streak + '</b><span>Дней подряд</span></div><div><b>' + nf + '</b><span>Друзей</span></div></div>' +
             '<div><p class="x-label" style="margin-bottom:8px">Последние записи</p><div id="pr-list" class="x-entries"></div></div>' +
             '<div class="links"><button class="btn" type="button" id="pr-splash">Показать заставку</button><button class="btn" type="button" id="pr-out">Выйти</button></div>';
           var list = document.getElementById('pr-list');
           var recent = [];
-          keys.forEach(function (k) { myNotes(k).slice().reverse().forEach(function (t) { recent.push({ k: k, t: t }); }); });
+          keys.forEach(function (k) { myNotes(k).slice().reverse().forEach(function (n) { recent.push({ k: k, t: n.text }); }); });
           recent.slice(0, 8).forEach(function (it) {
             var k = it.k, p = k.split('-'), dd = new Date(+p[0], +p[1] - 1, +p[2], 12);
             var row = document.createElement('div');
@@ -887,98 +924,51 @@
             list.appendChild(row);
           });
           if (!keys.length) list.innerHTML = '<p class="x-empty">Записей пока нет.</p>';
-          document.getElementById('pr-out').addEventListener('click', function () {
-            user = null; mine = {}; mineC = {};
-            try { sessionStorage.removeItem('central-user'); sessionStorage.removeItem('central-mine'); sessionStorage.removeItem('central-minec'); } catch (e) {}
-            store.mem = {};
-            show('reg');
-          });
+          document.getElementById('pr-out').addEventListener('click', function () { store.signOut(); });
           document.getElementById('pr-splash').addEventListener('click', openSplash);
           [].forEach.call(el.querySelectorAll('input[name="pr-shape"]'), function (r) {
             r.addEventListener('change', function () {
-              user.shape = r.value; store.set('user', user); renderProfile();
-              var nr = document.querySelector('#scr-profile input[name="pr-shape"][value="' + r.value + '"]'); if (nr) nr.focus();
+              user.shape = r.value;
+              store.saveProfile(user).then(function (p) {
+                user = p; renderProfile();
+                var nr = document.querySelector('#scr-profile input[name="pr-shape"][value="' + r.value + '"]'); if (nr) nr.focus();
+              });
             });
           });
         }
 
         /* ---------- Круг ---------- */
         var selected = null;
-        /* One 60-day ring: node n is the day TODAY + (n − today's position).
-           Geometry and wave math from ganzhi_lunar_wave_v2.html */
+        /* One 60-day ring: node n is the day TODAY + (n − today's position). */
         /* Notes grow inward with a FIXED step: about 24 notes on one day (everyone together) reach the centre ring */
         /* Proportions from the viewBox width W: node ring R = 0.43·W; node d = (2πR/60)/1.6, so the gap is 0.6·d all round;
            number 0.42·d; mark 0.24·d; first mark at R − d/2 − 0.6·d; step = (first − centre ring)/24; centre point 0.012·W, ring 0.04·W */
         var KW = 680, KC = KW / 2, KR = 0.43 * KW, KD = (2 * Math.PI * KR / 60) / 1.6, KNR = KD / 2, KFS = 0.42 * KD;
         var KDOT = 0.24 * KD / 2, KCR = 0.04 * KW, KPT = 0.012 * KW, KREACH = 24;
         var KR0 = KR - KD / 2 - 0.6 * KD, KSTEP = (KR0 - KCR) / KREACH;
-        var RW = 252, AMP = 42;
-        /* lunar wave, moon markers and Ekadashi: off for now, kept for a later option */
-        var SHOW_MOON = false;
-        var SYNODIC = 29.530589, NM0 = Date.UTC(2000, 0, 6, 18, 14);
         var TODAY_N = TODAY_SLOT.n;
         var WIN = [];
         for (var wi = 0; wi < 60; wi++) WIN.push(addDays(TODAY, wi + 1 - TODAY_N));
-        /* phase of node i: 0 new, 0.5 full */
-        var PH = WIN.map(function (d) { var x = ((d.getTime() - NM0) / 86400000) / SYNODIC; return ((x % 1) + 1) % 1; });
-        function ph(i) { return PH[i]; }
-        function dp(p) { return -AMP * Math.cos(p * 2 * Math.PI); }
         function ang(i) { return (i * 6 - 90) * Math.PI / 180; }
         function at(i, r) { var a = ang(i); return { x: KC + r * Math.cos(a), y: KC + r * Math.sin(a) }; }
-        function waveAt(i) { return at(i, RW + dp(ph(i))); }
         function f1(v) { return Math.round(v * 100) / 100; }
-        function crPath(pts) {
-          var n = pts.length, pt = function (i) { return pts[((i % n) + n) % n]; };
-          var d = 'M ' + pt(0).x.toFixed(2) + ' ' + pt(0).y.toFixed(2);
-          for (var i = 0; i < n; i++) {
-            var p0 = pt(i - 1), p1 = pt(i), p2 = pt(i + 1), p3 = pt(i + 2);
-            var bx1 = p1.x + (p2.x - p0.x) / 6, by1 = p1.y + (p2.y - p0.y) / 6;
-            var bx2 = p2.x - (p3.x - p1.x) / 6, by2 = p2.y - (p3.y - p1.y) / 6;
-            d += ' C ' + bx1.toFixed(2) + ' ' + by1.toFixed(2) + ' ' + bx2.toFixed(2) + ' ' + by2.toFixed(2) + ' ' + p2.x.toFixed(2) + ' ' + p2.y.toFixed(2);
-          }
-          return d + ' Z';
-        }
-        var WAVE_D = crPath(WIN.map(function (d, i) { return waveAt(i); }));
-        /* the node nearest each full (0.5) and new (0) moon: a local minimum of distance, within a day */
-        function nearest(dist) {
-          var out = [], lim = 1 / SYNODIC;
-          for (var i = 0; i < 60; i++) {
-            var v = dist(ph(i));
-            if (v > lim) continue;
-            if (i > 0 && dist(ph(i - 1)) < v) continue;
-            if (i < 59 && dist(ph(i + 1)) <= v) continue;
-            out.push(i);
-          }
-          return out;
-        }
-        var FULL_I = nearest(function (p) { return Math.abs(p - 0.5); });
-        var NEW_I = nearest(function (p) { return Math.min(p, 1 - p); });
-        function svgText(svg, x, y, txt, style) {
-          var t = mk('text', { x: x, y: y, 'text-anchor': 'middle', 'dominant-baseline': 'middle', style: style });
-          t.textContent = txt; svg.appendChild(t); return t;
-        }
         function renderKrug() {
           var s = TODAY_SLOT;
           document.getElementById('k-today-chip').textContent = 'Кольцо ' + RING_ROMAN[s.k] + ' · ' + s.n;
           var svg = document.getElementById('k-ring');
           svg.innerHTML = '';
 
-          /* lunar wave: closed Catmull-Rom through 60 points at RW + dp(ph(i)) */
-          if (SHOW_MOON) svg.appendChild(mk('path', { d: WAVE_D, fill: 'none', stroke: '#EF9F27', 'stroke-width': '1.3', 'stroke-opacity': '0.85' }));
-
-          var ekaDays = [], fullDays = [];
-
           /* note dots: one neat radial line per day, starting just inside the node.
              Order along the line: my notes, then each followed friend in the order of Люди.
              Fixed step; each mark is the author's shape filled with the note's colour. */
           var trackOf = { me: 0 }, nTracks = 1;
-          PEOPLE.forEach(function (p) { if (follow[p.id]) trackOf[p.id] = nTracks++; });
+          friends.forEach(function (p) { trackOf[p.id] = nTracks++; });
           var dayDots = [];
           for (var di = 0; di < 60; di++) {
             var dk = keyOf(WIN[di]), dots = [];
-            myNotes(dk).forEach(function (t, j) { dots.push({ t: 0, j: j, c: myColor(dk, j), sh: shapeOf(user) }); });
+            myNotes(dk).forEach(function (n, j) { dots.push({ t: 0, j: j, c: NOTE_COLORS[n.color || 0], sh: shapeOf(user) }); });
             if (WIN[di] <= TODAY) friendsOn(dk).forEach(function (e, j) {
-              if (trackOf[e.uid] != null) dots.push({ t: trackOf[e.uid], j: j, c: NOTE_COLORS[e.c], sh: shapeOf(person(e.uid)) });
+              if (trackOf[e.user_id] != null) dots.push({ t: trackOf[e.user_id], j: j, c: NOTE_COLORS[e.color || 0], sh: shapeOf(friendById(e.user_id)) });
             });
             dots.sort(function (a, b) { return a.t - b.t || a.j - b.j; });
             dayDots.push(dots);
@@ -1020,41 +1010,16 @@
             if (selected && selected.n === n) svg.appendChild(mk('circle', { cx: x, cy: y, r: f1(nr + 0.15 * KD), 'vector-effect': 'non-scaling-stroke', style: 'fill:none;stroke:var(--text-primary);stroke-width:1px;stroke-dasharray:3 3' }));
           }
 
-          /* moon markers on the wave, as in the reference */
-          if (SHOW_MOON) FULL_I.forEach(function (i) {
-            var w = waveAt(i);
-            svg.appendChild(mk('circle', { cx: f1(w.x), cy: f1(w.y), r: 6, fill: '#EF9F27', 'fill-opacity': '0.95' }));
-            fullDays.push(fmtDM(WIN[i]));
-          });
-          if (SHOW_MOON) NEW_I.forEach(function (i) {
-            var w = waveAt(i);
-            svg.appendChild(mk('circle', { cx: f1(w.x), cy: f1(w.y), r: 5, style: 'fill:var(--fill-primary-on);stroke:var(--text-secondary);stroke-width:0.8;stroke-opacity:0.6' }));
-            svg.appendChild(mk('circle', { cx: f1(w.x), cy: f1(w.y), r: 1.8, style: 'fill:var(--text-secondary);fill-opacity:0.45' }));
-          });
-          /* Ekadashi diamonds on the wave */
-          for (var m = 0; SHOW_MOON && m < 60; m++) {
-            if (!moonInfo(WIN[m]).eka) continue;
-            var ep = waveAt(m), sz = 5;
-            svg.appendChild(mk('polygon', {
-              points: [f1(ep.x) + ',' + f1(ep.y - sz), f1(ep.x + sz) + ',' + f1(ep.y), f1(ep.x) + ',' + f1(ep.y + sz), f1(ep.x - sz) + ',' + f1(ep.y)].join(' '),
-              style: 'fill:var(--x-eka);stroke:var(--fill-primary-on);stroke-width:0.8'
-            }));
-            ekaDays.push(fmtDM(WIN[m]));
-          }
-
           /* centre: "вместе мы можем достичь центра" — a small dark point and one faint ring */
-          var tm = SHOW_MOON ? moonInfo(TODAY) : null;
           svg.appendChild(mk('circle', { cx: KC, cy: KC, r: KCR, style: 'fill:none;stroke:var(--text-secondary);stroke-opacity:0.4;stroke-width:0.75' }));
           svg.appendChild(mk('circle', { cx: KC, cy: KC, r: f1(KPT), style: 'fill:var(--text-primary)' }));
           document.getElementById('k-date').textContent = fmtShort(TODAY) + ' · ' + TODAY_N + '/60';
 
           document.getElementById('k-rings').setAttribute('aria-label',
-            'Круг 60 дней с ' + fmtShort(WIN[0]) + ' по ' + fmtShort(WIN[59]) + '. Сегодня ' + TODAY_N + ' из 60' +
-            (SHOW_MOON ? ', ' + tm.name + '. Полнолуние: ' + (fullDays.join(', ') || 'нет') + '. Экадаши: ' + (ekaDays.join(', ') || 'нет') : '') + '.');
+            'Круг 60 дней с ' + fmtShort(WIN[0]) + ' по ' + fmtShort(WIN[59]) + '. Сегодня ' + TODAY_N + ' из 60.');
 
-          var seen = [{ nick: 'я', shape: shapeOf(user) }].concat(PEOPLE.filter(function (p) { return follow[p.id]; }));
+          var seen = [{ nick: 'я', shape: shapeOf(user) }].concat(friends);
           document.getElementById('k-legend').innerHTML =
-            (SHOW_MOON ? '<span><i class="x-lg-full"></i>полная луна</span><span><i class="x-lg-new"></i>новолуние</span><span><i class="x-lg-eka"></i>экадаши</span>' : '') +
             SHAPES.map(function (sh) {
               var full = seen.filter(function (p) { return shapeOf(p) === sh[0]; }).map(function (p) { return p.nick; }).join(', ') || '—';
               var name = Array.from(full).length > 10 ? Array.from(full).slice(0, 9).join('') + '…' : full;
@@ -1083,17 +1048,16 @@
           if (!s.out && current === 'krug') { selected = { k: s.k, n: s.n }; renderKrug(); }
           sheet.innerHTML = '<span class="x-sheet__grab" aria-hidden="true"></span>' +
             '<div class="x-row x-row--between"><p class="x-label">' + slotLabel(s) + '</p><button class="btn" type="button" id="sh-close">Закрыть</button></div>' +
-            '<div><h3>' + fmtShort(date) + '</h3><div class="x-day" style="margin-top:8px">' + elemTag(s) + moonTag(date) + (isT ? '<span class="chip chip--solid">Сегодня</span>' : '') + (future ? '<span class="chip">Ещё впереди</span>' : '') + '</div></div>' +
+            '<div><h3>' + fmtShort(date) + '</h3><div class="x-day" style="margin-top:8px">' + elemTag(s) + (isT ? '<span class="chip chip--solid">Сегодня</span>' : '') + (future ? '<span class="chip">Ещё впереди</span>' : '') + '</div></div>' +
             '<div class="x-card"><p class="x-label">' + (mn.length > 1 ? 'Мои записи · ' + mn.length : 'Моя запись') + '</p>' +
-            (mn.length ? mn.map(function (t, i) { return '<p>' + shapeIcon(shapeOf(user), myColor(key, i)) + esc(t) + '</p>'; }).join('') : '<p class="x-empty">' + (future ? 'День ещё не наступил.' : 'Записи нет.') + '</p>') +
+            (mn.length ? mn.map(function (n) { return '<p>' + shapeIcon(shapeOf(user), NOTE_COLORS[n.color || 0]) + esc(n.text) + '</p>'; }).join('') : '<p class="x-empty">' + (future ? 'День ещё не наступил.' : 'Записи нет.') + '</p>') +
             (isT ? '<div class="links"><button class="btn" type="button" id="sh-write">' + (mn.length ? '+ ещё мысль' : 'Написать') + '</button></div>' : '') + '</div>' +
             (future ? '' : '<div><p class="x-label" style="margin-bottom:8px">Друзья · ' + list.length + '</p>' + (list.length ? entryRows(list) : '<p class="x-empty">Никто из друзей не писал.</p>') + '</div>') +
             '<div class="x-card"><div class="x-row x-row--between"><p class="x-label">60 дней назад</p><span class="pill">' + fmtShort(ago) + '</span></div>' +
-            '<div class="x-day">' + moonTag(ago) + '</div>' +
             (agoList.length ? entryRows(agoList) : '<p class="x-empty">В этот день записей нет.</p>') + '</div>';
           openSheet('День');
           var w = document.getElementById('sh-write');
-          if (w) w.addEventListener('click', function () { adding = myNotes(keyOf(TODAY)).length > 0; editIdx = -1; show('today'); var ta = document.getElementById('t-text'); if (ta) ta.focus(); });
+          if (w) w.addEventListener('click', function () { adding = myNotes(keyOf(TODAY)).length > 0; editId = null; show('today'); var ta = document.getElementById('t-text'); if (ta) ta.focus(); });
         }
         /* shows the sheet instantly: no motion */
         function openSheet(label) {
@@ -1104,23 +1068,6 @@
           document.getElementById('sh-close').addEventListener('click', closeSheet);
           document.getElementById('sh-close').focus();
         }
-        /* "?" on Круг: how to read the ring */
-        function openHelp() {
-          sheet.innerHTML = '<span class="x-sheet__grab" aria-hidden="true"></span>' +
-            '<div class="x-row x-row--between"><p class="x-label">Как читать</p><button class="btn" type="button" id="sh-close">Закрыть</button></div>' +
-            '<h3>Круг 60 дней</h3>' +
-            '<ul class="x-help-list">' +
-            '<li>Шестьдесят дней вокруг сегодняшнего.</li>' +
-            '<li>Заметки идут от узла дня к центру: цвет — заметка, форма — автор.</li>' +
-            '<li>От узла к центру: сначала мои, затем друзья по порядку.</li>' +
-            '<li>Коснитесь узла, чтобы открыть день.</li>' +
-            '</ul>' +
-            '<div class="x-card"><p class="x-label">Стихии</p><div class="x-legend" aria-label="Стихии">' +
-            ELEM.map(function (n, i) { return '<span><i class="x-edot elem-' + i * 2 + '"></i>' + n + '</span>'; }).join('') +
-            '</div></div>';
-          openSheet('Как читать Круг');
-        }
-        document.getElementById('k-help').addEventListener('click', openHelp);
         function closeSheet() {
           if (!sheet.classList.contains('is-open')) return;
           sheet.classList.remove('is-open'); scrim.classList.remove('is-open');
@@ -1146,8 +1093,25 @@
           splash.hidden = true;
           splashOpen = false;
           phone.hidden = false;
-          show(user ? 'today' : 'reg');
+          route();
         }
+        /* No session: email step (or "check mail" if a link is pending). Session, no profile: setup. */
+        function route() {
+          if (!session) {
+            clearState();
+            regStep = store.pendingEmail() ? 'check' : 'email';
+            return show('reg');
+          }
+          loadAll().then(function () {
+            if (user) return show(current && current !== 'reg' ? current : 'today');
+            regStep = 'setup'; show('reg');
+          });
+        }
+        store.onAuth(function (s) {
+          session = s;
+          if (!s) current = null;
+          if (!splashOpen) route();
+        });
         function openSplash() {
           closeSheet();
           splash.hidden = false; splashOpen = true;
