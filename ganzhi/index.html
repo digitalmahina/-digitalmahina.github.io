@@ -46,7 +46,10 @@
         --S: min(calc(100vw - 48px), calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 168px));
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         padding: env(safe-area-inset-top, 0px) 24px calc(24px + env(safe-area-inset-bottom, 0px));
-        background: var(--fill-primary-on); overflow: hidden;
+        background-color: var(--x-paper-base);
+        background-image: var(--x-paper-grain), linear-gradient(var(--x-paper-veil), var(--x-paper-veil));
+        background-size: 200px 200px, auto;
+        overflow: hidden;
       }
       .x-splash[hidden] { display: none; }
       .x-wordmark { font: var(--x-t12m); letter-spacing: 0.32em; margin-right: -0.32em; color: var(--text-primary); }
@@ -85,16 +88,30 @@
         height: var(--ph); width: min(calc(var(--ph) * 390 / 844), calc(100vw - 32px));
         display: flex; flex-direction: column; overflow: hidden;
         font: var(--x-t15); color: var(--text-primary);
-        background: var(--fill-primary-on); border: 1px solid var(--stroke-primary); border-radius: var(--r-xl); box-shadow: var(--hark-shadow);
+        background-color: var(--x-paper-base);
+        background-image: var(--x-paper-grain), linear-gradient(var(--x-paper-veil), var(--x-paper-veil));
+        background-size: 200px 200px, auto;
+        border: 1px solid var(--stroke-primary); border-radius: var(--r-xl); box-shadow: var(--hark-shadow);
       }
       .x-phone[hidden] { display: none; }
+      /* Paper background: static warm grain over a soft warm grey */
+      :root {
+        --x-paper-base: light-dark(#e9e6e0, var(--fill-primary-on));
+        --x-paper-veil: light-dark(rgba(255, 255, 255, 0.8), transparent);
+        --x-paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.42 0 0 0 0 0.34 0 0 0 0 0.24 0 0 0 1.6 -0.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      }
+      html, body { background-color: var(--x-paper-base); }
       @media (max-width: 480px) {
         .x-phone { width: 100vw; height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }
       }
       .x-phone p, .x-phone h1, .x-phone h3 { margin: 0; overflow-wrap: anywhere; }
       .x-screen { flex: 1; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; padding: 0 16px 24px; display: none; flex-direction: column; gap: 16px; overscroll-behavior: contain; }
       .x-screen.is-active { display: flex; }
-      .x-top { position: sticky; top: 0; z-index: 2; flex: none; height: 48px; margin-inline: -16px; padding-inline: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--fill-primary-on); }
+      .x-top { position: sticky; top: 0; z-index: 2; flex: none; height: 48px; margin-inline: -16px; padding-inline: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+        /* Same paper as .x-phone; the header's top-left matches the phone's, so the grain tiles line up */
+        background-color: var(--x-paper-base);
+        background-image: var(--x-paper-grain), linear-gradient(var(--x-paper-veil), var(--x-paper-veil));
+        background-size: 200px 200px, auto; background-position: 0 0, 0 0; }
       .x-top .x-logo { --ls: 24px; }
       .x-h1 { font: var(--x-t24); }
       .x-sub { font: var(--x-t15); color: var(--text-secondary); }
@@ -104,7 +121,7 @@
       .x-addrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
 
       /* Tab bar: 56px + safe area, equal tabs, a 4px dot above the active icon */
-      .x-tabs { flex: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: calc(56px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); border-top: 1px solid var(--stroke-secondary); background: var(--fill-primary-on); }
+      .x-tabs { flex: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: calc(56px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); border-top: 1px solid var(--stroke-secondary); background: transparent; }
       .x-tabs[hidden] { display: none; }
       .x-tab { appearance: none; border: 0; background: none; color: var(--text-secondary); font: var(--x-t12); height: 56px; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; cursor: pointer; }
       .x-tab::before { content: ""; width: 4px; height: 4px; margin-bottom: 4px; border-radius: 50%; background: transparent; }
