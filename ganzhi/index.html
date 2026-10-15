@@ -307,30 +307,29 @@
           return k * 60 + (n - 1) - 11;
         }
 
-        function todayRingSlot(D) {
-          var total = D + 12;
-          var clamped = false;
-          if (total < 1) {
-            total = 1;
-            clamped = true;
-          } else if (total > 360) {
-            total = 360;
-            clamped = true;
-          }
-          var k = Math.floor((total - 1) / 60);
-          var n = total - k * 60;
-          return { k: k, n: n, clamped: clamped };
-        }
-
         /** Element of a node: gzIdx = (k*60+n-1)%60, stem = gzIdx%10, element = stem/2 */
         function stemOf(k, n) { return ((k * 60 + (n - 1)) % 60) % 10; }
         function elemOf(k, n) { return Math.floor(stemOf(k, n) / 2); }
 
-        var NOW = new Date();
-        var TODAY = noon(NOW);
-        var YEAR = TODAY.getFullYear();
-        var TODAY_D = daysSinceJan1(TODAY);
-        var TODAY_SLOT = todayRingSlot(TODAY_D);
+        /* Today's date state. After the last ring position (late December) the layout rolls into next year:
+           YEAR is the layout year and TODAY_D counts days from its Jan 1 (negative in late December). */
+        var TODAY, YEAR, TODAY_D, TODAY_SLOT, TODAY_N, KRUG_K, WIN = [];
+        function refreshToday() {
+          var t = noon(new Date());
+          if (TODAY && keyOf(t) === keyOf(TODAY)) return false;
+          TODAY = t;
+          YEAR = t.getFullYear() + (daysSinceJan1(t) + 12 > 360 ? 1 : 0);
+          TODAY_D = Math.round((t - new Date(YEAR, 0, 1, 12, 0, 0)) / 86400000);
+          TODAY_SLOT = slotOf(t);
+          /* Круг window: today's ring; between rings, the next ring I (starts Dec 21) */
+          TODAY_N = TODAY_SLOT.out ? 0 : TODAY_SLOT.n;
+          KRUG_K = TODAY_SLOT.out ? 0 : TODAY_SLOT.k;
+          var start = TODAY_SLOT.out ? addDays(new Date(YEAR, 0, 1, 12, 0, 0), -11) : addDays(t, 1 - TODAY_N);
+          WIN = [];
+          for (var wi = 0; wi < 60; wi++) WIN.push(addDays(start, wi));
+          return true;
+        }
+        refreshToday();
 
         /* ---------- Daily ring logo: 60 tiny circles, today's position larger, centre empty ---------- */
         var LOGO_HEX = [['#eaf3de', '#639922'], ['#faece7', '#993c1d'], ['#faeeda', '#854f0b'], ['#f1efe8', '#5f5e5a'], ['#e6f1fb', '#185fa5']];
@@ -359,7 +358,7 @@
           if (type) l.type = type;
           l.href = href;
         }
-        var LOGO_N = TODAY_SLOT.n;
+        var LOGO_N = TODAY_N;
         function applyLogo() {
           setLink('x-fav', 'icon', svgURL(logoSVG(LOGO_N, 'icon')), 'image/svg+xml');
           var touch = svgURL(logoSVG(LOGO_N, 'touch'));
@@ -372,8 +371,9 @@
         }
         /* Re-check once the date changes: instant swap, no motion */
         function checkLogoDay() {
-          var n = todayRingSlot(daysSinceJan1(new Date())).n;
-          if (n !== LOGO_N) { LOGO_N = n; applyLogo(); }
+          if (!refreshToday()) return;
+          if (TODAY_N !== LOGO_N) { LOGO_N = TODAY_N; applyLogo(); }
+          onNewDay();
         }
         function scheduleMidnight() {
           var now = new Date(), next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 5);
@@ -388,7 +388,6 @@
         /** Ring slot of any date: its own year's grid, or next year's ring I for late December */
         function slotOf(date) {
           var d = noon(date);
-          if (keyOf(d) === keyOf(TODAY)) return { k: TODAY_SLOT.k, n: TODAY_SLOT.n, out: false };
           var total = daysSinceJan1(d) + 12;
           if (total > 360) {
             var next = new Date(d.getFullYear() + 1, 0, 1, 12, 0, 0);
@@ -423,9 +422,10 @@
         function buildSixRings(prefix) {
           var svg0 = document.getElementById(prefix + '-ring-0');
           if (!svg0) return;
+          for (var ck = 0; ck < 6; ck++) { var cs = document.getElementById(prefix + '-ring-' + ck); if (cs) cs.innerHTML = ''; }
           var D = TODAY_D;
-          var todayK = TODAY_SLOT.k;
-          var todayN = TODAY_SLOT.n;
+          var todayK = TODAY_SLOT.out ? -1 : TODAY_SLOT.k;
+          var todayN = TODAY_SLOT.out ? -1 : TODAY_SLOT.n;
           var labelStyle = 'font-size:12px;font-weight:500;fill:var(--x-ts);opacity:0.9';
 
           svg0.appendChild(mk('line', { x1: cx, y1: 44, x2: cx, y2: H - 44, stroke: 'var(--x-bt)', 'stroke-width': 0.7, 'stroke-dasharray': '3 7' }));
@@ -794,7 +794,7 @@
             return '<label title="' + NOTE_COLOR_NAMES[ci] + '"><input type="radio" name="t-color" value="' + ci + '" aria-label="' + NOTE_COLOR_NAMES[ci] + '"' + (ci === curCI ? ' checked' : '') + ' /><span style="--pc:' + c + '"></span></label>';
           }).join('') + '</div>';
           var form = '<form id="t-form"><textarea class="x-textarea" id="t-text" aria-label="' + (list.length ? 'Ещё мысль' : 'Моя запись') + '" placeholder="' + (list.length && !editing ? 'Ещё одна мысль…' : 'Что было сегодня?') + '" maxlength="600"></textarea>' + swatches +
-            '<div class="x-row x-row--between"><span class="x-cap">Через 60 дней вернётся на позицию ' + s.n + '</span><span class="x-row">' +
+            '<div class="x-row x-row--between"><span class="x-cap">' + (s.out ? 'Сегодня между кольцами' : 'Через 60 дней вернётся на позицию ' + s.n) + '</span><span class="x-row">' +
             (editing ? '<button class="btn" type="button" id="t-del">Удалить</button>' : '') +
             (list.length ? '<button class="btn" type="button" id="t-cancel">Отмена</button>' : '') + '<button class="x-primary" type="submit">Сохранить</button></span></div></form>';
           el.innerHTML = top() +
@@ -813,17 +813,19 @@
             '</div>' +
             '<div><p class="x-label" style="margin-bottom:8px">Сегодня пишут · ' + fr.length + '</p>' + (fr.length ? entryRows(fr) : '<p class="x-empty">Пока никто из друзей не написал.</p>') + '</div>';
           function done() { editId = null; adding = false; return reloadNotes().then(renderToday); }
+          function removeNote() { if (window.confirm('Удалить запись?')) store.deleteNote(editId).then(done); }
           var f = document.getElementById('t-form');
           if (f) f.addEventListener('submit', function (e) {
             e.preventDefault();
             var v = document.getElementById('t-text').value.trim();
-            if (!v) return;
+            if (!v) { if (editing) removeNote(); return; }
             var chk = el.querySelector('input[name="t-color"]:checked'), ci = chk ? +chk.value : 0;
-            (editing ? store.updateNote(editId, { text: v, color: ci }) : store.addNote({ day: key, text: v, color: ci })).then(done);
+            /* the key is read at save time, so a note written after midnight goes under the new day */
+            (editing ? store.updateNote(editId, { text: v, color: ci }) : store.addNote({ day: keyOf(TODAY), text: v, color: ci })).then(done);
           });
           if (editing) list.forEach(function (n) { if (n.id === editId) document.getElementById('t-text').value = n.text; });
           var del = document.getElementById('t-del');
-          if (del) del.addEventListener('click', function () { store.deleteNote(editId).then(done); });
+          if (del) del.addEventListener('click', removeNote);
           var cancel = document.getElementById('t-cancel');
           if (cancel) cancel.addEventListener('click', function () { editId = null; adding = false; renderToday(); });
           var more = document.getElementById('t-more');
@@ -946,15 +948,12 @@
         var KW = 680, KC = KW / 2, KR = 0.43 * KW, KD = (2 * Math.PI * KR / 60) / 1.6, KNR = KD / 2, KFS = 0.42 * KD;
         var KDOT = 0.24 * KD / 2, KCR = 0.04 * KW, KPT = 0.012 * KW, KREACH = 24;
         var KR0 = KR - KD / 2 - 0.6 * KD, KSTEP = (KR0 - KCR) / KREACH;
-        var TODAY_N = TODAY_SLOT.n;
-        var WIN = [];
-        for (var wi = 0; wi < 60; wi++) WIN.push(addDays(TODAY, wi + 1 - TODAY_N));
         function ang(i) { return (i * 6 - 90) * Math.PI / 180; }
         function at(i, r) { var a = ang(i); return { x: KC + r * Math.cos(a), y: KC + r * Math.sin(a) }; }
         function f1(v) { return Math.round(v * 100) / 100; }
         function renderKrug() {
           var s = TODAY_SLOT;
-          document.getElementById('k-today-chip').textContent = 'Кольцо ' + RING_ROMAN[s.k] + ' · ' + s.n;
+          document.getElementById('k-today-chip').textContent = s.out ? 'Между кольцами' : 'Кольцо ' + RING_ROMAN[s.k] + ' · ' + s.n;
           var svg = document.getElementById('k-ring');
           svg.innerHTML = '';
 
@@ -1013,10 +1012,10 @@
           /* centre: "вместе мы можем достичь центра" — a small dark point and one faint ring */
           svg.appendChild(mk('circle', { cx: KC, cy: KC, r: KCR, style: 'fill:none;stroke:var(--text-secondary);stroke-opacity:0.4;stroke-width:0.75' }));
           svg.appendChild(mk('circle', { cx: KC, cy: KC, r: f1(KPT), style: 'fill:var(--text-primary)' }));
-          document.getElementById('k-date').textContent = fmtShort(TODAY) + ' · ' + TODAY_N + '/60';
+          document.getElementById('k-date').textContent = fmtShort(TODAY) + ' · ' + (s.out ? 'между кольцами' : TODAY_N + '/60');
 
           document.getElementById('k-rings').setAttribute('aria-label',
-            'Круг 60 дней с ' + fmtShort(WIN[0]) + ' по ' + fmtShort(WIN[59]) + '. Сегодня ' + TODAY_N + ' из 60.');
+            'Круг 60 дней с ' + fmtShort(WIN[0]) + ' по ' + fmtShort(WIN[59]) + '. ' + (s.out ? 'Сегодня между кольцами.' : 'Сегодня ' + TODAY_N + ' из 60.'));
 
           var seen = [{ nick: 'я', shape: shapeOf(user) }].concat(friends);
           document.getElementById('k-legend').innerHTML =
@@ -1026,7 +1025,7 @@
               return '<span title="' + esc(sh[1] + (full !== '—' ? ': ' + full : '')) + '">' + shapeIcon(sh[0]) + esc(name) + '</span>';
             }).join('');
         }
-        document.getElementById('k-open-today').addEventListener('click', function () { openDay(TODAY, { k: TODAY_SLOT.k, n: TODAY_SLOT.n }); });
+        document.getElementById('k-open-today').addEventListener('click', function () { openDay(TODAY); });
         document.getElementById('k-inner').addEventListener('click', function (e) {
           var r = document.getElementById('k-rings').getBoundingClientRect();
           var vx = ((e.clientX - r.left) / r.width) * 2 * KC, vy = ((e.clientY - r.top) / r.height) * 2 * KC;
@@ -1034,7 +1033,7 @@
           if (dist < KCR || dist > KR + KD) return;
           var turn = (Math.atan2(dy, dx) + Math.PI / 2) / (2 * Math.PI);
           var i = ((Math.round(turn * 60) % 60) + 60) % 60;
-          openDay(WIN[i], { k: TODAY_SLOT.k, n: i + 1 });
+          openDay(WIN[i], { k: KRUG_K, n: i + 1 });
         });
 
         /* ---------- Bottom sheet ---------- */
@@ -1084,9 +1083,26 @@
         /* ---------- Splash ---------- */
         var splash = document.getElementById('splash'), sRings = document.getElementById('s-rings'), phone = document.getElementById('phone');
         var splashOpen = true;
-        var sLine = slotLabel({ k: TODAY_SLOT.k, n: TODAY_SLOT.n }).replace('Кольцо', 'Кольцо') + ' · ' + fmtShort(TODAY);
-        document.getElementById('s-line').textContent = 'Открыть сегодня · ' + sLine;
-        sRings.setAttribute('aria-label', 'Войти в CENTRAL. Сегодня: ' + sLine);
+        function renderSplashLine() {
+          var sLine = (TODAY_SLOT.out ? 'между кольцами' : slotLabel(TODAY_SLOT)) + ' · ' + fmtShort(TODAY);
+          document.getElementById('s-line').textContent = 'Открыть сегодня · ' + sLine;
+          sRings.setAttribute('aria-label', 'Войти в CENTRAL. Сегодня: ' + sLine);
+        }
+        renderSplashLine();
+
+        /* The day changed (midnight timer or returning to the tab): redraw the splash and the current screen,
+           keeping an unsaved draft, so new notes go under the new day's key */
+        function onNewDay() {
+          renderSplashLine();
+          buildSixRings('s');
+          if (!current || current === 'reg' || !user) return;
+          var ta = document.getElementById('t-text'), draft = current === 'today' && ta && editId == null ? ta.value : '';
+          if (current === 'today') { editId = null; adding = false; renderToday(); }
+          if (current === 'feed') renderFeed();
+          if (current === 'krug') renderKrug();
+          if (current === 'profile') renderProfile();
+          if (draft) { var nt = document.getElementById('t-text'); if (nt) nt.value = draft; }
+        }
 
         function enter() {
           if (!splashOpen) return;
