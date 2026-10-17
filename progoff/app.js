@@ -47,6 +47,21 @@
     });
     s+='<circle cx="'+C+'" cy="'+C+'" r="3" fill="#2b2a27"/></svg>';return s}
 
+  /* Phase 5: rule-based hints, no AI. */
+  function hints(){var H=[],es=Store.entries(),tk=GZ.key(TODAY);
+    var days=es.filter(function(e){return e.kind==='day'||e.kind==='dream'}).map(function(e){return e.date}).sort();
+    var last=days.length?days[days.length-1]:null;
+    if(!last)H.push('Ты ещё ничего не записывал. Достаточно одной строки о сегодняшнем дне.');
+    else{var g=daysBetween(last,tk);if(g>=3)H.push('Последняя запись была '+g+' дн. назад. Вернись к ней одной строкой, без итогов.')}
+    if(!TS.out&&!nowEntry())H.push('В начале круга нет записи «Сейчас». Она помогает потом увидеть, как изменилось.');
+    if(!TS.out&&TS.n>=53&&ents('stone').length<12)H.push('Круг подходит к концу. Была ли в нём веха — событие, которое поменяло направление?');
+    var cp=curPeriod();if(!cp)H.push('Этап жизни не назван. Одно слово тоже подойдёт.');else if(daysBetween(cp.start,tk)>120)H.push('Этап «'+(cp.e.title||'')+'» идёт больше 120 дней. Он всё ещё тот же?');
+    var dr=es.filter(function(e){return e.kind==='dream'&&daysBetween(e.date,tk)<=14}).length;
+    if(dr>=3)H.push('За две недели накопились сны и образы. Не расшифровывай, просто заведи диалог с одним из них.');
+    if(window.Moon&&Moon.ekadashi&&LAYER==='e'){}
+    return H.slice(0,2)}
+  function hintsCard(){var H=hints();return H.length?'<div class="card soft"><span class="label">Подсказка</span>'+H.map(function(t){return '<p>'+esc(t)+'</p>'}).join('')+'</div>':''}
+
   function krug(){
     var head=TS.out?'Между кругами':'Круг '+GZ.ROM[TS.k];
     var sub=TS.out?'Новый круг I начнётся '+GZ.short(WIN[0]):GZ.short(WIN[0])+' – '+GZ.short(WIN[59])+' · день '+TS.n+' из 60';
@@ -58,14 +73,16 @@
     if(!TS.out)h+='<div class="card'+(nw?'':' soft')+'"><span class="label">Сейчас · начало круга '+GZ.ROM[TS.k]+'</span>'+(nw?'<p>'+esc(nw.text.slice(0,240))+(nw.text.length>240?'…':'')+'</p><p class="sub">записано '+GZ.short(GZ.parse(nw.date))+'</p>':'<p class="sub">Открытый момент: где ты стоишь на пороге этих 60 дней? Что уже есть, что только начинается?</p><button class="ghost" id="nowb">Записать «Сейчас»</button>')+'</div>';
     h+='<div class="row" id="lay">'+[['g','Ганьчжи'],['m','+ Луна'],['e','+ Экадаши']].map(function(x){return '<button class="'+(LAYER===x[0]?'primary':'ghost')+'" data-lay="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>';
     h+=ringSVG()+(LAYER!=='g'?'<p class="legend">● новолуние &nbsp; ○ полнолуние'+(LAYER==='e'?' &nbsp; ◇ экадаши (◆ пост отмечен)':'')+'</p>':'')+'<p class="legend">● запись дня &nbsp; ○ сон / образ &nbsp; — этап &nbsp; · тап по точке — открыть день</p>';
+    h+=hintsCard();
     h+='<div class="card"><span class="label">60 дней назад на этой точке</span>'+
-      (back.length?back.map(function(e){return '<p>«'+esc(e.text.slice(0,140))+(e.text.length>140?'…':'')+'»</p>'}).join(''):'<p class="sub">Пока пусто. Через 60 дней здесь появится то, что ты пишешь сегодня.</p>')+'</div>';
+      (back.length?back.map(function(e){return '<p>«'+esc((e.text||e.title||'').slice(0,140))+'»</p>'}).join('')+'<p class="sub">Что из этого продолжается? Продолжи:</p><div class="row"><button class="ghost" id="rd">Диалогом</button><button class="ghost" id="rs">Вехой</button><button class="ghost" id="rp">Этапом</button></div>':'<p class="sub">Пока пусто. Через 60 дней здесь появится то, что ты пишешь сегодня.</p>')+'</div>';
     h+='<button class="primary" id="write">Написать сегодня</button>';
     h+='<div class="row"><button class="link" id="exp">Скачать копию</button><button class="link" id="imp">Загрузить копию</button></div>';
     screen.innerHTML=h;
     $('#write').onclick=function(){editor(GZ.key(TODAY))};
     $('#newp').onclick=periodEditor;
     screen.querySelectorAll('[data-lay]').forEach(function(b){b.onclick=function(){setLayer(b.getAttribute('data-lay'));krug()}});
+    var rd=$('#rd');if(rd){rd.onclick=function(){document.querySelector('#tabs [data-tab=dialogs]').onclick()};$('#rs').onclick=stoneEditor;$('#rp').onclick=periodEditor}
     var nb=$('#nowb');if(nb)nb.onclick=nowEditor;
     screen.querySelectorAll('[data-day]').forEach(function(c){c.onclick=function(){day(c.getAttribute('data-day'))}});
     $('#exp').onclick=function(){var b=new Blob([Store.exportJSON()],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='dnevnik-'+GZ.key(TODAY)+'.json';a.click()};
