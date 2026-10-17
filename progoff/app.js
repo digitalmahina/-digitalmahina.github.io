@@ -262,7 +262,7 @@
     var p=partners().filter(function(e){return e.id===id})[0];if(!p){DP=null;return dialogs()}
     var ds=ents('dialog').filter(function(d){return d.partner===id}).reverse();
     var h='<div><h1>'+esc(p.title)+'</h1><p class="sub">'+PT[p.ptype]+' · диалогов: '+ds.length+'</p></div><button class="link" id="pb">‹ Все собеседники</button>';
-    h+=ds.length?ds.map(function(d){return '<div class="entry"><span class="kind">'+GZ.short(GZ.parse(d.date))+' '+GZ.parse(d.date).getFullYear()+'</span>'+d.lines.map(function(l){return '<p>'+(l.who==='me'?'<b>Я:</b> ':'<b>'+esc(p.title)+':</b> ')+esc(l.text)+'</p>'}).join('')+delBtn(d.id)+'</div>'}).join(''):'<p class="empty">Диалогов пока нет.</p>';
+    h+=ds.length?ds.map(function(d){return '<div class="entry"><span class="kind">'+GZ.short(GZ.parse(d.date))+' '+GZ.parse(d.date).getFullYear()+'</span>'+'<div class="chat">'+d.lines.map(function(l){return '<div class="bub '+(l.who==='me'?'me':'they')+'">'+esc(l.text)+'</div>'}).join('')+'</div>'+delBtn(d.id)+'</div>'}).join(''):'<p class="empty">Диалогов пока нет.</p>';
     h+='<button class="primary" id="nd">Новый диалог</button><button class="link" data-del="'+p.id+'">Удалить собеседника и его диалоги</button>';
     screen.innerHTML=h;$('#pb').onclick=function(){DP=null;dialogs()};$('#nd').onclick=function(){dialogEditor(p)};
     screen.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){if(b.dataset.sure){var i=b.getAttribute('data-del');
@@ -276,9 +276,10 @@
     $('#ps').onclick=function(){var n=$('#pn').value.trim();if(!n){$('#pn').focus();return}
       var e=Store.add({kind:'partner',date:GZ.key(TODAY),title:n,ptype:t});if(e){close();DP=e.id;dialogs()}}}
   function dialogEditor(p){var L=[],who='me',tk=GZ.key(TODAY);
-    function draw(){open('<div><h1>Диалог с «'+esc(p.title)+'»</h1><p class="sub">Реплики идут по очереди</p></div><div>'+L.map(function(l){return '<p><b>'+(l.who==='me'?'Я':esc(p.title))+':</b> '+esc(l.text)+'</p>'}).join('')+'</div><p class="sub">Говорит: '+(who==='me'?'я':esc(p.title))+'</p><textarea id="dl"></textarea><button class="ghost" id="da">Добавить реплику</button><button class="primary" id="dsv">Сохранить диалог</button>');
+    function draw(){open('<div><h1>Диалог с «'+esc(p.title)+'»</h1></div><div class="chat">'+L.map(function(l){return '<div class="bub '+(l.who==='me'?'me':'they')+'">'+esc(l.text)+'</div>'}).join('')+'</div><div class="seg"><button class="ghost'+(who==='me'?' on':'')+'" id="wm">Я</button><button class="ghost'+(who==='me'?'':' on')+'" id="wt">'+esc(p.title)+'</button></div><textarea id="dl"></textarea><button class="ghost" id="da">Добавить реплику</button><button class="primary" id="dsv">Сохранить диалог</button>');
       $('#dl').focus();
-      $('#da').onclick=function(){var t=$('#dl').value.trim();if(!t){$('#dl').focus();return}L.push({who:who,text:t});who=who==='me'?'they':'me';draw()};
+      $('#da').onclick=function(){var t=$('#dl').value.trim();if(!t){$('#dl').focus();return}L.push({who:who,text:t});draw()};
+      $('#wm').onclick=function(){who='me';draw()};$('#wt').onclick=function(){who='they';draw()};
       $('#dsv').onclick=function(){var t=$('#dl').value.trim();if(t){L.push({who:who,text:t})}if(!L.length){$('#dl').focus();return}
         if(Store.add({kind:'dialog',date:tk,partner:p.id,lines:L,text:L.map(function(l){return (l.who==='me'?'Я: ':p.title+': ')+l.text}).join(' · ')})){close();dialogs()}}}
     draw()}
