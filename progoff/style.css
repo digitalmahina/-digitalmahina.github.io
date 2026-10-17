@@ -23,10 +23,10 @@ h1{font:var(--t24)}
 .seg button:disabled{opacity:.4;cursor:default}
 textarea{width:100%;min-height:200px;border:1px solid var(--line);border-radius:var(--r);padding:16px;font:var(--t15);color:var(--ink);background:var(--paper);resize:vertical}
 textarea:focus{outline:2px solid var(--ink);outline-offset:-1px}
-.tabs{z-index:50;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);background:var(--paper);padding-bottom:env(safe-area-inset-bottom,0)}
+.tabs{z-index:50;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line);background:var(--paper);padding-bottom:env(safe-area-inset-bottom,0)}
 #lay .ghost,#lay .primary{white-space:nowrap;padding:0 8px;font:var(--t12);flex:1}
 .legend{line-height:18px}
-.tabs button{appearance:none;border:0;background:none;min-height:56px;font:var(--t12);color:var(--mute)}
+.tabs button{appearance:none;border:0;background:none;min-height:56px;padding:0 2px;font:var(--t12);font-size:11.5px;color:var(--mute)}
 .tabs button.on{color:var(--ink);font-weight:700}
 .veil{position:fixed;inset:0;background:rgba(43,42,39,.28);z-index:60}
 .sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:var(--kb,0px);width:100%;max-width:480px;max-height:calc(var(--vvh,100vh) - 16px);overscroll-behavior:contain;overflow:auto;background:var(--paper);border-radius:24px 24px 0 0;padding:16px 24px calc(24px + env(safe-area-inset-bottom,0));display:grid;gap:16px;z-index:61}
@@ -57,3 +57,5 @@ h2{font:var(--t12);font-weight:600;margin:12px 0 4px}
 
 .kb .sheet{border-radius:24px;padding-bottom:16px}
 .kb .sheet textarea{min-height:min(200px,28vh)}
+.lday{justify-self:start;font:var(--t12);font-weight:700;color:var(--ink);margin-top:8px;padding:0}
+#lf button{padding:0 4px}
