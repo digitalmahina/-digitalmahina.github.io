@@ -280,6 +280,8 @@
   function quiet(){
     var ms=meds(),tot=0,days={};ms.forEach(function(m){tot+=m.minutes||0;days[m.date]=(days[m.date]||0)+(m.minutes||0)});
     var h='<div><h1>Тишина</h1><p class="sub">Минута тишины и счётчик</p></div>';
+    var tm=days[GZ.key(TODAY)],en=-1,i0;for(i0=0;i0<40;i0++){if(MOON.ek(GZ.key(GZ.add(TODAY,i0)))){en=i0;break}}
+    h+='<p class="sub">Сегодня: '+(tm?'сидел '+tm+' мин':'ещё не сидел')+(en>=0?' · экадаши '+(en===0?'сегодня':'через '+en+' '+(en%10===1&&en!==11?'день':(en%10>=2&&en%10<=4&&(en<10||en>20)?'дня':'дней'))):'')+'</p>';
     if(QT){h+='<div class="card"><p class="sub">Идёт тишина · '+QT.dur+' мин</p><p class="big" id="qt">'+fmt(QT.dur*60-(Date.now()-QT.t0)/1000)+'</p><button class="primary" id="qe">Закончить</button></div>'}
     else{h+='<div class="card"><p class="sub">Сколько сидим</p><div class="seg" id="qd">'+[1,5,10,20].map(function(m){return '<button data-m="'+m+'"'+(QD===m?' class="on"':'')+'>'+m+'</button>'}).join('')+'<button data-m="0"'+([1,5,10,20].indexOf(QD)<0?' class="on"':'')+'>своя</button></div>'+([1,5,10,20].indexOf(QD)<0?'<input id="qc" class="field" type="number" min="1" max="180" value="'+QD+'" placeholder="минут">':'')+'<button class="primary" id="qs">Начать</button></div>'}
     h+='<div class="card soft"><p>Всего: <b>'+ms.length+'</b> · серия дней: <b>'+medStreak(ms)+'</b> · время: <b>'+tot+'</b> мин</p></div>';
