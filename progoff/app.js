@@ -75,6 +75,17 @@
     return H.slice(0,2)}
   function hintsCard(){var H=hints();return H.length?'<div class="card soft"><span class="label">Подсказка</span>'+H.map(function(t){return '<p>'+esc(t)+'</p>'}).join('')+'</div>':''}
 
+  var STANDALONE=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true,BIP=null;
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();BIP=e});
+  window.addEventListener('appinstalled',function(){STANDALONE=true;BIP=null;if(tab==='krug')render()});
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+  function addHome(){
+    if(BIP){BIP.prompt();BIP.userChoice.then(function(){BIP=null});return}
+    var ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    open('<h2>На экран «Домой»</h2>'+(ios?'<p>В Safari нажми «Поделиться» (квадрат со стрелкой вверх) внизу экрана, затем «На экран „Домой“» и «Добавить».</p><p class="sub">В других браузерах на iPhone этого пункта может не быть, открой страницу в Safari.</p>'
+      :'<p>Открой меню браузера (⋮ справа вверху) и выбери «Добавить на главный экран» или «Установить приложение».</p>')+
+      '<p class="sub">Записи остаются в этом браузере на этом устройстве. Иконка откроет тот же дневник.</p><button class="primary" id="a2ok">Понятно</button>');
+    $('#a2ok').onclick=close}
   function krug(){
     var head=TS.out?'Между кругами':'Круг '+GZ.ROM[TS.k];
     var sub=TS.out?'Новый круг I начнётся '+GZ.short(WIN[0]):GZ.short(WIN[0])+' – '+GZ.short(WIN[59])+' · день '+TS.n+' из 60';
@@ -90,9 +101,11 @@
     h+='<div class="card"><span class="label">60 дней назад на этой точке</span>'+
       (back.length?back.map(function(e){return '<p>«'+esc((e.text||e.title||'').slice(0,140))+'»</p>'}).join('')+'<p class="sub">Что из этого продолжается? Продолжи:</p><div class="row"><button class="ghost" id="rd">Диалогом</button><button class="ghost" id="rs">Вехой</button><button class="ghost" id="rp">Этапом</button></div>':'<p class="sub">Пока пусто. Через 60 дней здесь появится то, что ты пишешь сегодня.</p>')+'</div>';
     h+='<button class="primary" id="write">Написать сегодня</button>';
+    if(!STANDALONE)h+='<button class="ghost" id="a2hs">На экран «Домой»</button>';
     h+='<div class="row"><button class="link" id="exp">Скачать копию</button><button class="link" id="imp">Загрузить копию</button><button class="link" id="pdf">PDF кольца</button></div>';
     screen.innerHTML=h;
     $('#write').onclick=function(){editor(GZ.key(TODAY))};
+    var ah=$('#a2hs');if(ah)ah.onclick=addHome;
     $('#newp').onclick=periodEditor;
     screen.querySelectorAll('[data-lay]').forEach(function(b){b.onclick=function(){setLayer(b.getAttribute('data-lay'));krug()}});
     var rd=$('#rd');if(rd){rd.onclick=function(){document.querySelector('#tabs [data-tab=dialogs]').onclick()};$('#rs').onclick=stoneEditor;$('#rp').onclick=periodEditor}
