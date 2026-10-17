@@ -216,19 +216,26 @@
       h+='<div class="card'+(cur?'':' soft')+'"><div class="row"><b>Круг '+GZ.ROM[k]+(cur?' · сейчас':'')+'</b><span class="sub">'+GZ.short(a)+' – '+GZ.short(b)+'</span></div><p class="sub">Записей: '+n+'</p>'+(nw?'<p>«'+esc(nw.text.slice(0,140))+(nw.text.length>140?'…':'')+'»</p>':'')+'</div>'}
     h+='</div>';
     var ss=ents('stone'),ys=ents('yearnote').filter(function(e){return e.year===y}),fs=ents('fork');
+    var all=ss.concat(fs).sort(function(p,q){return p.date<q.date?-1:p.date>q.date?1:0});
+    if(all.length){var t0=GZ.parse(all[0].date).getTime(),t1=GZ.parse(all[all.length-1].date).getTime(),sp=Math.max(t1-t0,1),sn=0,sv='<svg viewBox="0 0 200 200" class="lifemap" role="img" aria-label="Схема жизни"><circle cx="100" cy="100" r="78" fill="none" stroke="#d9d6cc"/>';
+      all.forEach(function(e,i){var an=all.length>1?(GZ.parse(e.date).getTime()-t0)/sp*Math.PI*1.8-Math.PI/2:-Math.PI/2,x=(100+78*Math.cos(an)).toFixed(1),yy=(100+78*Math.sin(an)).toFixed(1);
+        if(e.kind==='stone'){sn++;sv+='<g data-go="'+e.id+'" style="cursor:pointer"><circle cx="'+x+'" cy="'+yy+'" r="9" fill="#faeeda" stroke="#854f0b"/><text x="'+x+'" y="'+(+yy+3.5)+'" font-size="10" text-anchor="middle" fill="#854f0b">'+sn+'</text></g>'}
+        else sv+='<g data-go="'+e.id+'" style="cursor:pointer"><path d="M'+x+' '+(yy-9)+' l9 9 l-9 9 l-9 -9z" fill="#e6f1fb" stroke="#185fa5"/></g>'});
+      h+='<div class="card"><span class="label">Схема жизни</span>'+sv+'</svg><p class="sub">Точки — вехи по порядку, ромбы — развилки. Нажми, чтобы открыть запись.</p></div>'}
+    h+='<div class="row"><button class="ghost" id="as2"'+(ss.length>=12?' disabled':'')+'>+ Веха</button><button class="ghost" id="af2">+ Развилка</button></div>';
     h+='<div class="row"><h2>Вехи</h2><span class="sub">'+ss.length+' из 12</span></div>';
-    h+=ss.length?ss.map(function(e){return '<div class="entry"><span class="kind">'+GZ.short(GZ.parse(e.date))+' '+GZ.parse(e.date).getFullYear()+'</span><p class="ptitle">'+esc(e.title)+'</p>'+(e.text?'<p>'+esc(e.text)+'</p>':'')+delBtn(e.id)+'</div>'}).join(''):'<p class="empty">Вехи — события, на которые жизнь опиралась, как камни на переправе.</p>';
+    h+=ss.length?ss.map(function(e){return '<div class="entry" id="e'+e.id+'"><span class="kind">'+GZ.short(GZ.parse(e.date))+' '+GZ.parse(e.date).getFullYear()+'</span><p class="ptitle">'+esc(e.title)+'</p>'+(e.text?'<p>'+esc(e.text)+'</p>':'')+delBtn(e.id)+'</div>'}).join(''):'<p class="empty">Вехи — события, на которые жизнь опиралась, как камни на переправе.</p>';
     h+='<button class="ghost" id="as"'+(ss.length>=12?' disabled':'')+'>Добавить веху</button>';
     h+='<div class="row"><h2>Заметки к '+y+' году</h2></div>';
     h+=ys.length?ys.map(function(e){return '<div class="entry"><p>'+esc(e.text)+'</p>'+delBtn(e.id)+'</div>'}).join(''):'<p class="empty">О чём был этот год?</p>';
     h+='<button class="ghost" id="ay">Записать о годе</button>';
     h+='<div class="row"><h2>Развилки</h2></div>';
-    h+=fs.length?fs.map(function(e){return '<div class="entry"><span class="kind">'+GZ.short(GZ.parse(e.date))+' '+GZ.parse(e.date).getFullYear()+'</span><p class="ptitle">'+esc(e.title)+'</p><p>Выбрано: '+esc(e.chosen)+'</p><p>Не выбрано: '+esc(e.other)+'</p>'+delBtn(e.id)+'</div>'}).join(''):'<p class="empty">Места, где путь мог пойти иначе.</p>';
+    h+=fs.length?fs.map(function(e){return '<div class="entry" id="e'+e.id+'"><span class="kind">'+GZ.short(GZ.parse(e.date))+' '+GZ.parse(e.date).getFullYear()+'</span><p class="ptitle">'+esc(e.title)+'</p><p>Выбрано: '+esc(e.chosen)+'</p><p>Не выбрано: '+esc(e.other)+'</p>'+delBtn(e.id)+'</div>'}).join(''):'<p class="empty">Места, где путь мог пойти иначе.</p>';
     h+='<button class="ghost" id="af">Добавить развилку</button>';
     screen.innerHTML=h;
     screen.querySelectorAll('[data-day]').forEach(function(c){c.onclick=function(){day(c.getAttribute('data-day'))}});screen.querySelectorAll('[data-lay]').forEach(function(c){c.onclick=function(){setLayer(c.getAttribute('data-lay'));life()}});
     $('#yp').onclick=function(){LY=y-1;life()};$('#yn').onclick=function(){LY=y+1;life()};
-    $('#as').onclick=stoneEditor;$('#ay').onclick=function(){yearEditor(y)};$('#af').onclick=forkEditor;
+    screen.querySelectorAll('[data-go]').forEach(function(g){g.onclick=function(){var el=document.getElementById('e'+g.getAttribute('data-go'));if(el){el.scrollIntoView();el.style.outline='2px solid #854f0b'}}});$('#as2').onclick=stoneEditor;$('#af2').onclick=forkEditor;    $('#as').onclick=stoneEditor;$('#ay').onclick=function(){yearEditor(y)};$('#af').onclick=forkEditor;
     screen.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){if(b.dataset.sure){Store.remove(b.getAttribute('data-del'));life()}else{b.dataset.sure='1';b.textContent='Точно удалить? Нажми ещё раз'}}});
   }
   function delBtn(id){return '<button class="link" data-del="'+id+'">Удалить</button>'}
