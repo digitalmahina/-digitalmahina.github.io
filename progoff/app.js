@@ -53,7 +53,7 @@
     if(!future)h+='<button class="primary" id="add">Записать в этот день</button>';
     open(h);
     var a=$('#add');if(a)a.onclick=function(){editor(k)};
-    sheet.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){if(confirm('Удалить запись?')){Store.remove(b.getAttribute('data-del'));render();day(k)}}});
+    sheet.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){if(b.dataset.sure){Store.remove(b.getAttribute('data-del'));render();day(k)}else{b.dataset.sure='1';b.textContent='Точно удалить? Нажми ещё раз'}}});
   }
 
   function editor(k){
