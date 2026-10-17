@@ -37,8 +37,8 @@
       var n=i+1,a=2*Math.PI*i/60,sx=Math.sin(a),cy=-Math.cos(a),x=C+R*sx,y=C+R*cy,el=GZ.EL[GZ.elem(n)],k=GZ.key(d);
       var es=Store.byDate(k).filter(function(e){return e.kind!=='period'&&e.kind!=='fast'&&e.kind!=='todo'}),j=0;
       es.slice(0,8).forEach(function(e){var rr=R-16-j*9;j++;
-        s+=e.kind==='dream'?'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.6" fill="none" stroke="'+el[1]+'" stroke-width="1.6"/>'
-          :'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.4" fill="'+el[1]+'"/>'});
+        s+=e.kind==='dream'?'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.6" fill="none" stroke="'+el[1]+'" stroke-width="1.6" data-day="'+k+'" style="cursor:pointer"/>'
+          :'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.4" fill="'+el[1]+'" data-day="'+k+'" style="cursor:pointer"/>'});
       if(LAYER!=='g'&&MOON.phase){var mr=R-MA*Math.cos(MOON.phase(k)*Math.PI/180),mx=+(C+mr*sx).toFixed(1),my=+(C+mr*cy).toFixed(1);
         if(MOON.nm(k))s+='<circle cx="'+mx+'" cy="'+my+'" r="4.6" fill="#fbfaf8" stroke="#b5b1a8" stroke-width="1"/><circle cx="'+mx+'" cy="'+my+'" r="1.3" fill="#b5b1a8"/>';
         else if(MOON.fm(k))s+='<circle cx="'+mx+'" cy="'+my+'" r="5" fill="'+OR+'"/>';
@@ -290,7 +290,29 @@
       var due=$('#td').value,p=$('#tp')?$('#tp').value:'',e={kind:'todo',date:due||GZ.key(TODAY),text:t,done:false};if(due)e.due=due;if(p)e.partner=p;
       if(Store.add(e)){close();todos();}}}
   var tab='krug';
-  function render(){if(tab==='krug')return krug();if(tab==='life')return life();if(tab==='dialogs')return dialogs();if(tab==='todo')return todos();return quiet()}
+  /* Лента: all notes, newest first, readable in full. */
+  var LF='all',LQ='';
+  function lenta(){
+    var F={all:'Все',day:'Дни',dream:'Сны',dialog:'Диалоги',life:'Жизнь'},grp={day:'day',now:'day',dream:'dream',dialog:'dialog',period:'life',stone:'life',yearnote:'life',fork:'life'};
+    var pn={};Store.entries().forEach(function(e){if(e.kind==='partner')pn[e.id]=e.title});
+    var es=Store.entries().filter(function(e){return grp[e.kind]&&(LF==='all'||grp[e.kind]===LF)});
+    if(LQ){var q=LQ.toLowerCase();es=es.filter(function(e){return ((e.text||'')+' '+(e.title||'')).toLowerCase().indexOf(q)>=0})}
+    es.sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:((a.created||'')<(b.created||'')?1:-1)});
+    var h='<div><h1>Лента</h1><p class="sub">Все записи, от новых к старым</p></div>';
+    h+='<input id="lq" class="field" type="search" placeholder="Поиск по записям" value="'+esc(LQ)+'">';
+    h+='<div class="seg" id="lf">'+Object.keys(F).map(function(k){return '<button data-f="'+k+'"'+(LF===k?' class="on"':'')+'>'+F[k]+'</button>'}).join('')+'</div>';
+    if(!es.length)h+='<p class="empty">'+(LQ||LF!=='all'?'Ничего не нашлось.':'Пока нет записей. Начни с круга: «Написать сегодня».')+'</p>';
+    var last='';
+    es.forEach(function(e){
+      if(e.date!==last){last=e.date;var d=GZ.parse(e.date),s=GZ.slot(d);h+='<button class="link lday" data-day="'+e.date+'">'+GZ.short(d)+(s.out?'':' · круг '+GZ.ROM[s.k]+', день '+s.n)+'</button>'}
+      var k=KIND[e.kind]+(e.kind==='dialog'&&pn[e.partner]?' · '+esc(pn[e.partner]):'')+(e.src==='ganzhi'?' · из Ганьчжи':'');
+      h+='<div class="entry"><span class="kind">'+k+'</span>'+(e.title&&e.kind!=='dialog'?'<p class="ptitle">'+esc(e.title)+'</p>':'')+(e.text?'<p>'+esc(e.text)+'</p>':'')+'</div>'});
+    screen.innerHTML=h;
+    var qi=$('#lq');qi.oninput=function(){LQ=qi.value;var p=qi.selectionStart;lenta();var n=$('#lq');n.focus();try{n.setSelectionRange(p,p)}catch(x){}};
+    screen.querySelectorAll('#lf button').forEach(function(b){b.onclick=function(){LF=b.getAttribute('data-f');lenta()}});
+    screen.querySelectorAll('[data-day]').forEach(function(b){b.onclick=function(){day(b.getAttribute('data-day'))}});
+  }
+  function render(){if(tab==='lenta')return lenta();if(tab==='krug')return krug();if(tab==='life')return life();if(tab==='dialogs')return dialogs();if(tab==='todo')return todos();return quiet()}
   document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){tab=b.getAttribute('data-tab');DP=null;
     document.querySelectorAll('#tabs button').forEach(function(x){x.classList.toggle('on',x===b)});close();render()}});
   document.addEventListener('visibilitychange',function(){if(!document.hidden){var k=GZ.key(TODAY);refresh();if(GZ.key(TODAY)!==k)render()}});
