@@ -294,5 +294,11 @@
   document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){tab=b.getAttribute('data-tab');DP=null;
     document.querySelectorAll('#tabs button').forEach(function(x){x.classList.toggle('on',x===b)});close();render()}});
   document.addEventListener('visibilitychange',function(){if(!document.hidden){var k=GZ.key(TODAY);refresh();if(GZ.key(TODAY)!==k)render()}});
+  /* Keyboard: keep the sheet above it (Android webviews/Telegram overlay the keyboard). */
+  (function(){var vv=window.visualViewport,R=document.documentElement;if(!vv)return;
+    function fit(){var kb=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);R.style.setProperty('--kb',kb+'px');R.style.setProperty('--vvh',vv.height+'px');R.classList.toggle('kb',kb>80);
+      var f=document.activeElement;if(kb>80&&f&&sheet.contains(f))setTimeout(function(){f.scrollIntoView({block:'nearest'})},30)}
+    vv.addEventListener('resize',fit);vv.addEventListener('scroll',fit);fit()})();
+  sheet.addEventListener('focusin',function(e){setTimeout(function(){e.target.scrollIntoView({block:'nearest'})},300)});
   render();
 })();
