@@ -46,3 +46,8 @@ label.sub{display:grid}
 h2{font:var(--t12);font-weight:600;margin:12px 0 4px}
 .ghost:disabled{opacity:.4}
 #pt{grid-auto-flow:row;grid-template-columns:1fr 1fr 1fr}
+.big{font-size:56px;text-align:center;margin:8px 0;font-variant-numeric:tabular-nums}
+.qgrid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin:8px 0 16px}
+.qc{aspect-ratio:1;border:1px solid #cfcbc0;border-radius:50%}
+.qc.on{background:#639922;border-color:#639922}
+.qc.td{outline:2px solid #2b2a27;outline-offset:1px}
