@@ -29,27 +29,36 @@
       if(i1>i0)s+='<path d="M'+a[0]+' '+a[1]+' A'+RA+' '+RA+' 0 '+big+' 1 '+b[0]+' '+b[1]+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round"/>';
       if(p.start>=w0){var t0=pt(i0,RA-5),t1=pt(i0,RA+5);s+='<line x1="'+t0[0]+'" y1="'+t0[1]+'" x2="'+t1[0]+'" y2="'+t1[1]+'" stroke="'+col+'" stroke-width="1.6"/>'}
       else if(i1===i0)s+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="1.6" fill="'+col+'"/>'});
+    var OR='#e9a53c',VI='#7c3aed',MA=20;
+    if(LAYER!=='g'&&MOON.phase){var w0k=GZ.key(WIN[0]),P=[];
+      for(var q=0;q<=236;q++){var u=q/4,r0=R-MA*Math.cos(MOON.phase(w0k,u)*Math.PI/180);P.push(pt(u,r0).join(' '))}
+      s+='<path d="M'+P.join(' L')+'" fill="none" stroke="'+OR+'" stroke-width="1.4" stroke-linejoin="round"/>'}
     WIN.forEach(function(d,i){
       var n=i+1,a=2*Math.PI*i/60,sx=Math.sin(a),cy=-Math.cos(a),x=C+R*sx,y=C+R*cy,el=GZ.EL[GZ.elem(n)],k=GZ.key(d);
       var es=Store.byDate(k).filter(function(e){return e.kind!=='period'&&e.kind!=='fast'&&e.kind!=='todo'}),j=0;
       es.slice(0,8).forEach(function(e){var rr=R-16-j*9;j++;
         s+=e.kind==='dream'?'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.6" fill="none" stroke="'+el[1]+'" stroke-width="1.6"/>'
           :'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.4" fill="'+el[1]+'"/>'});
-      if(LAYER!=='g'){var mr=R+12,mx=(C+mr*sx).toFixed(1),my=(C+mr*cy).toFixed(1);
-        if(MOON.nm(k))s+='<circle cx="'+mx+'" cy="'+my+'" r="3" fill="#2b2a27"/>';
-        else if(MOON.fm(k))s+='<circle cx="'+mx+'" cy="'+my+'" r="3" fill="#fbfaf8" stroke="#2b2a27" stroke-width="1.2"/>';
-        if(LAYER==='e'&&MOON.ek(k)){var f=Store.byDate(k).some(function(e){return e.kind==='fast'}),q=4.2;
-          s+='<path d="M'+mx+' '+(my-q)+' L'+(+mx+q)+' '+my+' L'+mx+' '+(+my+q)+' L'+(mx-q)+' '+my+' Z" fill="'+(f?'#2b2a27':'#fbfaf8')+'" stroke="#2b2a27" stroke-width="1.2"/>'}}
+      if(LAYER!=='g'&&MOON.phase){var mr=R-MA*Math.cos(MOON.phase(k)*Math.PI/180),mx=+(C+mr*sx).toFixed(1),my=+(C+mr*cy).toFixed(1);
+        if(MOON.nm(k))s+='<circle cx="'+mx+'" cy="'+my+'" r="4.6" fill="#fbfaf8" stroke="#b5b1a8" stroke-width="1"/><circle cx="'+mx+'" cy="'+my+'" r="1.3" fill="#b5b1a8"/>';
+        else if(MOON.fm(k))s+='<circle cx="'+mx+'" cy="'+my+'" r="5" fill="'+OR+'"/>';
+        if(LAYER==='e'&&MOON.ek(k)){var f=Store.byDate(k).some(function(e){return e.kind==='fast'}),q2=4.6;
+          s+='<path d="M'+mx+' '+(my-q2)+' L'+(mx+q2)+' '+my+' L'+mx+' '+(my+q2)+' L'+(mx-q2)+' '+my+' Z" fill="'+(f?VI:'#fbfaf8')+'" stroke="'+VI+'" stroke-width="1.3"/>'}}
       var tds=Store.byDate(k).filter(function(e){return e.kind==='todo'});
       if(tds.length){var dn=tds.every(function(e){return e.done}),t0=[C+(R+22)*sx,C+(R+22)*cy],t1=[C+(R+30)*sx,C+(R+30)*cy];
         s+='<line x1="'+t0[0].toFixed(1)+'" y1="'+t0[1].toFixed(1)+'" x2="'+t1[0].toFixed(1)+'" y2="'+t1[1].toFixed(1)+'" stroke="#2b2a27" stroke-width="'+(dn?3.4:1)+'" stroke-linecap="round"/>'}
       var isT=k===GZ.key(TODAY);
-      s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="7" fill="'+el[0]+'" stroke="'+el[1]+'" stroke-width="1"/>';
-      s+='<text x="'+x.toFixed(1)+'" y="'+(y+2.3).toFixed(1)+'" text-anchor="middle" font-size="'+(n>9?6:6.8)+'" font-weight="600" fill="'+el[1]+'" font-family="system-ui,sans-serif" pointer-events="none">'+n+'</text>';
-      if(isT)s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="11" fill="none" stroke="#2b2a27" stroke-width="1.6"/>';
+      s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="6" fill="'+el[0]+'" stroke="'+el[1]+'" stroke-width=".9"/>';
+      s+='<text x="'+x.toFixed(1)+'" y="'+(y+2).toFixed(1)+'" text-anchor="middle" font-size="'+(n>9?5.2:6)+'" font-weight="600" fill="'+el[1]+'" font-family="system-ui,sans-serif" pointer-events="none">'+n+'</text>';
+      if(isT)s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="9.5" fill="none" stroke="#2b2a27" stroke-width="1.5"/>';
       s+='<circle data-day="'+k+'" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="12" fill="transparent" style="cursor:pointer"/>';
     });
-    s+='<circle cx="'+C+'" cy="'+C+'" r="3" fill="#2b2a27"/></svg>';return s}
+    if(LAYER!=='g'&&MOON.pname){var tk=GZ.key(TODAY);s+='<circle cx="'+C+'" cy="'+C+'" r="46" fill="#f1efe8" stroke="#e3e0d8"/>'+
+      '<text x="'+C+'" y="'+(C-8)+'" text-anchor="middle" font-size="9" fill="#8a877f" font-family="system-ui,sans-serif">сегодня</text>'+
+      '<text x="'+C+'" y="'+(C+5)+'" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2b2a27" font-family="system-ui,sans-serif">'+GZ.short(TODAY)+'</text>'+
+      '<text x="'+C+'" y="'+(C+18)+'" text-anchor="middle" font-size="9" fill="#8a877f" font-family="system-ui,sans-serif">'+MOON.pname(tk)+'</text>'}
+    else s+='<circle cx="'+C+'" cy="'+C+'" r="3" fill="#2b2a27"/>';
+    s+='</svg>';return s}
 
   /* Phase 5: rule-based hints, no AI. */
   function hints(){var H=[],es=Store.entries(),tk=GZ.key(TODAY);
@@ -76,7 +85,7 @@
       '<button class="ghost" id="newp">Начался новый этап</button></div>';
     if(!TS.out)h+='<div class="card'+(nw?'':' soft')+'"><span class="label">Сейчас · начало круга '+GZ.ROM[TS.k]+'</span>'+(nw?'<p>'+esc(nw.text.slice(0,240))+(nw.text.length>240?'…':'')+'</p><p class="sub">записано '+GZ.short(GZ.parse(nw.date))+'</p>':'<p class="sub">Открытый момент: где ты стоишь на пороге этих 60 дней? Что уже есть, что только начинается?</p><button class="ghost" id="nowb">Записать «Сейчас»</button>')+'</div>';
     h+='<div class="row" id="lay">'+[['g','Ганьчжи'],['m','+ Луна'],['e','+ Экадаши']].map(function(x){return '<button class="'+(LAYER===x[0]?'primary':'ghost')+'" data-lay="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>';
-    h+=ringSVG()+(LAYER!=='g'?'<p class="legend">● новолуние &nbsp; ○ полнолуние'+(LAYER==='e'?' &nbsp; ◇ экадаши (◆ пост отмечен)':'')+'</p>':'')+'<p class="legend">● запись дня &nbsp; ○ сон / образ &nbsp; — этап &nbsp; · тап по точке — открыть день</p>';
+    h+=ringSVG()+(LAYER!=='g'?'<p class="legend"><span style="color:#e9a53c">●</span> полнолуние &nbsp; ◦ новолуние'+(LAYER==='e'?' &nbsp; <span style="color:#7c3aed">◇</span> экадаши (<span style="color:#7c3aed">◆</span> пост)':'')+'<br>линия: наружу — к полнолунию, внутрь — к новолунию</p>':'')+'<p class="legend">● запись дня &nbsp; ○ сон / образ &nbsp; — этап &nbsp; · тап по точке — открыть день</p>';
     h+=hintsCard();
     h+='<div class="card"><span class="label">60 дней назад на этой точке</span>'+
       (back.length?back.map(function(e){return '<p>«'+esc((e.text||e.title||'').slice(0,140))+'»</p>'}).join('')+'<p class="sub">Что из этого продолжается? Продолжи:</p><div class="row"><button class="ghost" id="rd">Диалогом</button><button class="ghost" id="rs">Вехой</button><button class="ghost" id="rp">Этапом</button></div>':'<p class="sub">Пока пусто. Через 60 дней здесь появится то, что ты пишешь сегодня.</p>')+'</div>';
