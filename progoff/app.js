@@ -35,7 +35,7 @@
       es.slice(0,8).forEach(function(e){var rr=R-16-j*9;j++;
         s+=e.kind==='dream'?'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.6" fill="none" stroke="'+el[1]+'" stroke-width="1.6"/>'
           :'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.4" fill="'+el[1]+'"/>'});
-      if(LAYER!=='g'){var mr=R+8,mx=(C+mr*sx).toFixed(1),my=(C+mr*cy).toFixed(1);
+      if(LAYER!=='g'){var mr=R+12,mx=(C+mr*sx).toFixed(1),my=(C+mr*cy).toFixed(1);
         if(MOON.nm(k))s+='<circle cx="'+mx+'" cy="'+my+'" r="3" fill="#2b2a27"/>';
         else if(MOON.fm(k))s+='<circle cx="'+mx+'" cy="'+my+'" r="3" fill="#fbfaf8" stroke="#2b2a27" stroke-width="1.2"/>';
         if(LAYER==='e'&&MOON.ek(k)){var f=Store.byDate(k).some(function(e){return e.kind==='fast'}),q=4.2;
