@@ -45,3 +45,4 @@ label.sub{display:grid}
 .stack{display:grid;gap:8px}
 h2{font:var(--t12);font-weight:600;margin:12px 0 4px}
 .ghost:disabled{opacity:.4}
+#pt{grid-auto-flow:row;grid-template-columns:1fr 1fr 1fr}
