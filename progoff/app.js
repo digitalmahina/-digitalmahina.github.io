@@ -6,7 +6,7 @@
   function refresh(){TODAY=GZ.noon(new Date());TS=GZ.slot(TODAY);
     var start=TS.out?GZ.dateOf(TS.year,0,1):GZ.add(TODAY,1-TS.n);WIN=[];for(var i=0;i<60;i++)WIN.push(GZ.add(start,i))}
   refresh();
-  var KIND={day:'день',fast:'пост',dream:'сон / образ',period:'начало этапа',now:'сейчас',stone:'веха',yearnote:'заметка к году',fork:'развилка',partner:'собеседник',dialog:'диалог'};
+  var KIND={day:'день',fast:'пост',dream:'сон / образ',period:'начало этапа',now:'сейчас',stone:'веха',yearnote:'заметка к году',fork:'развилка',partner:'собеседник',dialog:'диалог',med:'тишина'};
   function ringId(sl){return sl.out?null:sl.year+'-'+sl.k}
   /* Periods: each lasts from its date until the next period starts (or today). */
   function periods(){var ps=Store.entries().filter(function(e){return e.kind==='period'}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:((a.created||'')<(b.created||'')?-1:1)});
@@ -224,9 +224,28 @@
         if(Store.add({kind:'dialog',date:tk,partner:p.id,lines:L,text:L.map(function(l){return (l.who==='me'?'Я: ':p.title+': ')+l.text}).join(' · ')})){close();dialogs()}}}
     draw()}
 
-  var SOON={quiet:['Тишина','Минута тишины и счётчик медитаций. Фаза 6.']};
+  /* Quiet tab: text timer (no animation), meditation counter, 60-day grid. */
+  var QT=null,QD=5,QI=null;
+  function meds(){return Store.entries().filter(function(e){return e.kind==='med'})}
+  function fmt(s){s=Math.max(0,Math.round(s));var m=Math.floor(s/60),r=s%60;return (m<10?'0':'')+m+':'+(r<10?'0':'')+r}
+  function medStreak(ms){var set={};ms.forEach(function(m){set[m.date]=1});var d=TODAY,n=0;if(!set[GZ.key(d)])d=GZ.add(d,-1);while(set[GZ.key(d)]){n++;d=GZ.add(d,-1)}return n}
+  function qStop(save){if(QI){clearInterval(QI);QI=null}var t=QT;QT=null;
+    if(save&&t){var sec=Math.min(t.dur*60,(Date.now()-t.t0)/1000),mn=Math.round(sec/60);if(sec>=30&&mn<1)mn=1;if(mn>=1)Store.add({kind:'med',date:GZ.key(TODAY),minutes:mn,text:'Тишина, '+mn+' мин'})}
+    if(tab==='quiet')quiet()}
+  function qTick(){if(!QT)return;var left=QT.dur*60-(Date.now()-QT.t0)/1000;if(left<=0)return qStop(true);var el=$('#qt');if(el)el.textContent=fmt(left)}
+  function quiet(){
+    var ms=meds(),tot=0,days={};ms.forEach(function(m){tot+=m.minutes||0;days[m.date]=(days[m.date]||0)+(m.minutes||0)});
+    var h='<div><h1>Тишина</h1><p class="sub">Минута тишины и счётчик</p></div>';
+    if(QT){h+='<div class="card"><p class="sub">Идёт тишина · '+QT.dur+' мин</p><p class="big" id="qt">'+fmt(QT.dur*60-(Date.now()-QT.t0)/1000)+'</p><button class="primary" id="qe">Закончить</button></div>'}
+    else{h+='<div class="card"><p class="sub">Сколько сидим</p><div class="seg" id="qd">'+[1,5,10,20].map(function(m){return '<button data-m="'+m+'"'+(QD===m?' class="on"':'')+'>'+m+'</button>'}).join('')+'<button data-m="0"'+([1,5,10,20].indexOf(QD)<0?' class="on"':'')+'>своя</button></div>'+([1,5,10,20].indexOf(QD)<0?'<input id="qc" class="field" type="number" min="1" max="180" value="'+QD+'" placeholder="минут">':'')+'<button class="primary" id="qs">Начать</button></div>'}
+    h+='<div class="card soft"><p>Всего: <b>'+ms.length+'</b> · серия дней: <b>'+medStreak(ms)+'</b> · время: <b>'+tot+'</b> мин</p></div>';
+    h+='<p class="sub">Этот круг</p><div class="qgrid">'+WIN.map(function(d){var k=GZ.key(d);return '<span class="qc'+(days[k]?' on':'')+(k===GZ.key(TODAY)?' td':'')+'" title="'+k+(days[k]?' · '+days[k]+' мин':'')+'"></span>'}).join('')+'</div>';
+    screen.innerHTML=h;
+    if(QT){$('#qe').onclick=function(){qStop(true)};if(!QI)QI=setInterval(qTick,1000);return}
+    screen.querySelectorAll('#qd button').forEach(function(b){b.onclick=function(){var m=+b.getAttribute('data-m');QD=m||7;if(!m)QD=7;quiet();if(!m){var c=$('#qc');if(c)c.focus()}}});
+    $('#qs').onclick=function(){var c=$('#qc'),m=c?parseInt(c.value,10):QD;if(!(m>=1&&m<=180)){if(c)c.focus();return}QD=m;QT={dur:m,t0:Date.now()};quiet()}}
   var tab='krug';
-  function render(){if(tab==='krug')return krug();if(tab==='life')return life();if(tab==='dialogs')return dialogs();var s=SOON[tab];screen.innerHTML='<div><h1>'+s[0]+'</h1><p class="sub">Скоро</p></div><div class="card soft"><p>'+s[1]+'</p></div>'}
+  function render(){if(tab==='krug')return krug();if(tab==='life')return life();if(tab==='dialogs')return dialogs();return quiet()}
   document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){tab=b.getAttribute('data-tab');DP=null;
     document.querySelectorAll('#tabs button').forEach(function(x){x.classList.toggle('on',x===b)});close();render()}});
   document.addEventListener('visibilitychange',function(){if(!document.hidden){var k=GZ.key(TODAY);refresh();if(GZ.key(TODAY)!==k)render()}});
