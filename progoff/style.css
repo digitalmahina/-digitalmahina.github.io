@@ -41,3 +41,7 @@ textarea:focus{outline:2px solid var(--ink);outline-offset:-1px}
 label.sub{display:grid}
 .ptitle{font:var(--t19)}
 .card .ghost{justify-self:start}
+
+.stack{display:grid;gap:8px}
+h2{font:var(--t12);font-weight:600;margin:12px 0 4px}
+.ghost:disabled{opacity:.4}
