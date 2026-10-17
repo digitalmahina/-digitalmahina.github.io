@@ -24,7 +24,8 @@ h1{font:var(--t24)}
 textarea{width:100%;min-height:200px;border:1px solid var(--line);border-radius:var(--r);padding:16px;font:var(--t15);color:var(--ink);background:var(--paper);resize:vertical}
 textarea:focus{outline:2px solid var(--ink);outline-offset:-1px}
 .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--paper);padding-bottom:env(safe-area-inset-bottom,0)}
-@media(min-width:520px){.tabs{position:absolute;bottom:0}}
+#lay .ghost,#lay .primary{white-space:nowrap;padding:0 8px;font:var(--t12);flex:1}
+.legend{line-height:18px}
 .tabs button{appearance:none;border:0;background:none;min-height:56px;font:var(--t12);color:var(--mute)}
 .tabs button.on{color:var(--ink);font-weight:700}
 .veil{position:fixed;inset:0;background:rgba(43,42,39,.28);z-index:20}
