@@ -6,7 +6,7 @@
   function refresh(){TODAY=GZ.noon(new Date());TS=GZ.slot(TODAY);
     var start=TS.out?GZ.dateOf(TS.year,0,1):GZ.add(TODAY,1-TS.n);WIN=[];for(var i=0;i<60;i++)WIN.push(GZ.add(start,i))}
   refresh();
-  var KIND={day:'день',dream:'сон / образ',period:'начало этапа',now:'сейчас'};
+  var KIND={day:'день',dream:'сон / образ',period:'начало этапа',now:'сейчас',stone:'веха',yearnote:'заметка к году',fork:'развилка'};
   function ringId(sl){return sl.out?null:sl.year+'-'+sl.k}
   /* Periods: each lasts from its date until the next period starts (or today). */
   function periods(){var ps=Store.entries().filter(function(e){return e.kind==='period'}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:((a.created||'')<(b.created||'')?-1:1)});
@@ -115,11 +115,50 @@
       if(Store.add({kind:kind,date:k,text:t})){close();render()}};
   }
 
-  var SOON={life:['Жизнь','Годовые кольца, вехи (Stepping Stones), заметки к годам и развилки. Фаза 3.'],
-    dialogs:['Диалоги','Диалоги с людьми, делами, телом, событиями и обществом. Фаза 4.'],
+  /* Life tab: year rings, stepping stones (<=12), year notes, forks. */
+  var LY=null;
+  function ents(kind){return Store.entries().filter(function(e){return e.kind===kind}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0})}
+  function life(){
+    if(LY===null)LY=TS.year;var y=LY,h='<div><h1>Жизнь</h1><p class="sub">Год '+y+' · шесть колец по 60 дней</p></div>';
+    h+='<div class="seg"><button id="yp">‹ '+(y-1)+'</button><button id="yn">'+(y+1)+' ›</button></div><div class="stack">';
+    for(var k=0;k<6;k++){var a=GZ.dateOf(y,k,1),b=GZ.dateOf(y,k,60),ka=GZ.key(a),kb=GZ.key(b),id=y+'-'+k;
+      var n=Store.entries().filter(function(e){return e.date>=ka&&e.date<=kb&&e.kind!=='now'}).length;
+      var nw=Store.entries().filter(function(e){return e.kind==='now'&&e.ring===id})[0];
+      var cur=(!TS.out&&TS.year===y&&TS.k===k);
+      h+='<div class="card'+(cur?'':' soft')+'"><div class="row"><b>Круг '+GZ.ROM[k]+(cur?' · сейчас':'')+'</b><span class="sub">'+GZ.short(a)+' – '+GZ.short(b)+'</span></div><p class="sub">Записей: '+n+'</p>'+(nw?'<p>«'+esc(nw.text.slice(0,140))+(nw.text.length>140?'…':'')+'»</p>':'')+'</div>'}
+    h+='</div>';
+    var ss=ents('stone'),ys=ents('yearnote').filter(function(e){return e.year===y}),fs=ents('fork');
+    h+='<div class="row"><h2>Вехи</h2><span class="sub">'+ss.length+' из 12</span></div>';
+    h+=ss.length?ss.map(function(e){return '<div class="entry"><span class="kind">'+GZ.short(GZ.parse(e.date))+' '+GZ.parse(e.date).getFullYear()+'</span><p class="ptitle">'+esc(e.title)+'</p>'+(e.text?'<p>'+esc(e.text)+'</p>':'')+delBtn(e.id)+'</div>'}).join(''):'<p class="empty">Вехи — события, на которые жизнь опиралась, как камни на переправе.</p>';
+    h+='<button class="ghost" id="as"'+(ss.length>=12?' disabled':'')+'>Добавить веху</button>';
+    h+='<div class="row"><h2>Заметки к '+y+' году</h2></div>';
+    h+=ys.length?ys.map(function(e){return '<div class="entry"><p>'+esc(e.text)+'</p>'+delBtn(e.id)+'</div>'}).join(''):'<p class="empty">О чём был этот год?</p>';
+    h+='<button class="ghost" id="ay">Записать о годе</button>';
+    h+='<div class="row"><h2>Развилки</h2></div>';
+    h+=fs.length?fs.map(function(e){return '<div class="entry"><span class="kind">'+GZ.short(GZ.parse(e.date))+' '+GZ.parse(e.date).getFullYear()+'</span><p class="ptitle">'+esc(e.title)+'</p><p>Выбрано: '+esc(e.chosen)+'</p><p>Не выбрано: '+esc(e.other)+'</p>'+delBtn(e.id)+'</div>'}).join(''):'<p class="empty">Места, где путь мог пойти иначе.</p>';
+    h+='<button class="ghost" id="af">Добавить развилку</button>';
+    screen.innerHTML=h;
+    $('#yp').onclick=function(){LY=y-1;life()};$('#yn').onclick=function(){LY=y+1;life()};
+    $('#as').onclick=stoneEditor;$('#ay').onclick=function(){yearEditor(y)};$('#af').onclick=forkEditor;
+    screen.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){if(b.dataset.sure){Store.remove(b.getAttribute('data-del'));life()}else{b.dataset.sure='1';b.textContent='Точно удалить? Нажми ещё раз'}}});
+  }
+  function delBtn(id){return '<button class="link" data-del="'+id+'">Удалить</button>'}
+  function stoneEditor(){var tk=GZ.key(TODAY);
+    open('<div><h1>Веха</h1><p class="sub">Событие, которое держит жизнь. Всего до 12.</p></div><input id="st" class="field" maxlength="80" placeholder="Название"><label class="sub">Когда <input id="sd" class="field" type="date" max="'+tk+'" value="'+tk+'"></label><textarea id="sx" placeholder="Что это было и что оно дало?"></textarea><button class="primary" id="ss">Сохранить</button>');
+    $('#st').focus();$('#ss').onclick=function(){var t=$('#st').value.trim();if(!t){$('#st').focus();return}
+      if(ents('stone').length>=12)return;if(Store.add({kind:'stone',date:$('#sd').value||tk,title:t,text:$('#sx').value.trim()})){close();life()}}}
+  function yearEditor(y){open('<div><h1>Год '+y+'</h1></div><textarea id="yx" placeholder="Каким был этот год?"></textarea><button class="primary" id="ys">Сохранить</button>');
+    $('#yx').focus();$('#ys').onclick=function(){var t=$('#yx').value.trim();if(!t){$('#yx').focus();return}
+      if(Store.add({kind:'yearnote',date:y+'-12-31',year:y,text:t})){close();life()}}}
+  function forkEditor(){var tk=GZ.key(TODAY);
+    open('<div><h1>Развилка</h1></div><input id="ft" class="field" maxlength="80" placeholder="О чём был выбор"><label class="sub">Когда <input id="fd" class="field" type="date" max="'+tk+'" value="'+tk+'"></label><textarea id="fc" placeholder="Что выбрано"></textarea><textarea id="fo" placeholder="Что не выбрано"></textarea><button class="primary" id="fs">Сохранить</button>');
+    $('#ft').focus();$('#fs').onclick=function(){var t=$('#ft').value.trim(),c=$('#fc').value.trim(),o=$('#fo').value.trim();if(!t||!c||!o){(!t?$('#ft'):!c?$('#fc'):$('#fo')).focus();return}
+      if(Store.add({kind:'fork',date:$('#fd').value||tk,title:t,chosen:c,other:o})){close();life()}}}
+
+  var SOON={dialogs:['Диалоги','Диалоги с людьми, делами, телом, событиями и обществом. Фаза 4.'],
     quiet:['Тишина','Минута тишины и счётчик медитаций. Фаза 6.']};
   var tab='krug';
-  function render(){if(tab==='krug')return krug();var s=SOON[tab];screen.innerHTML='<div><h1>'+s[0]+'</h1><p class="sub">Скоро</p></div><div class="card soft"><p>'+s[1]+'</p></div>'}
+  function render(){if(tab==='krug')return krug();if(tab==='life')return life();var s=SOON[tab];screen.innerHTML='<div><h1>'+s[0]+'</h1><p class="sub">Скоро</p></div><div class="card soft"><p>'+s[1]+'</p></div>'}
   document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){tab=b.getAttribute('data-tab');
     document.querySelectorAll('#tabs button').forEach(function(x){x.classList.toggle('on',x===b)});close();render()}});
   document.addEventListener('visibilitychange',function(){if(!document.hidden){var k=GZ.key(TODAY);refresh();if(GZ.key(TODAY)!==k)render()}});
