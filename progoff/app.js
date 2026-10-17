@@ -44,8 +44,9 @@
       if(tds.length){var dn=tds.every(function(e){return e.done}),t0=[C+(R+22)*sx,C+(R+22)*cy],t1=[C+(R+30)*sx,C+(R+30)*cy];
         s+='<line x1="'+t0[0].toFixed(1)+'" y1="'+t0[1].toFixed(1)+'" x2="'+t1[0].toFixed(1)+'" y2="'+t1[1].toFixed(1)+'" stroke="#2b2a27" stroke-width="'+(dn?3.4:1)+'" stroke-linecap="round"/>'}
       var isT=k===GZ.key(TODAY);
-      s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5.2" fill="'+el[0]+'" stroke="'+el[1]+'" stroke-width="1"/>';
-      if(isT)s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="10" fill="none" stroke="#2b2a27" stroke-width="1.6"/>';
+      s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="7" fill="'+el[0]+'" stroke="'+el[1]+'" stroke-width="1"/>';
+      s+='<text x="'+x.toFixed(1)+'" y="'+(y+2.3).toFixed(1)+'" text-anchor="middle" font-size="'+(n>9?6:6.8)+'" font-weight="600" fill="'+el[1]+'" font-family="system-ui,sans-serif" pointer-events="none">'+n+'</text>';
+      if(isT)s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="11" fill="none" stroke="#2b2a27" stroke-width="1.6"/>';
       s+='<circle data-day="'+k+'" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="12" fill="transparent" style="cursor:pointer"/>';
     });
     s+='<circle cx="'+C+'" cy="'+C+'" r="3" fill="#2b2a27"/></svg>';return s}
