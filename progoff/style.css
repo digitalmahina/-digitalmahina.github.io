@@ -69,3 +69,8 @@ main.wide .ring{width:min(100%,calc(100vh - 210px))}
 main:not(.wide){max-width:560px;width:100%;margin:0 auto}
 }
 [hidden]{display:none!important}
+.chat{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.bub{max-width:80%;padding:8px 12px;border-radius:14px;font-size:14px;white-space:pre-wrap}
+.bub.me{align-self:flex-end;background:#2c2c2a;color:#fbfaf8}
+.bub.they{align-self:flex-start;background:#f1efe8;color:#2c2c2a}
+.seg{display:flex;gap:8px;margin:8px 0}.seg button.on{background:#2c2c2a;color:#fbfaf8}
