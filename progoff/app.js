@@ -80,12 +80,21 @@
   window.addEventListener('appinstalled',function(){STANDALONE=true;BIP=null;if(tab==='krug')render()});
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
   function addHome(){
-    if(BIP){BIP.prompt();BIP.userChoice.then(function(){BIP=null});return}
-    var ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-    open('<h2>На экран «Домой»</h2>'+(ios?'<p>В Safari нажми «Поделиться» (квадрат со стрелкой вверх) внизу экрана, затем «На экран „Домой“» и «Добавить».</p><p class="sub">В других браузерах на iPhone этого пункта может не быть, открой страницу в Safari.</p>'
-      :'<p>Открой меню браузера (⋮ справа вверху) и выбери «Добавить на главный экран» или «Установить приложение».</p>')+
-      '<p class="sub">Записи остаются в этом браузере на этом устройстве. Иконка откроет тот же дневник.</p><button class="primary" id="a2ok">Понятно</button>');
-    $('#a2ok').onclick=close}
+    if(BIP){var p=BIP;BIP=null;p.prompt();p.userChoice.then(function(c){if(c&&c.outcome==='accepted'){STANDALONE=true;close();if(tab==='krug')render()}}).catch(function(){});return}
+    var ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
+        and=/Android/.test(ua),mac=/Macintosh/.test(ua)&&!ios,saf=/Safari/.test(ua)&&!/Chrome|Chromium|Edg|CriOS|FxiOS|Firefox/.test(ua),fx=/Firefox|FxiOS/.test(ua),
+        tg=/Telegram/i.test(ua)||!!window.TelegramWebviewProxy;
+    var how=tg?'<p>Ты открыл дневник внутри Telegram, отсюда иконку не добавить. Нажми ⋮ → «Открыть в браузере», а там снова эту кнопку.</p>'
+      :ios?'<p>На iPhone и iPad браузер не разрешает сайтам ставить иконку самим. В Safari нажми «Поделиться» (квадрат со стрелкой) → «На экран „Домой“» → «Добавить».</p><p class="sub">В других браузерах на iPhone этого пункта может не быть, тогда открой страницу в Safari.</p>'
+      :and?(fx?'<p>В Firefox: меню ⋮ → «Установить» или «Добавить на главный экран».</p>':'<p>Ещё секунду. Если окно установки не появится само, открой меню ⋮ справа вверху → «Установить приложение» или «Добавить на главный экран».</p>')
+      :mac&&saf?'<p>В Safari на Mac: меню «Файл» → «Добавить в Dock».</p>'
+      :fx?'<p>Firefox на компьютере не устанавливает такие приложения. Открой страницу в Chrome или Edge.</p>'
+      :'<p>Ещё секунду. Если окно установки не появится само, нажми значок установки (монитор со стрелкой) справа в адресной строке или меню ⋮ → «Установить».</p>';
+    open('<h2>На экран «Домой»</h2>'+how+'<p class="sub">Записи останутся в этом браузере на этом устройстве. Иконка откроет тот же дневник.</p><button class="primary" id="a2ok">Понятно</button>');
+    $('#a2ok').onclick=close;
+    /* Chrome may hand over the install prompt a moment later: switch to the one-tap button. */
+    if(!ios&&!tg){var t0=Date.now(),iv=setInterval(function(){if(BIP&&$('#a2ok')){clearInterval(iv);var b=$('#a2ok');b.textContent='Установить';b.onclick=function(){addHome()}}else if(Date.now()-t0>15000||!$('#a2ok'))clearInterval(iv)},300)}
+  }
   function krug(){
     var head=TS.out?'Между кругами':'Круг '+GZ.ROM[TS.k];
     var sub=TS.out?'Новый круг I начнётся '+GZ.short(WIN[0]):GZ.short(WIN[0])+' – '+GZ.short(WIN[59])+' · день '+TS.n+' из 60';
