@@ -6,7 +6,7 @@
   function refresh(){TODAY=GZ.noon(new Date());TS=GZ.slot(TODAY);
     var start=TS.out?GZ.dateOf(TS.year,0,1):GZ.add(TODAY,1-TS.n);WIN=[];for(var i=0;i<60;i++)WIN.push(GZ.add(start,i))}
   refresh();
-  var KIND={day:'день',fast:'пост',dream:'сон / образ',period:'начало этапа',now:'сейчас',stone:'веха',yearnote:'заметка к году',fork:'развилка'};
+  var KIND={day:'день',fast:'пост',dream:'сон / образ',period:'начало этапа',now:'сейчас',stone:'веха',yearnote:'заметка к году',fork:'развилка',partner:'собеседник',dialog:'диалог'};
   function ringId(sl){return sl.out?null:sl.year+'-'+sl.k}
   /* Periods: each lasts from its date until the next period starts (or today). */
   function periods(){var ps=Store.entries().filter(function(e){return e.kind==='period'}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:((a.created||'')<(b.created||'')?-1:1)});
@@ -168,11 +168,49 @@
     $('#ft').focus();$('#fs').onclick=function(){var t=$('#ft').value.trim(),c=$('#fc').value.trim(),o=$('#fo').value.trim();if(!t||!c||!o){(!t?$('#ft'):!c?$('#fc'):$('#fo')).focus();return}
       if(Store.add({kind:'fork',date:$('#fd').value||tk,title:t,chosen:c,other:o})){close();life()}}}
 
-  var SOON={dialogs:['Диалоги','Диалоги с людьми, делами, телом, событиями и обществом. Фаза 4.'],
-    quiet:['Тишина','Минута тишины и счётчик медитаций. Фаза 6.']};
+  /* Dialogs: partners of 6 types, alternating lines. */
+  var PT={person:'человек',work:'дело',body:'тело',event:'событие',society:'общество',wisdom:'внутренняя мудрость'};
+  var DP=null;
+  function partners(){return ents('partner')}
+  function pname(id){var p=partners().filter(function(e){return e.id===id})[0];return p?p.title:'—'}
+  function dialogs(){
+    if(DP)return partnerPage(DP);
+    var ps=partners(),h='<div><h1>Диалоги</h1><p class="sub">Разговор со своей жизнью: человек, дело, тело, событие, общество, внутренняя мудрость</p></div>';
+    h+=ps.length?'<div class="stack">'+ps.map(function(p){var n=ents('dialog').filter(function(d){return d.partner===p.id}).length;
+      return '<div class="card soft" data-p="'+p.id+'"><div class="row"><b>'+esc(p.title)+'</b><span class="sub">'+PT[p.ptype]+'</span></div><p class="sub">Диалогов: '+n+'</p></div>'}).join('')+'</div>':'<p class="empty">Пока нет собеседников. Начни с того, с кем или с чем важно поговорить.</p>';
+    h+='<button class="ghost" id="ap">Добавить собеседника</button>';
+    screen.innerHTML=h;$('#ap').onclick=partnerEditor;
+    screen.querySelectorAll('[data-p]').forEach(function(c){c.onclick=function(){DP=c.getAttribute('data-p');dialogs()}});
+  }
+  function partnerPage(id){
+    var p=partners().filter(function(e){return e.id===id})[0];if(!p){DP=null;return dialogs()}
+    var ds=ents('dialog').filter(function(d){return d.partner===id}).reverse();
+    var h='<div><h1>'+esc(p.title)+'</h1><p class="sub">'+PT[p.ptype]+' · диалогов: '+ds.length+'</p></div><button class="link" id="pb">‹ Все собеседники</button>';
+    h+=ds.length?ds.map(function(d){return '<div class="entry"><span class="kind">'+GZ.short(GZ.parse(d.date))+' '+GZ.parse(d.date).getFullYear()+'</span>'+d.lines.map(function(l){return '<p>'+(l.who==='me'?'<b>Я:</b> ':'<b>'+esc(p.title)+':</b> ')+esc(l.text)+'</p>'}).join('')+delBtn(d.id)+'</div>'}).join(''):'<p class="empty">Диалогов пока нет.</p>';
+    h+='<button class="primary" id="nd">Новый диалог</button><button class="link" data-del="'+p.id+'">Удалить собеседника и его диалоги</button>';
+    screen.innerHTML=h;$('#pb').onclick=function(){DP=null;dialogs()};$('#nd').onclick=function(){dialogEditor(p)};
+    screen.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){if(b.dataset.sure){var i=b.getAttribute('data-del');
+      if(i===p.id){ents('dialog').filter(function(d){return d.partner===i}).forEach(function(d){Store.remove(d.id)});DP=null}
+      Store.remove(i);dialogs();render()}else{b.dataset.sure='1';b.textContent='Точно удалить? Нажми ещё раз'}}});
+  }
+  function partnerEditor(){
+    open('<div><h1>Собеседник</h1></div><input id="pn" class="field" maxlength="60" placeholder="Имя или название"><div class="seg" id="pt">'+Object.keys(PT).map(function(k,i){return '<button data-t="'+k+'"'+(i?'':' class="on"')+'>'+PT[k]+'</button>'}).join('')+'</div><button class="primary" id="ps">Сохранить</button>');
+    var t='person';$('#pn').focus();
+    sheet.querySelectorAll('#pt button').forEach(function(b){b.onclick=function(){t=b.getAttribute('data-t');sheet.querySelectorAll('#pt button').forEach(function(x){x.classList.toggle('on',x===b)})}});
+    $('#ps').onclick=function(){var n=$('#pn').value.trim();if(!n){$('#pn').focus();return}
+      var e=Store.add({kind:'partner',date:GZ.key(TODAY),title:n,ptype:t});if(e){close();DP=e.id;dialogs()}}}
+  function dialogEditor(p){var L=[],who='me',tk=GZ.key(TODAY);
+    function draw(){open('<div><h1>Диалог с «'+esc(p.title)+'»</h1><p class="sub">Реплики идут по очереди</p></div><div>'+L.map(function(l){return '<p><b>'+(l.who==='me'?'Я':esc(p.title))+':</b> '+esc(l.text)+'</p>'}).join('')+'</div><p class="sub">Говорит: '+(who==='me'?'я':esc(p.title))+'</p><textarea id="dl"></textarea><button class="ghost" id="da">Добавить реплику</button><button class="primary" id="dsv">Сохранить диалог</button>');
+      $('#dl').focus();
+      $('#da').onclick=function(){var t=$('#dl').value.trim();if(!t){$('#dl').focus();return}L.push({who:who,text:t});who=who==='me'?'they':'me';draw()};
+      $('#dsv').onclick=function(){var t=$('#dl').value.trim();if(t){L.push({who:who,text:t})}if(!L.length){$('#dl').focus();return}
+        if(Store.add({kind:'dialog',date:tk,partner:p.id,lines:L,text:L.map(function(l){return (l.who==='me'?'Я: ':p.title+': ')+l.text}).join(' · ')})){close();dialogs()}}}
+    draw()}
+
+  var SOON={quiet:['Тишина','Минута тишины и счётчик медитаций. Фаза 6.']};
   var tab='krug';
-  function render(){if(tab==='krug')return krug();if(tab==='life')return life();var s=SOON[tab];screen.innerHTML='<div><h1>'+s[0]+'</h1><p class="sub">Скоро</p></div><div class="card soft"><p>'+s[1]+'</p></div>'}
-  document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){tab=b.getAttribute('data-tab');
+  function render(){if(tab==='krug')return krug();if(tab==='life')return life();if(tab==='dialogs')return dialogs();var s=SOON[tab];screen.innerHTML='<div><h1>'+s[0]+'</h1><p class="sub">Скоро</p></div><div class="card soft"><p>'+s[1]+'</p></div>'}
+  document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){tab=b.getAttribute('data-tab');DP=null;
     document.querySelectorAll('#tabs button').forEach(function(x){x.classList.toggle('on',x===b)});close();render()}});
   document.addEventListener('visibilitychange',function(){if(!document.hidden){var k=GZ.key(TODAY);refresh();if(GZ.key(TODAY)!==k)render()}});
   render();
