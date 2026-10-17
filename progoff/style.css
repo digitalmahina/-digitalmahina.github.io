@@ -51,3 +51,5 @@ h2{font:var(--t12);font-weight:600;margin:12px 0 4px}
 .qc{aspect-ratio:1;border:1px solid #cfcbc0;border-radius:50%}
 .qc.on{background:#639922;border-color:#639922}
 .qc.td{outline:2px solid #2b2a27;outline-offset:1px}
+
+@media print{.tabs,#tabs,.row,button,#veil,#sheet,.hint{display:none!important}body{background:#fff}.card{break-inside:avoid;box-shadow:none}svg{max-width:100%}}
