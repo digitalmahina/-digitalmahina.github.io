@@ -6,7 +6,7 @@
   function refresh(){TODAY=GZ.noon(new Date());TS=GZ.slot(TODAY);
     var start=TS.out?GZ.dateOf(TS.year,0,1):GZ.add(TODAY,1-TS.n);WIN=[];for(var i=0;i<60;i++)WIN.push(GZ.add(start,i))}
   refresh();
-  var KIND={day:'день',fast:'пост',dream:'сон / образ',period:'начало этапа',now:'сейчас',stone:'веха',yearnote:'заметка к году',fork:'развилка',partner:'собеседник',dialog:'диалог',med:'тишина'};
+  var KIND={day:'день',fast:'пост',dream:'сон / образ',period:'начало этапа',now:'сейчас',stone:'веха',yearnote:'заметка к году',fork:'развилка',partner:'собеседник',dialog:'диалог',med:'тишина',todo:'дело'};
   function ringId(sl){return sl.out?null:sl.year+'-'+sl.k}
   /* Periods: each lasts from its date until the next period starts (or today). */
   function periods(){var ps=Store.entries().filter(function(e){return e.kind==='period'}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:((a.created||'')<(b.created||'')?-1:1)});
@@ -31,7 +31,7 @@
       else if(i1===i0)s+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="1.6" fill="'+col+'"/>'});
     WIN.forEach(function(d,i){
       var n=i+1,a=2*Math.PI*i/60,sx=Math.sin(a),cy=-Math.cos(a),x=C+R*sx,y=C+R*cy,el=GZ.EL[GZ.elem(n)],k=GZ.key(d);
-      var es=Store.byDate(k).filter(function(e){return e.kind!=='period'&&e.kind!=='fast'}),j=0;
+      var es=Store.byDate(k).filter(function(e){return e.kind!=='period'&&e.kind!=='fast'&&e.kind!=='todo'}),j=0;
       es.slice(0,8).forEach(function(e){var rr=R-16-j*9;j++;
         s+=e.kind==='dream'?'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.6" fill="none" stroke="'+el[1]+'" stroke-width="1.6"/>'
           :'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.4" fill="'+el[1]+'"/>'});
@@ -40,6 +40,9 @@
         else if(MOON.fm(k))s+='<circle cx="'+mx+'" cy="'+my+'" r="3" fill="#fbfaf8" stroke="#2b2a27" stroke-width="1.2"/>';
         if(LAYER==='e'&&MOON.ek(k)){var f=Store.byDate(k).some(function(e){return e.kind==='fast'}),q=4.2;
           s+='<path d="M'+mx+' '+(my-q)+' L'+(+mx+q)+' '+my+' L'+mx+' '+(+my+q)+' L'+(mx-q)+' '+my+' Z" fill="'+(f?'#2b2a27':'#fbfaf8')+'" stroke="#2b2a27" stroke-width="1.2"/>'}}
+      var tds=Store.byDate(k).filter(function(e){return e.kind==='todo'});
+      if(tds.length){var dn=tds.every(function(e){return e.done}),t0=[C+(R+22)*sx,C+(R+22)*cy],t1=[C+(R+30)*sx,C+(R+30)*cy];
+        s+='<line x1="'+t0[0].toFixed(1)+'" y1="'+t0[1].toFixed(1)+'" x2="'+t1[0].toFixed(1)+'" y2="'+t1[1].toFixed(1)+'" stroke="#2b2a27" stroke-width="'+(dn?3.4:1)+'" stroke-linecap="round"/>'}
       var isT=k===GZ.key(TODAY);
       s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5.2" fill="'+el[0]+'" stroke="'+el[1]+'" stroke-width="1"/>';
       if(isT)s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="10" fill="none" stroke="#2b2a27" stroke-width="1.6"/>';
@@ -118,9 +121,10 @@
   document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
 
   function day(k){
-    var d=GZ.parse(k),es=Store.byDate(k),future=d>TODAY,s=GZ.slot(d);
+    var d=GZ.parse(k),all=Store.byDate(k),es=all.filter(function(e){return e.kind!=='todo'}),tds=all.filter(function(e){return e.kind==='todo'}),future=d>TODAY,s=GZ.slot(d);
     var h='<div><h1>'+GZ.short(d)+'</h1><p class="sub">'+(s.out?'':'Круг '+GZ.ROM[s.k]+' · день '+s.n+' · ')+GZ.ELN[GZ.elem(s.n||1)]+'</p></div>';
     h+='<div>'+(es.length?es.map(function(e){return '<div class="entry"><span class="kind">'+KIND[e.kind]+(e.src==='ganzhi'?' · из Ганьчжи':'')+'</span>'+(e.kind==='period'?'<p class="ptitle">'+esc(e.title||'')+'</p>':'')+(e.text?'<p>'+esc(e.text)+'</p>':'')+(e.src?'':'<button class="link" data-del="'+e.id+'">Удалить</button>')+'</div>'}).join(''):'<p class="empty">'+(future?'Этот день ещё впереди.':'В этот день записей нет.')+'</p>')+'</div>';
+    if(tds.length)h+='<div><span class="label">Дела</span>'+tds.map(function(e){return '<p>'+(e.done?'✓ ':'○ ')+esc(e.text)+'</p>'}).join('')+'</div>';
     var ti=MOON.tithi(k);
     if(ti){h+='<p class="sub">Лунный день (титхи) '+ti+(MOON.nm(k)?' · новолуние':'')+(MOON.fm(k)?' · полнолуние':'')+(MOON.ek(k)?' · экадаши':'')+'</p>';
       if(MOON.ek(k)&&!future){var fd=es.filter(function(e){return e.kind==='fast'})[0];h+=fd?'<p>Пост отмечен. '+delBtn(fd.id)+'</p>':'<button class="ghost" id="fast">Отметить пост</button>'}}
@@ -245,8 +249,25 @@
     if(QT){$('#qe').onclick=function(){qStop(true)};if(!QI)QI=setInterval(qTick,1000);return}
     screen.querySelectorAll('#qd button').forEach(function(b){b.onclick=function(){var m=+b.getAttribute('data-m');QD=m||7;if(!m)QD=7;quiet();if(!m){var c=$('#qc');if(c)c.focus()}}});
     $('#qs').onclick=function(){var c=$('#qc'),m=c?parseInt(c.value,10):QD;if(!(m>=1&&m<=180)){if(c)c.focus();return}QD=m;QT={dur:m,t0:Date.now()};quiet()}}
+  /* Todo tab: simple organizer. */
+  function todoRow(e){var ov=!e.done&&e.due&&e.due<GZ.key(TODAY);
+    return '<div class="entry"><p>'+(e.done?'<s>'+esc(e.text)+'</s>':esc(e.text))+'</p><p class="sub">'+(e.due?(ov?'просрочено · ':'срок ')+GZ.short(GZ.parse(e.due)):'без срока')+(e.partner?' · '+esc(pname(e.partner)):'')+'</p><button class="link" data-tg="'+e.id+'">'+(e.done?'Вернуть':'Сделано')+'</button> <button class="link" data-del="'+e.id+'">Удалить</button></div>'}
+  function todos(){var tk=GZ.key(TODAY),all=ents('todo'),open_=all.filter(function(e){return !e.done}),dn=all.filter(function(e){return e.done});
+    var g1=open_.filter(function(e){return e.due&&e.due<=tk}),g2=open_.filter(function(e){return e.due&&e.due>tk}),g3=open_.filter(function(e){return !e.due});
+    var h='<div><h1>Дела</h1><p class="sub">Простой список. Срок видно на круге засечкой снаружи</p></div>';
+    h+=open_.length?'<div class="stack">'+g1.concat(g2,g3).map(todoRow).join('')+'</div>':'<p class="empty">Открытых дел нет.</p>';
+    h+='<button class="primary" id="tn">Новое дело</button>';
+    if(dn.length)h+='<details><summary class="sub">Сделано ('+dn.length+')</summary><div class="stack">'+dn.map(todoRow).join('')+'</div></details>';
+    screen.innerHTML=h;$('#tn').onclick=todoEditor;
+    screen.querySelectorAll('[data-tg]').forEach(function(b){b.onclick=function(){var id=b.getAttribute('data-tg'),e=all.filter(function(x){return x.id===id})[0];Store.update(id,{done:!e.done});todos()}});
+    screen.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){if(b.dataset.sure){Store.remove(b.getAttribute('data-del'));todos()}else{b.dataset.sure='1';b.textContent='Точно? Ещё раз'}}})}
+  function todoEditor(){var cases=partners().filter(function(p){return p.ptype==='work'});
+    open('<div><h1>Новое дело</h1></div><input id="tx" class="field" maxlength="200" placeholder="Что сделать"><label class="sub">Срок (необязательно)</label><input id="td" class="field" type="date">'+(cases.length?'<label class="sub">Собеседник-дело</label><select id="tp" class="field"><option value="">—</option>'+cases.map(function(p){return '<option value="'+p.id+'">'+esc(p.title)+'</option>'}).join('')+'</select>':'')+'<button class="primary" id="ts">Сохранить</button>');
+    $('#tx').focus();$('#ts').onclick=function(){var t=$('#tx').value.trim();if(!t){$('#tx').focus();return}
+      var due=$('#td').value,p=$('#tp')?$('#tp').value:'',e={kind:'todo',date:due||GZ.key(TODAY),text:t,done:false};if(due)e.due=due;if(p)e.partner=p;
+      if(Store.add(e)){close();todos();}}}
   var tab='krug';
-  function render(){if(tab==='krug')return krug();if(tab==='life')return life();if(tab==='dialogs')return dialogs();return quiet()}
+  function render(){if(tab==='krug')return krug();if(tab==='life')return life();if(tab==='dialogs')return dialogs();if(tab==='todo')return todos();return quiet()}
   document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){tab=b.getAttribute('data-tab');DP=null;
     document.querySelectorAll('#tabs button').forEach(function(x){x.classList.toggle('on',x===b)});close();render()}});
   document.addEventListener('visibilitychange',function(){if(!document.hidden){var k=GZ.key(TODAY);refresh();if(GZ.key(TODAY)!==k)render()}});
