@@ -77,7 +77,7 @@
     h+='<div class="card"><span class="label">60 дней назад на этой точке</span>'+
       (back.length?back.map(function(e){return '<p>«'+esc((e.text||e.title||'').slice(0,140))+'»</p>'}).join('')+'<p class="sub">Что из этого продолжается? Продолжи:</p><div class="row"><button class="ghost" id="rd">Диалогом</button><button class="ghost" id="rs">Вехой</button><button class="ghost" id="rp">Этапом</button></div>':'<p class="sub">Пока пусто. Через 60 дней здесь появится то, что ты пишешь сегодня.</p>')+'</div>';
     h+='<button class="primary" id="write">Написать сегодня</button>';
-    h+='<div class="row"><button class="link" id="exp">Скачать копию</button><button class="link" id="imp">Загрузить копию</button></div>';
+    h+='<div class="row"><button class="link" id="exp">Скачать копию</button><button class="link" id="imp">Загрузить копию</button><button class="link" id="pdf">PDF кольца</button></div>';
     screen.innerHTML=h;
     $('#write').onclick=function(){editor(GZ.key(TODAY))};
     $('#newp').onclick=periodEditor;
@@ -86,6 +86,7 @@
     var nb=$('#nowb');if(nb)nb.onclick=nowEditor;
     screen.querySelectorAll('[data-day]').forEach(function(c){c.onclick=function(){day(c.getAttribute('data-day'))}});
     $('#exp').onclick=function(){var b=new Blob([Store.exportJSON()],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='dnevnik-'+GZ.key(TODAY)+'.json';a.click()};
+    $('#pdf').onclick=function(){window.print()};
     $('#imp').onclick=function(){var i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=function(){var f=i.files[0];if(!f)return;f.text().then(function(t){importAsk(t)})};i.click()};
   }
 
