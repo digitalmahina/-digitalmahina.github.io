@@ -6,7 +6,7 @@
   function refresh(){TODAY=GZ.noon(new Date());TS=GZ.slot(TODAY);
     var start=TS.out?GZ.dateOf(TS.year,0,1):GZ.add(TODAY,1-TS.n);WIN=[];for(var i=0;i<60;i++)WIN.push(GZ.add(start,i))}
   refresh();
-  var KIND={day:'день',dream:'сон / образ',period:'начало этапа',now:'сейчас',stone:'веха',yearnote:'заметка к году',fork:'развилка'};
+  var KIND={day:'день',fast:'пост',dream:'сон / образ',period:'начало этапа',now:'сейчас',stone:'веха',yearnote:'заметка к году',fork:'развилка'};
   function ringId(sl){return sl.out?null:sl.year+'-'+sl.k}
   /* Periods: each lasts from its date until the next period starts (or today). */
   function periods(){var ps=Store.entries().filter(function(e){return e.kind==='period'}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:((a.created||'')<(b.created||'')?-1:1)});
@@ -16,6 +16,8 @@
   function daysBetween(a,b){return Math.round((GZ.parse(b)-GZ.parse(a))/864e5)}
   function nowEntry(){var id=ringId(TS);if(!id)return null;return Store.entries().filter(function(e){return e.kind==='now'&&e.ring===id})[0]||null}
 
+  var LAYER=(function(){try{return localStorage.getItem('progoff.layer')||'g'}catch(e){return 'g'}})();
+  function setLayer(v){LAYER=v;try{localStorage.setItem('progoff.layer',v)}catch(e){}}
   function ringSVG(){
     var C=180,R=148,s='<svg class="ring" viewBox="0 0 360 360" role="img" aria-label="Круг 60 дней">';
     s+='<circle cx="'+C+'" cy="'+C+'" r="'+R+'" fill="none" stroke="#e3e0d8"/>';
@@ -29,10 +31,15 @@
       else if(i1===i0)s+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="1.6" fill="'+col+'"/>'});
     WIN.forEach(function(d,i){
       var n=i+1,a=2*Math.PI*i/60,sx=Math.sin(a),cy=-Math.cos(a),x=C+R*sx,y=C+R*cy,el=GZ.EL[GZ.elem(n)],k=GZ.key(d);
-      var es=Store.byDate(k).filter(function(e){return e.kind!=='period'}),j=0;
+      var es=Store.byDate(k).filter(function(e){return e.kind!=='period'&&e.kind!=='fast'}),j=0;
       es.slice(0,8).forEach(function(e){var rr=R-16-j*9;j++;
         s+=e.kind==='dream'?'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.6" fill="none" stroke="'+el[1]+'" stroke-width="1.6"/>'
           :'<circle cx="'+(C+rr*sx).toFixed(1)+'" cy="'+(C+rr*cy).toFixed(1)+'" r="3.4" fill="'+el[1]+'"/>'});
+      if(LAYER!=='g'){var mr=R+8,mx=(C+mr*sx).toFixed(1),my=(C+mr*cy).toFixed(1);
+        if(MOON.nm(k))s+='<circle cx="'+mx+'" cy="'+my+'" r="3" fill="#2b2a27"/>';
+        else if(MOON.fm(k))s+='<circle cx="'+mx+'" cy="'+my+'" r="3" fill="#fbfaf8" stroke="#2b2a27" stroke-width="1.2"/>';
+        if(LAYER==='e'&&MOON.ek(k)){var f=Store.byDate(k).some(function(e){return e.kind==='fast'}),q=4.2;
+          s+='<path d="M'+mx+' '+(my-q)+' L'+(+mx+q)+' '+my+' L'+mx+' '+(+my+q)+' L'+(mx-q)+' '+my+' Z" fill="'+(f?'#2b2a27':'#fbfaf8')+'" stroke="#2b2a27" stroke-width="1.2"/>'}}
       var isT=k===GZ.key(TODAY);
       s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5.2" fill="'+el[0]+'" stroke="'+el[1]+'" stroke-width="1"/>';
       if(isT)s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="10" fill="none" stroke="#2b2a27" stroke-width="1.6"/>';
@@ -49,7 +56,8 @@
     h+='<div class="card"><span class="label">Текущий этап</span>'+(cp?'<p class="ptitle">'+esc(cp.e.title||'Без названия')+'</p><p class="sub">с '+GZ.short(GZ.parse(cp.start))+' · '+(daysBetween(cp.start,GZ.key(TODAY))+1)+'-й день</p>'+(cp.e.text?'<p>'+esc(cp.e.text.slice(0,180))+(cp.e.text.length>180?'…':'')+'</p>':''):'<p class="sub">Этап — отрезок жизни со своим настроением. Назови тот, в котором ты сейчас.</p>')+
       '<button class="ghost" id="newp">Начался новый этап</button></div>';
     if(!TS.out)h+='<div class="card'+(nw?'':' soft')+'"><span class="label">Сейчас · начало круга '+GZ.ROM[TS.k]+'</span>'+(nw?'<p>'+esc(nw.text.slice(0,240))+(nw.text.length>240?'…':'')+'</p><p class="sub">записано '+GZ.short(GZ.parse(nw.date))+'</p>':'<p class="sub">Открытый момент: где ты стоишь на пороге этих 60 дней? Что уже есть, что только начинается?</p><button class="ghost" id="nowb">Записать «Сейчас»</button>')+'</div>';
-    h+=ringSVG()+'<p class="legend">● запись дня &nbsp; ○ сон / образ &nbsp; — этап &nbsp; · тап по точке — открыть день</p>';
+    h+='<div class="row" id="lay">'+[['g','Ганьчжи'],['m','+ Луна'],['e','+ Экадаши']].map(function(x){return '<button class="'+(LAYER===x[0]?'primary':'ghost')+'" data-lay="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>';
+    h+=ringSVG()+(LAYER!=='g'?'<p class="legend">● новолуние &nbsp; ○ полнолуние'+(LAYER==='e'?' &nbsp; ◇ экадаши (◆ пост отмечен)':'')+'</p>':'')+'<p class="legend">● запись дня &nbsp; ○ сон / образ &nbsp; — этап &nbsp; · тап по точке — открыть день</p>';
     h+='<div class="card"><span class="label">60 дней назад на этой точке</span>'+
       (back.length?back.map(function(e){return '<p>«'+esc(e.text.slice(0,140))+(e.text.length>140?'…':'')+'»</p>'}).join(''):'<p class="sub">Пока пусто. Через 60 дней здесь появится то, что ты пишешь сегодня.</p>')+'</div>';
     h+='<button class="primary" id="write">Написать сегодня</button>';
@@ -57,6 +65,7 @@
     screen.innerHTML=h;
     $('#write').onclick=function(){editor(GZ.key(TODAY))};
     $('#newp').onclick=periodEditor;
+    screen.querySelectorAll('[data-lay]').forEach(function(b){b.onclick=function(){setLayer(b.getAttribute('data-lay'));krug()}});
     var nb=$('#nowb');if(nb)nb.onclick=nowEditor;
     screen.querySelectorAll('[data-day]').forEach(function(c){c.onclick=function(){day(c.getAttribute('data-day'))}});
     $('#exp').onclick=function(){var b=new Blob([Store.exportJSON()],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='dnevnik-'+GZ.key(TODAY)+'.json';a.click()};
@@ -94,9 +103,13 @@
     var d=GZ.parse(k),es=Store.byDate(k),future=d>TODAY,s=GZ.slot(d);
     var h='<div><h1>'+GZ.short(d)+'</h1><p class="sub">'+(s.out?'':'Круг '+GZ.ROM[s.k]+' · день '+s.n+' · ')+GZ.ELN[GZ.elem(s.n||1)]+'</p></div>';
     h+='<div>'+(es.length?es.map(function(e){return '<div class="entry"><span class="kind">'+KIND[e.kind]+(e.src==='ganzhi'?' · из Ганьчжи':'')+'</span>'+(e.kind==='period'?'<p class="ptitle">'+esc(e.title||'')+'</p>':'')+(e.text?'<p>'+esc(e.text)+'</p>':'')+(e.src?'':'<button class="link" data-del="'+e.id+'">Удалить</button>')+'</div>'}).join(''):'<p class="empty">'+(future?'Этот день ещё впереди.':'В этот день записей нет.')+'</p>')+'</div>';
+    var ti=MOON.tithi(k);
+    if(ti){h+='<p class="sub">Лунный день (титхи) '+ti+(MOON.nm(k)?' · новолуние':'')+(MOON.fm(k)?' · полнолуние':'')+(MOON.ek(k)?' · экадаши':'')+'</p>';
+      if(MOON.ek(k)&&!future){var fd=es.filter(function(e){return e.kind==='fast'})[0];h+=fd?'<p>Пост отмечен. '+delBtn(fd.id)+'</p>':'<button class="ghost" id="fast">Отметить пост</button>'}}
     if(!future)h+='<button class="primary" id="add">Записать в этот день</button>';
     open(h);
     var a=$('#add');if(a)a.onclick=function(){editor(k)};
+    var fb=$('#fast');if(fb)fb.onclick=function(){if(Store.add({kind:'fast',date:k,text:''})){render();day(k)}};
     sheet.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){if(b.dataset.sure){Store.remove(b.getAttribute('data-del'));render();day(k)}else{b.dataset.sure='1';b.textContent='Точно удалить? Нажми ещё раз'}}});
   }
 
