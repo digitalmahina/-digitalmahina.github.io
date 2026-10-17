@@ -29,7 +29,7 @@ textarea:focus{outline:2px solid var(--ink);outline-offset:-1px}
 .tabs button{appearance:none;border:0;background:none;min-height:56px;font:var(--t12);color:var(--mute)}
 .tabs button.on{color:var(--ink);font-weight:700}
 .veil{position:fixed;inset:0;background:rgba(43,42,39,.28);z-index:20}
-.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;max-height:88%;overflow:auto;background:var(--paper);border-radius:24px 24px 0 0;padding:16px 24px calc(24px + env(safe-area-inset-bottom,0));display:grid;gap:16px;z-index:21}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:var(--kb,0px);width:100%;max-width:480px;max-height:calc(var(--vvh,100vh) - 16px);overscroll-behavior:contain;overflow:auto;background:var(--paper);border-radius:24px 24px 0 0;padding:16px 24px calc(24px + env(safe-area-inset-bottom,0));display:grid;gap:16px;z-index:21}
 .grab{justify-self:center;width:32px;height:4px;border-radius:2px;background:var(--line)}
 .entry{display:grid;gap:4px;padding:12px 0;border-bottom:1px solid var(--line)}
 .entry:last-child{border-bottom:0}
@@ -54,3 +54,6 @@ h2{font:var(--t12);font-weight:600;margin:12px 0 4px}
 .qc.td{outline:2px solid #2b2a27;outline-offset:1px}
 
 @media print{.tabs,#tabs,.row,button,#veil,#sheet,.hint{display:none!important}body{background:#fff}.card{break-inside:avoid;box-shadow:none}svg{max-width:100%}}
+
+.kb .sheet{border-radius:24px;padding-bottom:16px}
+.kb .sheet textarea{min-height:min(200px,28vh)}
