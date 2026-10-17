@@ -95,7 +95,12 @@
     /* Chrome may hand over the install prompt a moment later: switch to the one-tap button. */
     if(!ios&&!tg){var t0=Date.now(),iv=setInterval(function(){if(BIP&&$('#a2ok')){clearInterval(iv);var b=$('#a2ok');b.textContent='Установить';b.onclick=function(){addHome()}}else if(Date.now()-t0>15000||!$('#a2ok'))clearInterval(iv)},300)}
   }
-  function krug(){
+  /* Wide screens (desktop app window): ring on the left, everything else on the right. */
+  var WIDE=window.matchMedia?matchMedia('(min-width: 860px)'):{matches:false};
+  function wideKrug(){if(!WIDE.matches)return;var L=document.createElement('div'),Rt=document.createElement('div');L.className='kl';Rt.className='kr';
+    [].slice.call(screen.children).forEach(function(c){(c.matches('#lay,.ring,.legend')?L:Rt).appendChild(c)});screen.appendChild(L);screen.appendChild(Rt);screen.classList.add('wide')}
+  if(WIDE.addEventListener)WIDE.addEventListener('change',function(){if(tab==='krug')render()});
+  function krug(){screen.classList.remove('wide');
     var head=TS.out?'Между кругами':'Круг '+GZ.ROM[TS.k];
     var sub=TS.out?'Новый круг I начнётся '+GZ.short(WIN[0]):GZ.short(WIN[0])+' – '+GZ.short(WIN[59])+' · день '+TS.n+' из 60';
     var back=Store.byDate(GZ.key(GZ.add(TODAY,-60)));
@@ -122,6 +127,7 @@
     screen.querySelectorAll('[data-day]').forEach(function(c){c.onclick=function(){day(c.getAttribute('data-day'))}});
     $('#exp').onclick=function(){var b=new Blob([Store.exportJSON()],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='dnevnik-'+GZ.key(TODAY)+'.json';a.click()};
     $('#pdf').onclick=function(){window.print()};
+    wideKrug();
     $('#imp').onclick=function(){var i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=function(){var f=i.files[0];if(!f)return;f.text().then(function(t){importAsk(t)})};i.click()};
   }
 
@@ -322,7 +328,7 @@
     screen.querySelectorAll('#lf button').forEach(function(b){b.onclick=function(){LF=b.getAttribute('data-f');lenta()}});
     screen.querySelectorAll('[data-day]').forEach(function(b){b.onclick=function(){day(b.getAttribute('data-day'))}});
   }
-  function render(){if(tab==='lenta')return lenta();if(tab==='krug')return krug();if(tab==='life')return life();if(tab==='dialogs')return dialogs();if(tab==='todo')return todos();return quiet()}
+  function render(){screen.classList.remove('wide');if(tab==='lenta')return lenta();if(tab==='krug')return krug();if(tab==='life')return life();if(tab==='dialogs')return dialogs();if(tab==='todo')return todos();return quiet()}
   document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){tab=b.getAttribute('data-tab');DP=null;
     document.querySelectorAll('#tabs button').forEach(function(x){x.classList.toggle('on',x===b)});close();render()}});
   document.addEventListener('visibilitychange',function(){if(!document.hidden){var k=GZ.key(TODAY);refresh();if(GZ.key(TODAY)!==k)render()}});
