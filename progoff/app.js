@@ -46,7 +46,7 @@
           s+='<path d="M'+mx+' '+(my-q2)+' L'+(mx+q2)+' '+my+' L'+mx+' '+(my+q2)+' L'+(mx-q2)+' '+my+' Z" fill="'+(f?VI:'#fbfaf8')+'" stroke="'+VI+'" stroke-width="1.3"/>'}}
       var tds=Store.byDate(k).filter(function(e){return e.kind==='todo'});
       if(tds.length){var dn=tds.every(function(e){return e.done}),t0=[C+(R+22)*sx,C+(R+22)*cy],t1=[C+(R+30)*sx,C+(R+30)*cy];
-        s+='<line x1="'+t0[0].toFixed(1)+'" y1="'+t0[1].toFixed(1)+'" x2="'+t1[0].toFixed(1)+'" y2="'+t1[1].toFixed(1)+'" stroke="#2b2a27" stroke-width="'+(dn?3.4:1)+'" stroke-linecap="round"/>'}
+        s+='<line x1="'+t0[0].toFixed(1)+'" y1="'+t0[1].toFixed(1)+'" x2="'+t1[0].toFixed(1)+'" y2="'+t1[1].toFixed(1)+'" stroke="#2b2a27" stroke-width="1" stroke-linecap="round"/><circle cx="'+(C+(R+33)*sx).toFixed(1)+'" cy="'+(C+(R+33)*cy).toFixed(1)+'" r="2.4" fill="'+(dn?'#2b2a27':'#fbfaf8')+'" stroke="#2b2a27" stroke-width="1"/>'}
       var isT=k===GZ.key(TODAY);
       s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="6" fill="'+el[0]+'" stroke="'+el[1]+'" stroke-width=".9"/>';
       s+='<text x="'+x.toFixed(1)+'" y="'+(y+2).toFixed(1)+'" text-anchor="middle" font-size="'+(n>9?5.2:6)+'" font-weight="600" fill="'+el[1]+'" font-family="system-ui,sans-serif" pointer-events="none">'+n+'</text>';
@@ -147,13 +147,14 @@
     var d=GZ.parse(k),all=Store.byDate(k),es=all.filter(function(e){return e.kind!=='todo'}),tds=all.filter(function(e){return e.kind==='todo'}),future=d>TODAY,s=GZ.slot(d);
     var h='<div><h1>'+GZ.short(d)+'</h1><p class="sub">'+(s.out?'':'Круг '+GZ.ROM[s.k]+' · день '+s.n+' · ')+GZ.ELN[GZ.elem(s.n||1)]+'</p></div>';
     h+='<div>'+(es.length?es.map(function(e){return '<div class="entry"><span class="kind">'+KIND[e.kind]+(e.src==='ganzhi'?' · из Ганьчжи':'')+'</span>'+(e.kind==='period'?'<p class="ptitle">'+esc(e.title||'')+'</p>':'')+(e.text?'<p>'+esc(e.text)+'</p>':'')+(e.src?'':'<button class="link" data-del="'+e.id+'">Удалить</button>')+'</div>'}).join(''):'<p class="empty">'+(future?'Этот день ещё впереди.':'В этот день записей нет.')+'</p>')+'</div>';
-    if(tds.length)h+='<div><span class="label">Дела</span>'+tds.map(function(e){return '<p>'+(e.done?'✓ ':'○ ')+esc(e.text)+'</p>'}).join('')+'</div>';
+    if(tds.length)h+='<div><span class="label">Дела</span>'+tds.map(function(e){return '<p><button class="btn" data-dtg="'+e.id+'" style="padding:0 8px;margin-right:6px">'+(e.done?'✓':'○')+'</button>'+esc(e.text)+'</p>'}).join('')+'</div>';
     var ti=MOON.tithi(k);
     if(ti){h+='<p class="sub">Лунный день (титхи) '+ti+(MOON.nm(k)?' · новолуние':'')+(MOON.fm(k)?' · полнолуние':'')+(MOON.ek(k)?' · экадаши':'')+'</p>';
       if(MOON.ek(k)&&!future){var fd=es.filter(function(e){return e.kind==='fast'})[0];h+=fd?'<p>Пост отмечен. '+delBtn(fd.id)+'</p>':'<button class="ghost" id="fast">Отметить пост</button>'}}
     if(!future)h+='<button class="primary" id="add">Записать в этот день</button>';
     open(h);
     var a=$('#add');if(a)a.onclick=function(){editor(k)};
+    sheet.querySelectorAll('[data-dtg]').forEach(function(b){b.onclick=function(){var id=b.getAttribute('data-dtg'),e=tds.filter(function(x){return x.id===id})[0];Store.update(id,{done:!e.done});render();day(k)}});
     var fb=$('#fast');if(fb)fb.onclick=function(){if(Store.add({kind:'fast',date:k,text:''})){render();day(k)}};
     sheet.querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){if(b.dataset.sure){Store.remove(b.getAttribute('data-del'));render();day(k)}else{b.dataset.sure='1';b.textContent='Точно удалить? Нажми ещё раз'}}});
   }
